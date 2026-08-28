@@ -8,7 +8,6 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
     private var webView: WKWebView!
     private var bannerView: BannerView?
-    private var bannerBottomConstraint: NSLayoutConstraint?
     private var interstitialAd: InterstitialAd?
     private var rewardedAd: RewardedAd?
     private var pendingRewardType: String = ""
@@ -83,7 +82,6 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         view.addSubview(bannerView)
 
-        // Center banner horizontally at safe area bottom
         NSLayoutConstraint.activate([
             bannerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             bannerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
@@ -95,35 +93,34 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     // MARK: - 📁 Load Game from Local Assets
     private func loadLocalGame() {
         let bundle = Bundle.main
-        var htmlURL: URL?
+        var targetURL: URL?
 
-        // Look in 'www' subfolder or root bundle
+        // Candidate 1: In 'www' subdirectory
         if let path = bundle.path(forResource: "index", ofType: "html", inDirectory: "www") {
-            htmlURL = URL(fileURLWithPath: path)
-        } else if let path = bundle.path(forResource: "index", ofType: "html") {
-            htmlURL = URL(fileURLWithPath: path)
-        } else if let resourceURL = bundle.resourceURL {
-            let fileManager = FileManager.default
-            if let enumerator = fileManager.enumerator(at: resourceURL, includingPropertiesForKeys: nil) {
-                for case let file as URL in enumerator {
-                    if file.lastPathComponent == "index.html" {
-                        htmlURL = file
-                        break
-                    }
-                }
+            targetURL = URL(fileURLWithPath: path)
+        }
+        // Candidate 2: In root bundle
+        else if let path = bundle.path(forResource: "index", ofType: "html") {
+            targetURL = URL(fileURLWithPath: path)
+        }
+        // Candidate 3: Direct file path check
+        else {
+            let directWWW = bundle.bundleURL.appendingPathComponent("www").appendingPathComponent("index.html")
+            let directRoot = bundle.bundleURL.appendingPathComponent("index.html")
+            if FileManager.default.fileExists(atPath: directWWW.path) {
+                targetURL = directWWW
+            } else if FileManager.default.fileExists(atPath: directRoot.path) {
+                targetURL = directRoot
             }
         }
 
-        guard let targetURL = htmlURL else {
+        if let htmlURL = targetURL {
+            let accessURL = bundle.bundleURL
+            print("🚀 Loading Gridoria HTML: \(htmlURL.path)")
+            webView.loadFileURL(htmlURL, allowingReadAccessTo: accessURL)
+        } else {
             print("⚠️ Error: index.html not found in bundle.")
-            return
         }
-
-        let folderURL = targetURL.deletingLastPathComponent()
-        print("🚀 Loading Gridoria from: \(targetURL.path)")
-
-        // Load with full folder access
-        webView.loadFileURL(targetURL, allowingReadAccessTo: folderURL)
     }
 
     // MARK: - 🌐 WKNavigationDelegate

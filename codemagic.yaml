@@ -46,9 +46,12 @@ workflows:
           APP_PATH=$(find build -name "Gridoria.app" | head -n 1)
           if [ -n "$APP_PATH" ]; then
             echo "Found app at: $APP_PATH"
+            # Ensure all www files exist at root and in www subfolder
+            mkdir -p "$APP_PATH/www"
+            cp -r www/* "$APP_PATH/www/"
+            cp -r www/* "$APP_PATH/"
             APP_DIR=$(dirname "$APP_PATH")
             APP_NAME=$(basename "$APP_PATH")
-            # Create direct zip of .app for Appetize.io
             (cd "$APP_DIR" && zip -r "$CM_BUILD_DIR/output/Gridoria_Simulator.zip" "$APP_NAME")
             cp -r "$APP_PATH" "$CM_BUILD_DIR/output/"
           fi

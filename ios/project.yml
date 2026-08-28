@@ -11,7 +11,7 @@ targets:
     sources:
       - path: Gridoria
       - path: www
-        type: folder
+        buildPhase: resources
     info:
       path: Gridoria/Info.plist
       properties:
