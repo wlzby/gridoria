@@ -60,7 +60,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         view.addSubview(webView)
 
-        // Webview fills the whole screen
+        // Webview fills entire view
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: view.topAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -95,37 +95,62 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         let bundle = Bundle.main
         var targetURL: URL?
 
-        // Candidate 1: In 'www' subdirectory
-        if let path = bundle.path(forResource: "index", ofType: "html", inDirectory: "www") {
-            targetURL = URL(fileURLWithPath: path)
-        }
-        // Candidate 2: In root bundle
-        else if let path = bundle.path(forResource: "index", ofType: "html") {
-            targetURL = URL(fileURLWithPath: path)
-        }
-        // Candidate 3: Direct file path check
-        else {
-            let directWWW = bundle.bundleURL.appendingPathComponent("www").appendingPathComponent("index.html")
-            let directRoot = bundle.bundleURL.appendingPathComponent("index.html")
-            if FileManager.default.fileExists(atPath: directWWW.path) {
-                targetURL = directWWW
-            } else if FileManager.default.fileExists(atPath: directRoot.path) {
-                targetURL = directRoot
+        // Check all possible bundle paths
+        let candidates = [
+            bundle.url(forResource: "index", withExtension: "html", subdirectory: "www"),
+            bundle.url(forResource: "index", withExtension: "html"),
+            bundle.bundleURL.appendingPathComponent("www").appendingPathComponent("index.html"),
+            bundle.bundleURL.appendingPathComponent("index.html")
+        ]
+
+        for url in candidates {
+            if let url = url, FileManager.default.fileExists(atPath: url.path) {
+                targetURL = url
+                break
             }
         }
 
-        if let htmlURL = targetURL {
-            let accessURL = bundle.bundleURL
-            print("🚀 Loading Gridoria HTML: \(htmlURL.path)")
-            webView.loadFileURL(htmlURL, allowingReadAccessTo: accessURL)
+        // Recursive directory search fallback
+        if targetURL == nil, let resourceURL = bundle.resourceURL {
+            let fileManager = FileManager.default
+            if let enumerator = fileManager.enumerator(at: resourceURL, includingPropertiesForKeys: nil) {
+                for case let file as URL in enumerator {
+                    if file.lastPathComponent == "index.html" {
+                        targetURL = file
+                        break
+                    }
+                }
+            }
+        }
+
+        guard let htmlURL = targetURL else {
+            print("⚠️ Critical Error: index.html not found in bundle.")
+            let debugHTML = """
+            <!DOCTYPE html><html><body style="background:#0b1536;color:#ffffff;font-family:-apple-system,sans-serif;padding:30px;text-align:center;">
+            <h2>Gridoria iOS Loader</h2>
+            <p>Bundle: \(bundle.bundlePath)</p>
+            <p>Error: index.html missing from bundle.</p>
+            </body></html>
+            """
+            webView.loadHTMLString(debugHTML, baseURL: nil)
+            return
+        }
+
+        let baseDir = htmlURL.deletingLastPathComponent()
+        print("🚀 Loading Gridoria HTML: \(htmlURL.path)")
+
+        // 1. Try reading as HTML string with baseURL (bypasses sandbox file:// quirks)
+        if let htmlString = try? String(contentsOf: htmlURL, encoding: .utf8) {
+            webView.loadHTMLString(htmlString, baseURL: baseDir)
         } else {
-            print("⚠️ Error: index.html not found in bundle.")
+            // 2. Fallback to loadFileURL
+            webView.loadFileURL(htmlURL, allowingReadAccessTo: bundle.bundleURL)
         }
     }
 
     // MARK: - 🌐 WKNavigationDelegate
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("✅ Gridoria WKWebView finished loading.")
+        print("✅ Gridoria WKWebView finished loading successfully.")
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
