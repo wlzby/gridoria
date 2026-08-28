@@ -32,8 +32,12 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         setupWebView()
         setupBannerView()
         loadLocalGame()
-        loadInterstitialAd()
-        loadRewardedAd()
+
+        // Safely load ads after UI is presented
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.loadInterstitialAd()
+            self?.loadRewardedAd()
+        }
     }
 
     // MARK: - 🌐 Setup WKWebView
@@ -95,7 +99,6 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         let bundle = Bundle.main
         var targetURL: URL?
 
-        // Check all possible bundle paths
         let candidates = [
             bundle.url(forResource: "index", withExtension: "html", subdirectory: "www"),
             bundle.url(forResource: "index", withExtension: "html"),
@@ -110,7 +113,6 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             }
         }
 
-        // Recursive directory search fallback
         if targetURL == nil, let resourceURL = bundle.resourceURL {
             let fileManager = FileManager.default
             if let enumerator = fileManager.enumerator(at: resourceURL, includingPropertiesForKeys: nil) {
@@ -125,25 +127,15 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         guard let htmlURL = targetURL else {
             print("⚠️ Critical Error: index.html not found in bundle.")
-            let debugHTML = """
-            <!DOCTYPE html><html><body style="background:#0b1536;color:#ffffff;font-family:-apple-system,sans-serif;padding:30px;text-align:center;">
-            <h2>Gridoria iOS Loader</h2>
-            <p>Bundle: \(bundle.bundlePath)</p>
-            <p>Error: index.html missing from bundle.</p>
-            </body></html>
-            """
-            webView.loadHTMLString(debugHTML, baseURL: nil)
             return
         }
 
         let baseDir = htmlURL.deletingLastPathComponent()
         print("🚀 Loading Gridoria HTML: \(htmlURL.path)")
 
-        // 1. Try reading as HTML string with baseURL (bypasses sandbox file:// quirks)
         if let htmlString = try? String(contentsOf: htmlURL, encoding: .utf8) {
             webView.loadHTMLString(htmlString, baseURL: baseDir)
         } else {
-            // 2. Fallback to loadFileURL
             webView.loadFileURL(htmlURL, allowingReadAccessTo: bundle.bundleURL)
         }
     }
