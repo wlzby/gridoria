@@ -10,7 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Boolean {
+    ) -> Bool {
         
         // 1. Audio Session: Playback category ensures sound works even if the iPhone physical mute switch is ON
         do {
@@ -20,8 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("Failed to set AVAudioSession category: \(error)")
         }
 
-        // 2. Initialize Google Mobile Ads SDK
-        GADMobileAds.sharedInstance().start(completionHandler: nil)
+        // 2. Initialize Google Mobile Ads SDK (Modern Swift API)
+        MobileAds.shared.start(completionHandler: nil)
 
         return true
     }

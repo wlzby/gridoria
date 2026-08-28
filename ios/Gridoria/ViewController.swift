@@ -4,13 +4,13 @@ import AVFoundation
 import AudioToolbox
 import GoogleMobileAds
 
-class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, GADBannerViewDelegate, GADFullScreenContentDelegate {
+class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, BannerViewDelegate, FullScreenContentDelegate {
 
     private var webView: WKWebView!
-    private var bannerView: GADBannerView?
+    private var bannerView: BannerView?
     private var bannerHeightConstraint: NSLayoutConstraint?
-    private var interstitialAd: GADInterstitialAd?
-    private var rewardedAd: GADRewardedAd?
+    private var interstitialAd: InterstitialAd?
+    private var rewardedAd: RewardedAd?
     private var pendingRewardType: String = ""
 
     // ── AdMob Unit IDs (Replace with your live production AdMob iOS IDs) ──
@@ -62,7 +62,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
     // MARK: - 📢 Setup Banner View
     private func setupBannerView() {
-        bannerView = GADBannerView(adSize: GADAdSizeBanner)
+        bannerView = BannerView(adSize: AdSizeBanner)
         guard let bannerView = bannerView else { return }
 
         bannerView.adUnitID = BANNER_AD_UNIT_ID
@@ -88,7 +88,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         bannerHeightConstraint = bannerView.heightAnchor.constraint(equalToConstant: 0)
         bannerHeightConstraint?.isActive = true
 
-        bannerView.load(GADRequest())
+        bannerView.load(Request())
     }
 
     // MARK: - 📁 Load Game from Local Assets
@@ -183,8 +183,8 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
     // MARK: - 🎬 Interstitial Ads
     private func loadInterstitialAd() {
-        let request = GADRequest()
-        GADInterstitialAd.load(withAdUnitID: INTERSTITIAL_AD_UNIT_ID, request: request) { [weak self] ad, error in
+        let request = Request()
+        InterstitialAd.load(with: INTERSTITIAL_AD_UNIT_ID, request: request) { [weak self] ad, error in
             if let error = error {
                 print("Interstitial load failed: \(error.localizedDescription)")
                 return
@@ -200,14 +200,14 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
                 self?.loadInterstitialAd()
                 return
             }
-            interstitial.present(fromRootViewController: self)
+            interstitial.present(from: self)
         }
     }
 
     // MARK: - 🎁 Rewarded Ads
     private func loadRewardedAd() {
-        let request = GADRequest()
-        GADRewardedAd.load(withAdUnitID: REWARDED_AD_UNIT_ID, request: request) { [weak self] ad, error in
+        let request = Request()
+        RewardedAd.load(with: REWARDED_AD_UNIT_ID, request: request) { [weak self] ad, error in
             if let error = error {
                 print("Rewarded ad load failed: \(error.localizedDescription)")
                 return
@@ -227,7 +227,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             }
 
             self.pendingRewardType = rewardType
-            rewardedAd.present(fromRootViewController: self) { [weak self] in
+            rewardedAd.present(from: self) { [weak self] in
                 guard let self = self else { return }
                 let type = self.pendingRewardType
                 self.webView.evaluateJavaScript("if (typeof window.onRewardedAdSuccess === 'function') window.onRewardedAdSuccess('\(type)');", completionHandler: nil)
@@ -236,22 +236,22 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     }
 
     // MARK: - 🔄 FullScreenContentDelegate
-    func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        if ad is GADRewardedAd {
+    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
+        if ad is RewardedAd {
             let type = pendingRewardType
             webView.evaluateJavaScript("if (typeof window.onRewardedAdDismissed === 'function') window.onRewardedAdDismissed('\(type)');", completionHandler: nil)
             loadRewardedAd()
-        } else if ad is GADInterstitialAd {
+        } else if ad is InterstitialAd {
             loadInterstitialAd()
         }
     }
 
-    func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        if ad is GADRewardedAd {
+    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        if ad is RewardedAd {
             let type = pendingRewardType
             webView.evaluateJavaScript("if (typeof window.onRewardedAdFailed === 'function') window.onRewardedAdFailed('\(type)', '\(error.localizedDescription)');", completionHandler: nil)
             loadRewardedAd()
-        } else if ad is GADInterstitialAd {
+        } else if ad is InterstitialAd {
             loadInterstitialAd()
         }
     }
