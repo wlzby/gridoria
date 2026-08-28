@@ -4,7 +4,7 @@ import AVFoundation
 import AudioToolbox
 import GoogleMobileAds
 
-class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, BannerViewDelegate, FullScreenContentDelegate {
+class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate, BannerViewDelegate, FullScreenContentDelegate {
 
     private var webView: WKWebView!
     private var bannerView: BannerView?
@@ -47,9 +47,11 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        config.defaultWebpagePreferences.allowsContentJavaScript = true
 
         webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.backgroundColor = .clear
         webView.isOpaque = false
         webView.scrollView.bounces = false
@@ -93,32 +95,48 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
     // MARK: - 📁 Load Game from Local Assets
     private func loadLocalGame() {
-        let baseAccessURL = Bundle.main.resourceURL ?? Bundle.main.bundleURL
+        let bundleURL = Bundle.main.bundleURL
+        let resourceURL = Bundle.main.resourceURL ?? bundleURL
+        
+        var targetURL: URL?
 
         // 1. Check in 'www' subfolder
         if let url = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "www") {
-            webView.loadFileURL(url, allowingReadAccessTo: baseAccessURL)
-            return
-        }
-        
-        // 2. Check in root resource bundle
-        if let url = Bundle.main.url(forResource: "index", withExtension: "html") {
-            webView.loadFileURL(url, allowingReadAccessTo: baseAccessURL)
-            return
-        }
-
-        // 3. Recursive directory search
-        let fileManager = FileManager.default
-        if let enumerator = fileManager.enumerator(at: baseAccessURL, includingPropertiesForKeys: nil) {
-            for case let fileURL as URL in enumerator {
-                if fileURL.lastPathComponent == "index.html" {
-                    webView.loadFileURL(fileURL, allowingReadAccessTo: baseAccessURL)
-                    return
+            targetURL = url
+        } else if let url = Bundle.main.url(forResource: "index", withExtension: "html") {
+            targetURL = url
+        } else {
+            // Recursive scan
+            let fileManager = FileManager.default
+            if let enumerator = fileManager.enumerator(at: resourceURL, includingPropertiesForKeys: nil) {
+                for case let fileURL as URL in enumerator {
+                    if fileURL.lastPathComponent == "index.html" {
+                        targetURL = fileURL
+                        break
+                    }
                 }
             }
         }
 
-        print("⚠️ Error: index.html could not be found in any iOS bundle location.")
+        if let htmlURL = targetURL {
+            print("🚀 Loading Gridoria HTML: \(htmlURL.path)")
+            webView.loadFileURL(htmlURL, allowingReadAccessTo: resourceURL)
+        } else {
+            print("⚠️ Error: index.html could not be found in iOS bundle.")
+        }
+    }
+
+    // MARK: - 🌐 WKNavigationDelegate
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        print("✅ Gridoria WKWebView finished loading successfully.")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        print("❌ Gridoria WKWebView failed navigation: \(error.localizedDescription)")
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        print("❌ Gridoria WKWebView failed provisional navigation: \(error.localizedDescription)")
     }
 
     // MARK: - 🌉 WKScriptMessageHandler (Bridge with JavaScript)
@@ -220,7 +238,6 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     private func showRewardedAd(rewardType: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self, let rewardedAd = self.rewardedAd else {
-                // Fallback if ad is not ready
                 self?.webView.evaluateJavaScript("if (typeof window.onRewardedAdFailed === 'function') window.onRewardedAdFailed('\(rewardType)', 'Ad not ready');", completionHandler: nil)
                 self?.loadRewardedAd()
                 return
