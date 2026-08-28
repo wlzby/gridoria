@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="tr" style="background-color: #0b1536;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Gridoria - 2048 Ceiling Shooter</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Chakra+Petch:wght@700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- CSS Styling -->
+    <link rel="stylesheet" href="style.css?v=3.1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #0b1536; background: linear-gradient(160deg, #0b1536 0%, #1e3a8a 50%, #2563eb 100%);">
+
+    <!-- 🚀 MAWELLY STUDIO SPLASH SCREEN -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <span class="splash-brand-text">mawelly</span>
+                <span class="splash-purple-dot">●</span>
+            </div>
+            <div class="splash-subtext">s t u d i o</div>
+        </div>
+        <div class="splash-spinner-wrapper">
+            <div class="splash-spinner"></div>
+        </div>
+    </div>
+
+    <div id="app-container">
+        
+        <!-- 🪵 ANA MENÜ EKRANI (MAIN MENU VIEW) -->
+        <div id="main-menu-view" class="view-screen">
+            <div class="main-menu-container">
+                
+                <!-- Üst Bar: Sol - Elmas Sayacı | Sağ - Daily Ödül -->
+                <div class="menu-top-bar">
+                    <!-- Sol Üst: Elmas Sayacı Pill Widget'ı -->
+                    <div class="menu-gems-pill" id="btn-open-shop-top" title="Mağaza">
+                        <span class="gem-icon">💎</span>
+                        <strong id="menu-top-gems-val">150</strong>
+                        <span class="gem-add-btn">+</span>
+                    </div>
+
+                    <!-- Sağ Üst: Daily Giriş Takvimi Widget'ı -->
+                    <div class="daily-calendar-widget" id="menu-btn-daily-widget" title="Günlük Ödül">
+                        <div class="calendar-top-tag">DAILY</div>
+                        <div class="calendar-body">
+                            <span class="check-icon">✓</span>
+                        </div>
+                        <div class="notification-badge-dot"></div>
+                    </div>
+                </div>
+
+                <!-- 👑 GRIDORIA OFFICIAL 3D LOGO BADGE -->
+                <div class="menu-brand-header">
+                    <img src="gridoria_logo.jpg" alt="Gridoria Logo" class="main-game-logo-img">
+                </div>
+
+                <!-- 🎮 Oyna & Birleştir Canlı Demo Widget (Auto-Playing Interactive Menu Preview) -->
+                <div class="menu-hero-section menu-demo-section" id="menu-demo-section">
+                    <div class="demo-play-container">
+                        <!-- Üst Hedef Yuvası (Başta Boş, Sonra Fırlatılan Taş Gelecek) -->
+                        <div class="demo-target-box" id="demo-target-box">
+                            <div class="demo-empty-placeholder" id="demo-placeholder-icon">🎯</div>
+                            <div class="demo-target-tile tile hidden" id="demo-target-tile">
+                                <span id="demo-target-val" class="demo-tile-num tile-number">2</span>
+                            </div>
+                        </div>
+
+                        <!-- Fırlatma Yönü Oku -->
+                        <div class="demo-arrow-indicator">▲</div>
+
+                        <!-- Alt Fırlatıcı (Launcher) Taşı -->
+                        <div class="demo-launcher-box">
+                            <div class="demo-launcher-tile tile val-2" id="demo-launcher-tile">
+                                <span id="demo-launcher-val" class="demo-tile-num tile-number">2</span>
+                            </div>
+                        </div>
+
+                        <!-- Animasyon Sırasında Fırlatılan Uçan Taş -->
+                        <div class="demo-flying-tile tile hidden" id="demo-flying-tile">
+                            <span id="demo-flying-val" class="demo-tile-num tile-number">2</span>
+                        </div>
+                    </div>
+                    <div class="hero-block-label" id="demo-widget-label">DOKUN &amp; BİRLEŞTİR</div>
+                </div>
+
+                <!-- Gridoria Aksiyon Butonları -->
+                <div class="menu-actions-bottom">
+                    <!-- OYUNA BAŞLA / STAGE 1 OYNAYIN Yeşil Oval Buton -->
+                    <button class="main-stage-play-btn" id="btn-start-game">
+                        <span class="play-btn-text">OYNAYIN</span>
+                    </button>
+
+                    <!-- Alt Bilgi Metni -->
+                    <div class="menu-footer-hint">
+                        <span>Dokun ve Fırlat • 2048 Ahşap Bulmaca</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 🎮 OYUN EKRANI (GAMEPLAY VIEW) -->
+        <div id="game-view" class="view-screen hidden">
+            <!-- Header: Badges & Score & Combo -->
+            <header class="game-header">
+                <div class="header-top">
+                    <!-- Sol Üst Grubu: Ev İkonu & Elmas Bakiyesi Yana Yana -->
+                    <div class="header-left-group">
+                        <button class="icon-btn" id="btn-home-menu" title="Ana Menü">🏠</button>
+                        <div class="pill-badge diamond-pill" id="btn-open-shop" title="Elmas Mağazası">
+                            <span class="diamond-icon">💎</span>
+                            <span id="diamond-count">0</span>
+                            <div class="plus-btn">+</div>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Üst: En Yüksek Skor -->
+                    <div class="pill-badge crown-pill" id="btn-crown-high" title="En Yüksek Skor">
+                        <span class="crown-icon">👑</span>
+                        <span id="high-score">0</span>
+                    </div>
+                </div>
+
+                <!-- 💎 OYUNA ÖZEL KRİSTAL KOR & SKOR ROZETİ (GRIDORIA SCORE CENTERPIECE) -->
+                <div class="gridoria-score-container" id="gridoria-score-box">
+                    <div class="score-backdrop-glow"></div>
+                    <div class="score-emblem-bg">💎</div>
+                    <div class="score-display" id="current-score">0</div>
+                </div>
+
+                <!-- 🎯 DİNAMİK HEDEF TAŞ ROZETİ (256 ➔ 512 ➔ 1024 ➔ 2048) -->
+                <div class="target-goal-capsule" id="target-goal-box" title="Şimdiki Hedef Taş">
+                    <span class="target-icon">🎯</span>
+                    <span class="target-text">HEDEF:</span>
+                    <span class="target-badge-val" id="target-goal-val">256</span>
+                </div>
+
+                <div class="play-status" aria-live="polite">
+                    <span class="status-dot"></span>
+                    <span id="play-status-text">Hedef sütunu seç ve taşı fırlat</span>
+                </div>
+
+            </header>
+
+            <!-- Main Game Body & Grid Board -->
+            <main class="game-body">
+
+                <div class="grid-board-wrapper">
+                    <div class="grid-board" id="grid-board">
+                        <!-- 30 Grid Cells (6 rows x 5 cols) Generated by JS -->
+                    </div>
+                    
+                    <!-- Bottom Column Highlight Indicators -->
+                    <div class="column-indicators" id="col-indicators">
+                        <div class="col-indicator" data-col="0"></div>
+                        <div class="col-indicator" data-col="1"></div>
+                        <div class="col-indicator active" data-col="2"></div>
+                        <div class="col-indicator" data-col="3"></div>
+                        <div class="col-indicator" data-col="4"></div>
+                    </div>
+                </div>
+
+                <!-- Shooter Controls Area (Bottom Launcher Dock) -->
+                <div class="shooter-area">
+                    <div class="active-shooter-box">
+                        <div class="shooter-tile val-2" id="shooter-current">
+                            <span class="tile-number">2</span>
+                        </div>
+                    </div>
+
+                    <div class="shooter-arrow-indicator" title="Sıradaki Taş">←</div>
+
+                    <div class="shooter-next-box" id="shooter-next" title="Sonraki Taş">
+                        <div class="next-tile val-8" id="next-tile"><span class="tile-number" id="next-tile-val">8</span></div>
+                        <div class="next-badge-plus">+</div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer: Power-up Boosters Bar -->
+            <footer class="powerups-footer">
+                <button class="powerup-btn" id="powerup-bomb" title="Bomba Patlat">
+                    <div class="booster-icon-box bomb-bg">
+                        <span class="powerup-icon">💣</span>
+                    </div>
+                    <div class="powerup-cost">
+                        <span class="cost-diamond">💎</span>
+                        <span>45</span>
+                    </div>
+                </button>
+
+                <button class="powerup-btn" id="powerup-hammer" title="Çekiç (Bloğu Kır)">
+                    <div class="booster-icon-box hammer-bg">
+                        <span class="powerup-icon">🔨</span>
+                    </div>
+                    <div class="powerup-cost">
+                        <span class="cost-diamond">💎</span>
+                        <span>25</span>
+                    </div>
+                </button>
+
+                <button class="powerup-btn" id="powerup-swap" title="Taşı Değiştir">
+                    <div class="booster-icon-box swap-bg">
+                        <span class="powerup-icon">⇄</span>
+                    </div>
+                    <div class="powerup-cost">
+                        <span class="cost-diamond">💎</span>
+                        <span>20</span>
+                    </div>
+                </button>
+
+                <button class="powerup-btn" id="powerup-undo" title="Geri Al">
+                    <div class="booster-icon-box undo-bg">
+                        <span class="powerup-icon">↩️</span>
+                    </div>
+                    <div class="powerup-cost">
+                        <span class="cost-diamond">💎</span>
+                        <span>15</span>
+                    </div>
+                </button>
+            </footer>
+
+            <!-- 📢 AdMob Banner Reklam Alanı (Banner Ad Reservation Slot) -->
+            <div id="banner-ad-container" class="banner-ad-container">
+                <div class="banner-ad-placeholder" id="banner-ad-placeholder">
+                    <span class="ad-label">📢 BANNER REKLAM ALANI</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Target Tile Selection Banner Overlay for Hammer/Bomb -->
+        <div class="powerup-banner hidden" id="powerup-banner">
+            <span id="powerup-banner-text">Yok etmek istediğin taşı seç</span>
+            <button class="cancel-btn" id="btn-cancel-powerup">İptal</button>
+        </div>
+
+        <!-- Main Wood Menu Modal Overlay -->
+        <div class="modal-overlay hidden" id="modal-main-menu">
+            <div class="modal-card wood-main-menu-card">
+                <div class="menu-wood-header">
+                    <span class="wood-crown-badge">👑 GRIDORIA 2048</span>
+                    <h1 class="wood-menu-title">AHŞAP EDİSYON</h1>
+                </div>
+                <div class="menu-stats-row">
+                    <div class="menu-stat-pill">
+                        <span class="stat-label">EN YÜKSEK</span>
+                        <strong id="menu-stat-high">0</strong>
+                    </div>
+                    <div class="menu-stat-pill">
+                        <span class="stat-label">ELMASLAR</span>
+                        <strong id="menu-stat-gems">💎 0</strong>
+                    </div>
+                </div>
+                <div class="menu-buttons-list">
+                    <button class="wood-menu-btn primary-wood-btn" id="btn-play-game">
+                        <span>OYUNA BAŞLA</span>
+                        <span class="play-arrow-icon">▶</span>
+                    </button>
+                    <button class="wood-menu-btn" id="btn-menu-themes">
+                        <span>🪵 AHŞAP TEMALARI</span>
+                    </button>
+                    <button class="wood-menu-btn" id="btn-menu-missions">
+                        <span>📋 GÜNLÜK GÖREVLER</span>
+                    </button>
+                    <button class="wood-menu-btn" id="btn-menu-shop">
+                        <span>💎 ELMAS MAĞAZASI</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay hidden" id="modal-daily">
+            <div class="modal-card daily-modal-card">
+                <button class="modal-close-icon" id="btn-close-daily" title="Kapat">✕</button>
+                <h2 class="daily-modal-title">Günlük Ödül</h2>
+                <p class="daily-modal-subtitle" id="daily-reward-subtitle">Progress kaybedilecek bir gün kaybolmamalıdır.</p>
+
+                <!-- 7-Day Rewards Grid Container -->
+                <div class="daily-grid-container" id="daily-grid-container">
+                    <!-- Dynamic JavaScript Rendering of 7 Days Grid -->
+                </div>
+
+                <!-- Countdown Timer -->
+                <div class="daily-countdown-box" id="daily-countdown-box">
+                    <span>Sonraki ödül: </span>
+                    <strong id="daily-timer-val">00 : 00 : 00</strong>
+                </div>
+
+                <button class="primary-btn daily-claim-btn" id="btn-claim-daily">ÖDÜLÜ AL</button>
+            </div>
+        </div>
+
+        <!-- 🎨 TEMA SEÇİM MODAL'I (REFERENCE DESIGN) -->
+        <div class="modal-overlay hidden" id="modal-themes">
+            <div class="modal-card theme-modal-card">
+                <!-- Header: Back Arrow + Centered Title -->
+                <div class="theme-modal-header">
+                    <button class="theme-back-btn" id="btn-close-themes">←</button>
+                    <h2 class="theme-modal-title">Tema</h2>
+                    <div style="width: 28px;"></div>
+                </div>
+
+                <!-- Segmented Capsule Tab Toggle -->
+                <div class="theme-tab-capsule">
+                    <button class="theme-tab-btn active" id="tab-btn-bg" data-tab="bg">Arka Planlar</button>
+                    <button class="theme-tab-btn" id="tab-btn-color" data-tab="color">Renkler</button>
+                </div>
+
+                <!-- TAB 1: ARKA PLANLAR (BACKGROUNDS GRID VIEW) -->
+                <div class="theme-tab-content" id="tab-content-bg">
+                    <div class="bg-themes-grid">
+                        <!-- ⭐ GİRİŞ & VARSAYILAN ÜCRETSİZ TEMALAR -->
+                        <div class="bg-card active" data-bg="obsidian" data-cost="0">
+                            <div class="bg-card-thumb obsidian-bg-thumb"></div>
+                            <span class="bg-card-name">Gece Siyahı ✨</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="walnut" data-cost="0">
+                            <div class="bg-card-thumb walnut-bg-thumb"></div>
+                            <span class="bg-card-name">Ceviz Ahşap 🪵</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="forest" data-cost="0">
+                            <div class="bg-card-thumb forest-bg-thumb"></div>
+                            <span class="bg-card-name">Yeşil Orman 🌲</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
+                        </div>
+
+                        <!-- 💎 250 ELMAS PREMİUM TEMALAR -->
+                        <div class="bg-card" data-bg="aurora" data-cost="250">
+                            <div class="bg-card-thumb aurora-bg-thumb"></div>
+                            <span class="bg-card-name">Kutup Işıkları</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="nebula" data-cost="250">
+                            <div class="bg-card-thumb nebula-bg-thumb"></div>
+                            <span class="bg-card-name">Kozmik Nebula</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="oak" data-cost="250">
+                            <div class="bg-card-thumb oak-bg-thumb"></div>
+                            <span class="bg-card-name">Meşe Ahşap</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="cherry" data-cost="250">
+                            <div class="bg-card-thumb cherry-bg-thumb"></div>
+                            <span class="bg-card-name">Kiraz Ahşap</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="ebony" data-cost="250">
+                            <div class="bg-card-thumb ebony-bg-thumb"></div>
+                            <span class="bg-card-name">Abanoz Ahşap</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="clouds" data-cost="250">
+                            <div class="bg-card-thumb clouds-bg-thumb"></div>
+                            <span class="bg-card-name">Altın Gökyüzü</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="earth" data-cost="250">
+                            <div class="bg-card-thumb earth-bg-thumb"></div>
+                            <span class="bg-card-name">Dünya & Uzay</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="ocean" data-cost="250">
+                            <div class="bg-card-thumb ocean-bg-thumb"></div>
+                            <span class="bg-card-name">Turkuaz Deniz</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="puppy" data-cost="250">
+                            <div class="bg-card-thumb puppy-bg-thumb"></div>
+                            <span class="bg-card-name">Sevimli Köpekler</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="cat" data-cost="250">
+                            <div class="bg-card-thumb cat-bg-thumb"></div>
+                            <span class="bg-card-name">Kara Kedi</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="lake" data-cost="250">
+                            <div class="bg-card-thumb lake-bg-thumb"></div>
+                            <span class="bg-card-name">Gece Gölü</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="cyber" data-cost="250">
+                            <div class="bg-card-thumb cyber-bg-thumb"></div>
+                            <span class="bg-card-name">Siber Yarış</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge">🔒 250 💎</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: RENKLER (COLOR PALETTES LIST VIEW) -->
+                <div class="theme-tab-content hidden" id="tab-content-color">
+                    <div class="color-palettes-list">
+                        <!-- 1. VARSAYILAN -->
+                        <div class="palette-card active" data-color="default">
+                            <div class="palette-grid-preview">
+                                <span style="background: #a855f7;"></span>
+                                <span style="background: #eab308;"></span>
+                                <span style="background: #84cc16;"></span>
+                                <span style="background: #0ea5e9;"></span>
+                                <span style="background: #ef4444;"></span>
+                                <span style="background: #2563eb;"></span>
+                                <span style="background: #f59e0b;"></span>
+                                <span style="background: #8b5cf6;"></span>
+                                <span style="background: #f43f5e;"></span>
+                            </div>
+                            <span class="palette-title">VARSAYILAN</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 2. FLUFFY (9 TÜYLÜ RENK) -->
+                        <div class="palette-card" data-color="fluffy">
+                            <div class="palette-grid-preview">
+                                <span style="background: url('fluffy_blue_fur.jpg') center/cover no-repeat;"></span>
+                                <span style="background: url('fluffy_green_fur.jpg') center/cover no-repeat;"></span>
+                                <span style="background: url('fluffy_pink_fur.jpg') center/cover no-repeat;"></span>
+                                <span style="background: url('fluffy_red_fur.jpg') center/cover no-repeat;"></span>
+                                <span style="background: url('fluffy_purple_fur.jpg') center/cover no-repeat;"></span>
+                                <span style="background: url('fluffy_yellow_fur.jpg') center/cover no-repeat;"></span>
+                                <span style="background: url('fluffy_orange_fur.jpg') center/cover no-repeat;"></span>
+                                <span style="background: url('fluffy_cyan_fur.jpg') center/cover no-repeat;"></span>
+                                <span style="background: url('fluffy_fur_texture.jpg') center/cover no-repeat;"></span>
+                            </div>
+                            <span class="palette-title">FLUFFY (9 TÜYLÜ RENK) 🧸</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 3. SİYAH & ALTIN (PRO) -->
+                        <div class="palette-card" data-color="ebonygold">
+                            <div class="palette-pro-badge">💎 PRO</div>
+                            <div class="palette-grid-preview">
+                                <span style="background: #ffd700;"></span>
+                                <span style="background: #374151;"></span>
+                                <span style="background: #d4af37;"></span>
+                                <span style="background: #1f2937;"></span>
+                                <span style="background: #b8860b;"></span>
+                                <span style="background: #111827;"></span>
+                                <span style="background: #f59e0b;"></span>
+                                <span style="background: #4b5563;"></span>
+                                <span style="background: #eab308;"></span>
+                            </div>
+                            <span class="palette-title">SİYAH & ALTIN 👑</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 4. TERS RENKLER (PRO INVERTED NEON) -->
+                        <div class="palette-card" data-color="inverted">
+                            <div class="palette-pro-badge">💎 PRO</div>
+                            <div class="palette-grid-preview">
+                                <span style="background: #00f2fe; border: 2px solid #000;"></span>
+                                <span style="background: #ff007f; border: 2px solid #000;"></span>
+                                <span style="background: #39ff14; border: 2px solid #000;"></span>
+                                <span style="background: #ffd700; border: 2px solid #000;"></span>
+                                <span style="background: #ff4500; border: 2px solid #000;"></span>
+                                <span style="background: #7928ca; border: 2px solid #000;"></span>
+                                <span style="background: #00e5ff; border: 2px solid #000;"></span>
+                                <span style="background: #ff1493; border: 2px solid #000;"></span>
+                                <span style="background: #ccff00; border: 2px solid #000;"></span>
+                            </div>
+                            <span class="palette-title">TERS RENKLER 🔄</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 5. CANLI NEON POP (PRO) -->
+                        <div class="palette-card" data-color="vivid">
+                            <div class="palette-pro-badge">💎 PRO</div>
+                            <div class="palette-grid-preview">
+                                <span style="background: #ff007f;"></span>
+                                <span style="background: #ff4500;"></span>
+                                <span style="background: #ffb703;"></span>
+                                <span style="background: #00f2fe;"></span>
+                                <span style="background: #70e000;"></span>
+                                <span style="background: #3a0ca3;"></span>
+                                <span style="background: #f72585;"></span>
+                                <span style="background: #4cc9f0;"></span>
+                                <span style="background: #7209b7;"></span>
+                            </div>
+                            <span class="palette-title">CANLI NEON ⚡</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 6. KRİSTAL BUZ (PRO) -->
+                        <div class="palette-card" data-color="crystal">
+                            <div class="palette-pro-badge">💎 PRO</div>
+                            <div class="palette-grid-preview">
+                                <span style="background: #a5f3fc;"></span>
+                                <span style="background: #38bdf8;"></span>
+                                <span style="background: #e0f2fe;"></span>
+                                <span style="background: #0284c7;"></span>
+                                <span style="background: #bae6fd;"></span>
+                                <span style="background: #0369a1;"></span>
+                                <span style="background: #cbd5e1;"></span>
+                                <span style="background: #00c6ff;"></span>
+                                <span style="background: #f1f5f9;"></span>
+                            </div>
+                            <span class="palette-title">KRİSTAL BUZ 🧊</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 7. VOLKANİK ATEŞ (PRO) -->
+                        <div class="palette-card" data-color="lava">
+                            <div class="palette-pro-badge">💎 PRO</div>
+                            <div class="palette-grid-preview">
+                                <span style="background: #ff4500;"></span>
+                                <span style="background: #dc2626;"></span>
+                                <span style="background: #ffb703;"></span>
+                                <span style="background: #991b1b;"></span>
+                                <span style="background: #f97316;"></span>
+                                <span style="background: #7f1d1d;"></span>
+                                <span style="background: #ff7518;"></span>
+                                <span style="background: #450a0a;"></span>
+                                <span style="background: #ea580c;"></span>
+                            </div>
+                            <span class="palette-title">VOLKANİK ATEŞ 🔥</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 8. KOZMİK GALAKSİ (PRO) -->
+                        <div class="palette-card" data-color="galaxy">
+                            <div class="palette-pro-badge">💎 PRO</div>
+                            <div class="palette-grid-preview">
+                                <span style="background: #7928ca;"></span>
+                                <span style="background: #ff0080;"></span>
+                                <span style="background: #4c1d95;"></span>
+                                <span style="background: #3b82f6;"></span>
+                                <span style="background: #a855f7;"></span>
+                                <span style="background: #1e1b4b;"></span>
+                                <span style="background: #d8b4fe;"></span>
+                                <span style="background: #2e1065;"></span>
+                                <span style="background: #00f2fe;"></span>
+                            </div>
+                            <span class="palette-title">KOZMİK GALAKSİ 🌌</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 9. KIRMIZI AŞK -->
+                        <div class="palette-card" data-color="red">
+                            <div class="palette-grid-preview">
+                                <span style="background: #ff4d6d;"></span>
+                                <span style="background: #c9184a;"></span>
+                                <span style="background: #ff758f;"></span>
+                                <span style="background: #a4133c;"></span>
+                                <span style="background: #ff8fa3;"></span>
+                                <span style="background: #800f2f;"></span>
+                                <span style="background: #ffb3c1;"></span>
+                                <span style="background: #590d22;"></span>
+                                <span style="background: #e63946;"></span>
+                            </div>
+                            <span class="palette-title">KIRMIZI AŞK ❤️</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 10. ZÜMRÜT ORMAN -->
+                        <div class="palette-card" data-color="emerald">
+                            <div class="palette-grid-preview">
+                                <span style="background: #2ecc71;"></span>
+                                <span style="background: #10b981;"></span>
+                                <span style="background: #059669;"></span>
+                                <span style="background: #047857;"></span>
+                                <span style="background: #34d399;"></span>
+                                <span style="background: #065f46;"></span>
+                                <span style="background: #6ee7b7;"></span>
+                                <span style="background: #064e3b;"></span>
+                                <span style="background: #15803d;"></span>
+                            </div>
+                            <span class="palette-title">ZÜMRÜT ORMAN 🌲</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 11. SAFİR & OKYANUS -->
+                        <div class="palette-card" data-color="sapphire">
+                            <div class="palette-pro-badge">💎 PRO</div>
+                            <div class="palette-grid-preview">
+                                <span style="background: #00c6ff;"></span>
+                                <span style="background: #0072ff;"></span>
+                                <span style="background: #0284c7;"></span>
+                                <span style="background: #0369a1;"></span>
+                                <span style="background: #38bdf8;"></span>
+                                <span style="background: #1e40af;"></span>
+                                <span style="background: #67e8f9;"></span>
+                                <span style="background: #0f172a;"></span>
+                                <span style="background: #00f2fe;"></span>
+                            </div>
+                            <span class="palette-title">SAFİR & OKYANUS 🌊</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 12. SİBERPUNK NEON (PRO) -->
+                        <div class="palette-card" data-color="vaporwave">
+                            <div class="palette-pro-badge">💎 PRO</div>
+                            <div class="palette-grid-preview">
+                                <span style="background: #ff007f;"></span>
+                                <span style="background: #ff00cc;"></span>
+                                <span style="background: #cc00ff;"></span>
+                                <span style="background: #9900ff;"></span>
+                                <span style="background: #ff3399;"></span>
+                                <span style="background: #e60073;"></span>
+                                <span style="background: #ff66cc;"></span>
+                                <span style="background: #c71585;"></span>
+                                <span style="background: #ff1493;"></span>
+                            </div>
+                            <span class="palette-title">SİBERPUNK NEON 🎆</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+
+                        <!-- 13. RAHATLATICI -->
+                        <div class="palette-card" data-color="relaxing">
+                            <div class="palette-grid-preview">
+                                <span style="background: #e09f9d;"></span>
+                                <span style="background: #7bb4cb;"></span>
+                                <span style="background: #b197cb;"></span>
+                                <span style="background: #d4a5cb;"></span>
+                                <span style="background: #81cca8;"></span>
+                                <span style="background: #e2b7cb;"></span>
+                                <span style="background: #a3ca9e;"></span>
+                                <span style="background: #dec1d8;"></span>
+                                <span style="background: #b2b887;"></span>
+                            </div>
+                            <span class="palette-title">RAHATLATICI 🍃</span>
+                            <div class="palette-select-icon">
+                                <span class="circle-check">✓</span>
+                                <span class="circle-empty"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔮 SIRADAKİ TAŞ ÖNİZLEME MODALI (10 Dakika - Elmas veya Reklam ile Aç) -->
+        <div class="modal-overlay hidden" id="modal-peek-unlock">
+            <div class="modal-card peek-modal-card">
+                <button class="peek-modal-close" id="btn-close-peek-modal" title="Kapat">✕</button>
+
+                <!-- Hero Stacked Tiles Graphic Artwork -->
+                <div class="peek-graphic-container">
+                    <div class="peek-bg-rays"></div>
+                    <div class="peek-stacked-tiles">
+                        <div class="peek-tile-card back-card">
+                            <span class="star-deco">✨</span>
+                        </div>
+                        <div class="peek-tile-card front-card">
+                            <span class="card-label">NEXT</span>
+                            <span class="card-icon">🔮</span>
+                            <div class="card-time-badge">+10m</div>
+                            <span class="star-deco-right">✨</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="peek-modal-title">Önizleme</h2>
+                <p class="peek-modal-subtitle">Bir sonraki blok için 10 dakika içinde önizleme yapabilirsiniz.</p>
+
+                <div class="peek-action-buttons">
+                    <!-- Option 1: Gem Unlock (100 Gems) -->
+                    <button class="peek-gem-btn" id="btn-confirm-peek-unlock">
+                        <span class="gem-icon">💎</span>
+                        <span class="btn-val">100</span>
+                    </button>
+
+                    <!-- OR Divider -->
+                    <div class="peek-or-divider">OR</div>
+
+                    <!-- Option 2: Free Watch Rewarded Ad Unlock -->
+                    <button class="peek-ad-btn" id="btn-ad-peek-unlock">
+                        <span class="ad-icon">📺<sup>AD</sup></span>
+                        <span class="btn-val">Almak</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay hidden" id="modal-missions">
+            <div class="modal-card missions-card">
+                <div class="modal-header"><h2>GUNLUK GOREVLER</h2><button class="close-btn" id="btn-close-missions">✕</button></div>
+                <div class="missions-panel" aria-label="Gorevler">
+                    <div class="missions-heading"><span>Gorevlerini tamamla</span><span id="difficulty-label">SEVIYE 1</span></div>
+                    <div class="mission-row"><span>10 birlesme yap</span><span id="mission-merges">0/10</span><button data-mission="merges">+5</button></div>
+                    <div class="mission-row"><span>128 tasi yap</span><span id="mission-tile">0/128</span><button data-mission="tile">+8</button></div>
+                    <div class="mission-row"><span>500 skor yap</span><span id="mission-score">0/500</span><button data-mission="score">+8</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mission-toast hidden" id="mission-toast" role="status">
+            <div class="mission-toast-badge">
+                <span class="mission-toast-icon" id="mission-toast-icon">🎯</span>
+            </div>
+            <div class="mission-toast-text-group">
+                <strong id="mission-toast-title">GÖREV TAMAMLANDI!</strong>
+                <span id="mission-toast-text">Ödülünü Görevler menüsünden al.</span>
+            </div>
+        </div>
+
+        <!-- 🛒 FULL SCREEN SHOP VIEW (TAM EKRAN MAĞAZA GÖRÜNÜMÜ) -->
+        <div class="modal-overlay full-screen-shop hidden" id="modal-shop">
+            <div class="shop-full-container">
+                <!-- Shop Top Header Bar -->
+                <header class="shop-header">
+                    <div class="shop-title-wrapper">
+                        <span class="shop-title-icon">🛒</span>
+                        <h1 class="shop-title">MAĞAZA</h1>
+                    </div>
+                    <div class="shop-gems-pill">
+                        <span class="gem-icon">💎</span>
+                        <span id="shop-gems-val" class="gem-val">150</span>
+                    </div>
+                </header>
+
+                <!-- Scrollable Shop Content -->
+                <div class="shop-content-scroll">
+
+                    <!-- SECTION 1: 🌟 ÖZEL FIRSATLAR & ÜCRETSİZ ELMAS -->
+                    <section class="shop-section">
+                        <h2 class="shop-section-title">
+                            <span>🌟</span> ÖZEL FIRSATLAR & HEDİYELER
+                        </h2>
+                        
+                        <!-- 🎁 Free Gems Watch Ad Banner -->
+                        <div class="shop-card special-reward-card" id="btn-rewarded-free-gems">
+                            <div class="special-card-left">
+                                <div class="special-gift-badge">ÜCRETSİZ</div>
+                                <span class="special-icon">🎁</span>
+                                <div class="special-text">
+                                    <div class="special-title">ÜCRETSİZ ELMAS HEDİYESİ</div>
+                                    <div class="special-desc">Kısa bir reklam izle ve anında <strong>+50 💎 Elmas</strong> kazan!</div>
+                                </div>
+                            </div>
+                            <button class="shop-buy-btn gold-pulse-btn">
+                                <span>🎬 İZLE & KAZAN</span>
+                            </button>
+                        </div>
+
+                        <!-- ⚡ Starter Pack Banner -->
+                        <div class="shop-card starter-pack-card" id="btn-buy-starter-pack">
+                            <div class="starter-card-badge">%70 İNDİRİM</div>
+                            <div class="starter-card-body">
+                                <span class="starter-icon">📦</span>
+                                <div class="starter-details">
+                                    <div class="starter-title">BAŞLANGIÇ HOŞ GELDİN PAKETİ</div>
+                                    <div class="starter-items">
+                                        <span>💎 500 Elmas</span> • <span>🔨 3x Çekiç</span> • <span>💣 3x Bomba</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="shop-buy-btn special-price-btn" data-pack="starter">
+                                <span>₺19.99</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- SECTION 2: 💎 ELMAS PAKETLERİ -->
+                    <section class="shop-section">
+                        <h2 class="shop-section-title">
+                            <span>💎</span> ELMAS PAKETLERİ
+                        </h2>
+                        <div class="shop-items-grid">
+                            
+                            <!-- Pack 1: 100 Gems (Avuç Dolusu Elmas) -->
+                            <div class="shop-card gem-card" data-gems="100" data-price="9.99">
+                                <div class="gem-img-wrapper">
+                                    <img src="gem_pouch.jpg" alt="Avuç Dolusu Elmas" class="gem-pack-img">
+                                </div>
+                                <div class="gem-card-header">
+                                    <span class="gem-amount">100 💎</span>
+                                </div>
+                                <div class="gem-card-subtitle">Avuç Dolusu Elmas</div>
+                                <button class="shop-buy-btn gem-buy-btn">₺9.99</button>
+                            </div>
+
+                            <!-- Pack 2: 500 Gems (Elmas Kesi) -->
+                            <div class="shop-card gem-card featured-card" data-gems="500" data-price="39.99">
+                                <div class="card-ribbon ribbon-popular">POPÜLER</div>
+                                <div class="gem-img-wrapper">
+                                    <img src="gem_sack.jpg" alt="Elmas Kesi" class="gem-pack-img">
+                                </div>
+                                <div class="gem-card-header">
+                                    <span class="gem-amount">500 💎</span>
+                                </div>
+                                <div class="gem-bonus-tag">+%20 EKSTRA BONUS</div>
+                                <div class="gem-card-subtitle">Elmas Kesi</div>
+                                <button class="shop-buy-btn gem-buy-btn">₺39.99</button>
+                            </div>
+
+                            <!-- Pack 3: 1,200 Gems (Elmas Sandığı) -->
+                            <div class="shop-card gem-card featured-card" data-gems="1200" data-price="79.99">
+                                <div class="card-ribbon ribbon-bestseller">EN ÇOK SATAN</div>
+                                <div class="gem-img-wrapper">
+                                    <img src="gem_chest.jpg" alt="Elmas Sandığı" class="gem-pack-img">
+                                </div>
+                                <div class="gem-card-header">
+                                    <span class="gem-amount">1,200 💎</span>
+                                </div>
+                                <div class="gem-bonus-tag">+%50 EKSTRA BONUS</div>
+                                <div class="gem-card-subtitle">Elmas Sandığı</div>
+                                <button class="shop-buy-btn gem-buy-btn">₺79.99</button>
+                            </div>
+
+                            <!-- Pack 4: 3,000 Gems (Elmas Hazinesi) -->
+                            <div class="shop-card gem-card featured-card" data-gems="3000" data-price="179.99">
+                                <div class="card-ribbon ribbon-bestvalue">EN İYİ DEĞER</div>
+                                <div class="gem-img-wrapper">
+                                    <img src="gem_vault.jpg" alt="Elmas Hazinesi" class="gem-pack-img">
+                                </div>
+                                <div class="gem-card-header">
+                                    <span class="gem-amount">3,000 💎</span>
+                                </div>
+                                <div class="gem-bonus-tag">+%100 EKSTRA BONUS</div>
+                                <div class="gem-card-subtitle">Elmas Hazinesi</div>
+                                <button class="shop-buy-btn gem-buy-btn">₺179.99</button>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- SECTION 3: 🚀 GÜÇLENDİRİCİ MAĞAZASI (Booster Store) -->
+                    <section class="shop-section">
+                        <h2 class="shop-section-title">
+                            <span>🚀</span> GÜÇLENDİRİCİ (JOKER) MAĞAZASI
+                        </h2>
+                        <div class="booster-items-list">
+                            
+                            <!-- Booster 1: Hammer -->
+                            <div class="shop-card booster-card" data-booster="hammer" data-count="5" data-cost="150">
+                                <div class="booster-left">
+                                    <span class="booster-icon">🔨</span>
+                                    <div class="booster-info">
+                                        <div class="booster-name">5x Blok Kırma Çekici</div>
+                                        <div class="booster-desc">İstediğiniz herhangi bir blok veya taşı kırıp temizler.</div>
+                                    </div>
+                                </div>
+                                <button class="shop-buy-btn booster-buy-btn">
+                                    <span>💎 150</span>
+                                </button>
+                            </div>
+
+                            <!-- Booster 2: Bomb -->
+                            <div class="shop-card booster-card" data-booster="bomb" data-count="5" data-cost="200">
+                                <div class="booster-left">
+                                    <span class="booster-icon">💣</span>
+                                    <div class="booster-info">
+                                        <div class="booster-name">5x Alan Bombası</div>
+                                        <div class="booster-desc">Seçtiğiniz alanın etrafındaki tüm taşları patlatır.</div>
+                                    </div>
+                                </div>
+                                <button class="shop-buy-btn booster-buy-btn">
+                                    <span>💎 200</span>
+                                </button>
+                            </div>
+
+                            <!-- Booster 3: Swap -->
+                            <div class="shop-card booster-card" data-booster="swap" data-count="5" data-cost="150">
+                                <div class="booster-left">
+                                    <span class="booster-icon">🔄</span>
+                                    <div class="booster-info">
+                                        <div class="booster-name">5x Taş Değiştirici</div>
+                                        <div class="booster-desc">Izgaradaki 2 taşın yerini birbiriyle değiştirir.</div>
+                                    </div>
+                                </div>
+                                <button class="shop-buy-btn booster-buy-btn">
+                                    <span>💎 150</span>
+                                </button>
+                            </div>
+
+                            <!-- Booster Pack: Mega Bundle -->
+                            <div class="shop-card booster-card mega-booster-card" data-booster="mega" data-cost="400">
+                                <div class="card-ribbon ribbon-save">%30 TASARRUF</div>
+                                <div class="booster-left">
+                                    <span class="booster-icon">⚡📦</span>
+                                    <div class="booster-info">
+                                        <div class="booster-name">SÜPER JOKER PAKETİ</div>
+                                        <div class="booster-desc">3x Çekiç + 3x Bomba + 3x Değiştirici İndirimli Paket</div>
+                                    </div>
+                                </div>
+                                <button class="shop-buy-btn booster-buy-btn mega-buy-btn">
+                                    <span>💎 400</span>
+                                </button>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- SECTION 4: 👑 VIP & REKLAMSIZ MOD -->
+                    <section class="shop-section">
+                        <div class="shop-card vip-card" id="btn-buy-vip">
+                            <div class="vip-glow"></div>
+                            <div class="vip-header">
+                                <span class="vip-crown">👑</span>
+                                <div>
+                                    <div class="vip-title">VIP KULÜBÜ & REKLAMSIZ OYUN</div>
+                                    <div class="vip-subtitle">Kalıcı Ayrıcalıklı Deneyim</div>
+                                </div>
+                            </div>
+                            <ul class="vip-features">
+                                <li>✨ Tüm Geçiş & Banner Reklamları Kalıcı Olarak Kaldırılır</li>
+                                <li>📸 Sınırsız Özel Fotoğraf & Arka Plan Yükleme Hakkı</li>
+                                <li>💎 Anında +1,000 Hediye Elmas Bakiyesi</li>
+                                <li>🏆 Profilinizde Özel VIP Altın Rozeti</li>
+                            </ul>
+                            <button class="shop-buy-btn vip-buy-btn">
+                                <span>👑 VIP OL • ₺99.99</span>
+                            </button>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div class="modal-overlay hidden" id="modal-gameover">
+            <div class="modal-card">
+                <h2 class="modal-title">OYUN BİTTİ</h2>
+                <div class="modal-score-box">
+                    <div class="score-row">
+                        <span>Skor:</span>
+                        <strong id="final-score">0</strong>
+                    </div>
+                    <div class="score-row">
+                        <span>En Yüksek:</span>
+                        <strong id="final-best">0</strong>
+                    </div>
+                    <div class="score-row">
+                        <span>Kazanılan Elmas:</span>
+                        <strong id="final-gems">+0 💎</strong>
+                    </div>
+                </div>
+
+                <!-- 🛡️ Rewarded Revive Action -->
+                <button class="primary-btn" id="btn-rewarded-revive" style="background: linear-gradient(135deg, #10B981, #059669); margin-bottom: 10px; width: 100%; padding: 13px; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); border-radius: 14px; border: none; color: #fff; cursor: pointer;">
+                    🛡️ REKLAM İZLE & CANLAN
+                </button>
+
+                <!-- 🎁 2X Elmas Action -->
+                <button class="secondary-btn" id="btn-rewarded-double-gems" style="background: linear-gradient(135deg, #F59E0B, #D97706); margin-bottom: 10px; width: 100%; padding: 12px; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); border-radius: 14px; border: none; color: #fff; cursor: pointer;">
+                    🎁 2X ELMAS KAZAN (+💎)
+                </button>
+
+                <button class="primary-btn" id="btn-restart">YENİDEN BAŞLA</button>
+            </div>
+        </div>
+
+        <!-- 👤 PROFİL MODALI -->
+        <!-- 👤 FULL SCREEN PROFILE VIEW (TAM EKRAN PROFİL EKRANI) -->
+        <div class="modal-overlay full-screen-profile hidden" id="modal-profile">
+            <div class="profile-full-container">
+                <!-- Profile Top Header Bar -->
+                <header class="profile-header">
+                    <div class="profile-title-wrapper">
+                        <span class="profile-title-icon">👤</span>
+                        <h1 class="profile-title">OYUNCU PROFİLİ</h1>
+                    </div>
+                    <div class="profile-gems-badge" id="profile-top-gems-pill">
+                        <span class="gem-icon">💎</span>
+                        <span id="profile-top-gems-val">150</span>
+                    </div>
+                </header>
+
+                <!-- Scrollable Profile Content Area -->
+                <div class="profile-content-scroll">
+
+                    <!-- User Banner & Hero Card -->
+                    <div class="profile-hero-card">
+                        <div class="profile-avatar-circle" id="btn-profile-avatar-circle" style="cursor: pointer;" title="Profil Fotoğrafını Değiştir">
+                            <span class="avatar-emoji">🧙‍♂️</span>
+                            <button class="change-avatar-btn" id="btn-change-avatar" title="Avatar Değiştir">✏️</button>
+                        </div>
+                        <div class="profile-hero-info">
+                            <h2 class="profile-hero-name" id="profile-display-name">wlzby <span style="font-size: 14px; cursor: pointer; opacity: 0.8;" id="btn-edit-username-pen" title="İsim ve Fotoğraf Değiştir">✏️</span></h2>
+                            <span class="profile-rank-tag">🏆 Ustalaşmış Oyuncu</span>
+                            <span class="profile-level-badge" id="profile-display-level">21. Düzey Seviye</span>
+                        </div>
+                    </div>
+
+                    <!-- Player Lifetime Stats Grid (4 Key Cards) -->
+                    <div class="profile-section-title">📊 KARİYER İSTATİSTİKLERİ</div>
+                    <div class="profile-stats-grid-2x2">
+                        <div class="stat-box-hero stat-gold">
+                            <span class="stat-box-icon">🏆</span>
+                            <span class="stat-box-label">EN YÜKSEK SKOR</span>
+                            <strong class="stat-box-val" id="profile-stat-highscore">0</strong>
+                        </div>
+                        <div class="stat-box-hero stat-cyan">
+                            <span class="stat-box-icon">🧩</span>
+                            <span class="stat-box-label">EN YÜKSEK BLOK</span>
+                            <strong class="stat-box-val" id="profile-stat-besttile">2048</strong>
+                        </div>
+                        <div class="stat-box-hero stat-purple">
+                            <span class="stat-box-icon">🔥</span>
+                            <span class="stat-box-label">TOPLAM BİRLEŞTİRME</span>
+                            <strong class="stat-box-val" id="profile-stat-merges">0</strong>
+                        </div>
+                        <div class="stat-box-hero stat-emerald">
+                            <span class="stat-box-icon">💎</span>
+                            <span class="stat-box-label">ELMAS BAKİYESİ</span>
+                            <strong class="stat-box-val" id="profile-stat-gems">150 💎</strong>
+                        </div>
+                    </div>
+
+                    <!-- Achievements & Badges List -->
+                    <div class="profile-section-title">🏅 BAŞARIMLAR VE UNVANLAR</div>
+                    <div class="achievements-card-list">
+                        <div class="achievement-item completed">
+                            <span class="achieve-icon">🎯</span>
+                            <div class="achieve-info">
+                                <strong>İlk Birleşme</strong>
+                                <small>İlk blok birleştirmesini tamamla</small>
+                            </div>
+                            <span class="achieve-badge">TAMAMLANDI</span>
+                        </div>
+                        <div class="achievement-item completed">
+                            <span class="achieve-icon">👑</span>
+                            <div class="achieve-info">
+                                <strong>2048 Şampiyonu</strong>
+                                <small>2048 bloğuna ulaşmayı başar</small>
+                            </div>
+                            <span class="achieve-badge">TAMAMLANDI</span>
+                        </div>
+                        <div class="achievement-item">
+                            <span class="achieve-icon">🐉</span>
+                            <div class="achieve-info">
+                                <strong>4096 Efsanesi</strong>
+                                <small>4096 bloğuna ulaş ve ejderha unvanını al</small>
+                            </div>
+                            <span class="achieve-progress">1/2</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Buttons -->
+                    <div class="profile-actions-wrapper">
+                        <button class="profile-action-btn btn-open-themes" id="btn-profile-themes">
+                            <span>🎨 TEMALAR</span>
+                        </button>
+                        <button class="profile-action-btn btn-open-shop" id="btn-profile-shop">
+                            <span>💎 MAĞAZAYA GİT</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 🏆 FULL SCREEN LEADERBOARD VIEW (TAM EKRAN LİDERLİK TABLOSU) -->
+        <div class="modal-overlay full-screen-leaderboard hidden" id="modal-leaderboard">
+            <div class="lb-full-container">
+                <!-- Leaderboard Top Header Bar -->
+                <header class="lb-header">
+                    <div class="lb-title-wrapper">
+                        <span class="lb-title-icon">📊</span>
+                        <h1 class="lb-title">LİDERLİK TABLOSU</h1>
+                    </div>
+                    <div class="lb-user-badge">
+                        <span class="lb-badge-icon">👑</span>
+                        <span id="lb-header-high-score" class="lb-header-score-val">0</span>
+                    </div>
+                </header>
+
+                <!-- Fixed Top Area (Podium + Segmented Tabs) -->
+                <div class="lb-fixed-top">
+                    <!-- Top 3 Podium Cards -->
+                    <div class="podium-container">
+                        <!-- 2nd Rank (Silver) -->
+                        <div class="podium-card rank-2-card">
+                            <div class="podium-crown">🥈</div>
+                            <div class="podium-avatar">🧙‍♂️</div>
+                            <div class="podium-name">wlzby (Sen)</div>
+                            <div class="podium-score" id="podium-user-score">98,400</div>
+                            <div class="podium-tile">2048</div>
+                            <div class="podium-base base-2">2</div>
+                        </div>
+
+                        <!-- 1st Rank (Gold Winner) -->
+                        <div class="podium-card rank-1-card">
+                            <div class="podium-crown">👑</div>
+                            <div class="podium-avatar">🐉</div>
+                            <div class="podium-name">EfsaneEjder</div>
+                            <div class="podium-score">142,500</div>
+                            <div class="podium-tile">4096</div>
+                            <div class="podium-base base-1">1</div>
+                        </div>
+
+                        <!-- 3rd Rank (Bronze) -->
+                        <div class="podium-card rank-3-card">
+                            <div class="podium-crown">🥉</div>
+                            <div class="podium-avatar">🐺</div>
+                            <div class="podium-name">Bozkurt</div>
+                            <div class="podium-score">85,200</div>
+                            <div class="podium-tile">2048</div>
+                            <div class="podium-base base-3">3</div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Tabs: TÜM ZAMANLAR vs HAFTALIK -->
+                    <div class="lb-tabs-segmented">
+                        <button class="lb-tab active" data-lb="all">
+                            <span>🏆 TÜM ZAMANLAR</span>
+                        </button>
+                        <button class="lb-tab" data-lb="weekly">
+                            <span>🔥 HAFTALIK LİDERLER</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Marked Scrollable Leaderboard List Panel -->
+                <div class="leaderboard-list" id="leaderboard-list">
+                    <!-- 50 rows rendered dynamically by JS -->
+                </div>
+
+                <!-- 📌 Sticky Bottom Player Rank Bar (Fixed above Bottom Nav Bar) -->
+                <div class="lb-sticky-user-bar" id="lb-sticky-user-bar">
+                    <span class="lb-sticky-rank" id="lb-sticky-rank-val">#59</span>
+                    <div class="lb-sticky-avatar" id="lb-sticky-avatar-val">🧙‍♂️</div>
+                    <div class="lb-sticky-user-info" id="btn-sticky-edit-name" title="İsim ve Avatarını Değiştir">
+                        <strong class="lb-sticky-name" id="lb-sticky-name-val">Misafir_4982</strong>
+                        <span class="lb-edit-icon-badge">✏️</span>
+                    </div>
+                    <div class="lb-sticky-score-box">
+                        <strong class="lb-sticky-score" id="lb-sticky-score-val">107.244</strong>
+                        <small>puan</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✏️ PROFİL DÜZENLEME MODALI (EDIT / CREATE PROFILE POPUP) -->
+        <div class="modal-overlay hidden" id="modal-edit-profile">
+            <div class="modal-card edit-profile-card">
+                <div class="modal-header">
+                    <h2>✏️ PROFİL DÜZENLEME</h2>
+                    <button class="close-btn" id="btn-close-edit-profile">✕</button>
+                </div>
+
+                <div class="edit-profile-content">
+                    <!-- Bonus Reward Callout Banner -->
+                    <div class="profile-reward-banner">
+                        <span class="banner-gift-icon">🎁</span>
+                        <div class="banner-text">
+                            <strong>Profilini Oluştur & Kazan!</strong>
+                            <small>Profilini kaydet, anında <strong class="highlight-gem">+50 💎</strong> hediye kazan.</small>
+                        </div>
+                    </div>
+
+                    <!-- Nickname Input Section -->
+                    <div class="edit-field-group">
+                        <label class="edit-label">BİR TAKMA AD GİRİN</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">👤</span>
+                            <input type="text" id="input-username" class="custom-nickname-input" placeholder="Buraya yazın..." maxlength="15" value="wlzby">
+                        </div>
+                    </div>
+
+                    <!-- Avatar Selection Grid -->
+                    <div class="edit-field-group">
+                        <label class="edit-label">BİR AVATAR VEYA FOTOĞRAF SEÇİN</label>
+                        <!-- Hidden File Input for Custom Profile Photo Avatar -->
+                        <input type="file" id="input-custom-avatar" accept="image/*" class="hidden" style="display: none;">
+                        <div class="avatar-select-grid" id="avatar-select-grid">
+                            <!-- 📸 KENDİ FOTOĞRAFIN YÜKLE SEÇENEĞİ -->
+                            <div class="avatar-option custom-avatar-option" id="btn-upload-avatar" data-avatar="custom" title="Kendi Fotoğrafını Yükle">
+                                <div class="custom-avatar-preview-box" id="preview-custom-avatar">
+                                    <span class="custom-avatar-icon" id="icon-custom-avatar">📸</span>
+                                </div>
+                            </div>
+                            <div class="avatar-option active" data-avatar="🧙‍♂️">🧙‍♂️</div>
+                            <div class="avatar-option" data-avatar="🐉">🐉</div>
+                            <div class="avatar-option" data-avatar="🐺">🐺</div>
+                            <div class="avatar-option" data-avatar="🦁">🦁</div>
+                            <div class="avatar-option" data-avatar="⚡">⚡</div>
+                            <div class="avatar-option" data-avatar="🦅">🦅</div>
+                            <div class="avatar-option" data-avatar="🐯">🐯</div>
+                            <div class="avatar-option" data-avatar="🦊">🦊</div>
+                            <div class="avatar-option" data-avatar="🚀">🚀</div>
+                            <div class="avatar-option" data-avatar="🤖">🤖</div>
+                            <div class="avatar-option" data-avatar="🦄">🦄</div>
+                            <div class="avatar-option" data-avatar="👑">👑</div>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Button -->
+                    <button class="btn-confirm-profile" id="btn-save-profile">
+                        <span>PROFİLİ ONAYLA (+50 💎)</span>
+                    </button>
+                    <small class="edit-disclaimer">*Takma adınızı ve avatarınızı dilediğiniz zaman değiştirebilirsiniz.*</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚙️ FULL SCREEN SETTINGS VIEW (TAM EKRAN AYARLAR EKRANI) -->
+        <div class="modal-overlay full-screen-settings hidden" id="modal-settings">
+            <div class="settings-full-container">
+                <!-- Settings Top Header Bar -->
+                <header class="settings-header">
+                    <div class="settings-title-wrapper">
+                        <span class="settings-title-icon">⚙️</span>
+                        <h1 class="settings-title">OYUN AYARLARI</h1>
+                    </div>
+                    <div class="settings-version-badge">
+                        <span>v1.1.8</span>
+                    </div>
+                </header>
+
+                <!-- Fixed Top Area (2 Quick Toggles + Leaderboard-style Segmented Tabs) -->
+                <div class="settings-fixed-top">
+                    <!-- Top 2 Quick Toggle Icon Cards (Audio & Haptics) -->
+                    <div class="settings-top-toggles-2col">
+                        <button class="setting-toggle-card active" id="btn-toggle-sound-card">
+                            <span class="toggle-card-icon" id="icon-sound-state">🔊</span>
+                            <div class="toggle-card-text">
+                                <strong id="text-sound-title">SES AÇIK</strong>
+                                <small id="text-sound-sub">Oyun Efektleri</small>
+                            </div>
+                        </button>
+
+                        <button class="setting-toggle-card active" id="btn-toggle-vibe-card">
+                            <span class="toggle-card-icon" id="icon-vibe-state">📳</span>
+                            <div class="toggle-card-text">
+                                <strong id="text-vibe-title">TİTREŞİM AÇIK</strong>
+                                <small id="text-vibe-sub">Dokunsal Haptik</small>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Leaderboard-style Segmented Tabs (Ahşap Temaları / Renk Paletleri) -->
+                    <div class="settings-tabs-segmented">
+                        <button class="settings-tab-btn active" id="tab-settings-themes" data-tab="themes">
+                            <span>🪵 AHŞAP TEMALARI</span>
+                        </button>
+                        <button class="settings-tab-btn" id="tab-settings-colors" data-tab="colors">
+                            <span>🎨 RENK PALETLERİ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Scroll List Box (Leaderboard-style Scroll Panel) -->
+                <div class="settings-main-scroll-list" id="settings-scroll-list">
+
+                    <!-- Tab 1: Wood & Background Themes Panel (Visual Cards Grid View) -->
+                    <div class="settings-panel-view active" id="panel-settings-themes">
+                        <!-- Hidden File Input for Custom Background Photo -->
+                        <input type="file" id="input-custom-bg" accept="image/*" class="hidden" style="display: none;">
+
+                        <div class="bg-themes-grid">
+                            <!-- ➕ KENDİ FOTOĞRAFIN (ÖZEL TEMA - ÜCRET Lİ) -->
+                            <div class="bg-card custom-bg-card" data-bg="custom" data-cost="500" id="card-custom-bg">
+                                <div class="bg-card-thumb custom-bg-thumb">
+                                    <span class="custom-bg-icon" id="icon-custom-bg-preview">➕</span>
+                                </div>
+                                <span class="bg-card-name" id="text-custom-bg-title">Kendi Fotoğrafın</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge" id="badge-custom-bg-price">💎 500</div>
+                            </div>
+
+                            <!-- ⭐ GİRİŞ & VARSAYILAN ÜCRETSİZ TEMALAR -->
+                            <div class="bg-card active" data-bg="obsidian" data-cost="0">
+                                <div class="bg-card-thumb obsidian-bg-thumb"></div>
+                                <span class="bg-card-name">Gece Siyahı ✨</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="walnut" data-cost="0">
+                                <div class="bg-card-thumb walnut-bg-thumb"></div>
+                                <span class="bg-card-name">Ceviz Ahşap 🪵</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="forest" data-cost="0">
+                                <div class="bg-card-thumb forest-bg-thumb"></div>
+                                <span class="bg-card-name">Yeşil Orman 🌲</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
+                            </div>
+
+                            <!-- 💎 250 ELMAS PREMİUM TEMALAR -->
+                            <div class="bg-card" data-bg="aurora" data-cost="250">
+                                <div class="bg-card-thumb aurora-bg-thumb"></div>
+                                <span class="bg-card-name">Kutup Işıkları</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="nebula" data-cost="250">
+                                <div class="bg-card-thumb nebula-bg-thumb"></div>
+                                <span class="bg-card-name">Kozmik Nebula</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="oak" data-cost="250">
+                                <div class="bg-card-thumb oak-bg-thumb"></div>
+                                <span class="bg-card-name">Meşe Ahşap</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="cherry" data-cost="250">
+                                <div class="bg-card-thumb cherry-bg-thumb"></div>
+                                <span class="bg-card-name">Kiraz Ahşap</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="ebony" data-cost="250">
+                                <div class="bg-card-thumb ebony-bg-thumb"></div>
+                                <span class="bg-card-name">Abanoz Ahşap</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="clouds" data-cost="250">
+                                <div class="bg-card-thumb clouds-bg-thumb"></div>
+                                <span class="bg-card-name">Altın Gökyüzü</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="earth" data-cost="250">
+                                <div class="bg-card-thumb earth-bg-thumb"></div>
+                                <span class="bg-card-name">Dünya & Uzay</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="ocean" data-cost="250">
+                                <div class="bg-card-thumb ocean-bg-thumb"></div>
+                                <span class="bg-card-name">Turkuaz Deniz</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="puppy" data-cost="250">
+                                <div class="bg-card-thumb puppy-bg-thumb"></div>
+                                <span class="bg-card-name">Sevimli Köpekler</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="cat" data-cost="250">
+                                <div class="bg-card-thumb cat-bg-thumb"></div>
+                                <span class="bg-card-name">Kara Kedi</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="lake" data-cost="250">
+                                <div class="bg-card-thumb lake-bg-thumb"></div>
+                                <span class="bg-card-name">Gece Gölü</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+
+                            <div class="bg-card" data-bg="cyber" data-cost="250">
+                                <div class="bg-card-thumb cyber-bg-thumb"></div>
+                                <span class="bg-card-name">Siber Yarış</span>
+                                <div class="bg-check-badge">✓</div>
+                                <div class="bg-price-badge">🔒 250 💎</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Color Palettes Panel (Visual Cards Grid View - Tile Colors) -->
+                    <div class="settings-panel-view hidden" id="panel-settings-colors">
+                        <div class="color-palettes-grid">
+
+                            <!-- 1. VARSAYILAN -->
+                            <div class="color-card active" data-color="default">
+                                <div class="color-card-preview-box">
+                                    <div class="palette-grid-3x3">
+                                        <span style="background: #a855f7;">2</span>
+                                        <span style="background: #eab308;">4</span>
+                                        <span style="background: #84cc16;">8</span>
+                                        <span style="background: #0ea5e9;">16</span>
+                                        <span style="background: #ef4444;">32</span>
+                                        <span style="background: #2563eb;">64</span>
+                                        <span style="background: #f59e0b;">128</span>
+                                        <span style="background: #8b5cf6;">256</span>
+                                        <span style="background: #f43f5e;">512</span>
+                                    </div>
+                                </div>
+                                <span class="color-card-name">Varsayılan Taşlar 💎</span>
+                                <div class="color-check-badge">✓</div>
+                            </div>
+
+                            <!-- 2. FLUFFY POFUDUK -->
+                            <div class="color-card" data-color="fluffy">
+                                <div class="color-card-preview-box">
+                                    <div class="palette-grid-3x3">
+                                        <span style="background: url('fluffy_blue_fur.jpg') center/cover no-repeat;">2</span>
+                                        <span style="background: url('fluffy_green_fur.jpg') center/cover no-repeat;">4</span>
+                                        <span style="background: url('fluffy_pink_fur.jpg') center/cover no-repeat;">8</span>
+                                        <span style="background: url('fluffy_red_fur.jpg') center/cover no-repeat;">16</span>
+                                        <span style="background: url('fluffy_purple_fur.jpg') center/cover no-repeat;">32</span>
+                                        <span style="background: url('fluffy_yellow_fur.jpg') center/cover no-repeat;">64</span>
+                                        <span style="background: url('fluffy_orange_fur.jpg') center/cover no-repeat;">128</span>
+                                        <span style="background: url('fluffy_cyan_fur.jpg') center/cover no-repeat;">256</span>
+                                        <span style="background: url('fluffy_fur_texture.jpg') center/cover no-repeat;">512</span>
+                                    </div>
+                                </div>
+                                <span class="color-card-name">Fluffy Pofuduk Taşlar 🧸</span>
+                                <div class="color-check-badge">✓</div>
+                            </div>
+
+                            <!-- 3. SİYAH & ALTIN (PRO) -->
+                            <div class="color-card" data-color="ebonygold">
+                                <div class="color-card-preview-box">
+                                    <div class="palette-grid-3x3">
+                                        <span style="background: #ffd700; color: #000; text-shadow: none;">2</span>
+                                        <span style="background: #374151;">4</span>
+                                        <span style="background: #d4af37; color: #000; text-shadow: none;">8</span>
+                                        <span style="background: #1f2937;">16</span>
+                                        <span style="background: #f59e0b;">32</span>
+                                        <span style="background: #111827;">64</span>
+                                        <span style="background: #eab308; color: #000; text-shadow: none;">128</span>
+                                        <span style="background: #4b5563;">256</span>
+                                        <span style="background: #fbbf24; color: #000; text-shadow: none;">512</span>
+                                    </div>
+                                </div>
+                                <span class="color-card-name">Siyah & Altın Taşlar 👑</span>
+                                <div class="color-check-badge">✓</div>
+                            </div>
+
+                            <!-- 4. SOFT PASTEL -->
+                            <div class="color-card" data-color="pastel">
+                                <div class="color-card-preview-box">
+                                    <div class="palette-grid-3x3">
+                                        <span style="background: #f472b6;">2</span>
+                                        <span style="background: #38bdf8;">4</span>
+                                        <span style="background: #4ade80;">8</span>
+                                        <span style="background: #fbbf24;">16</span>
+                                        <span style="background: #c084fc;">32</span>
+                                        <span style="background: #fb7185;">64</span>
+                                        <span style="background: #a7f3d0; color: #1e293b; text-shadow: none;">128</span>
+                                        <span style="background: #fed7aa; color: #1e293b; text-shadow: none;">256</span>
+                                        <span style="background: #e9d5ff; color: #1e293b; text-shadow: none;">512</span>
+                                    </div>
+                                </div>
+                                <span class="color-card-name">Soft Pastel Taşlar 🌸</span>
+                                <div class="color-check-badge">✓</div>
+                            </div>
+
+                            <!-- 5. SİBER NEON -->
+                            <div class="color-card" data-color="neon">
+                                <div class="color-card-preview-box">
+                                    <div class="palette-grid-3x3">
+                                        <span style="background: #00f2fe; color: #000; text-shadow: none;">2</span>
+                                        <span style="background: #ff0844;">4</span>
+                                        <span style="background: #76b852;">8</span>
+                                        <span style="background: #b224ef;">16</span>
+                                        <span style="background: #ffb703; color: #000; text-shadow: none;">32</span>
+                                        <span style="background: #f107a3;">64</span>
+                                        <span style="background: #00c6ff; color: #000; text-shadow: none;">128</span>
+                                        <span style="background: #f857a6;">256</span>
+                                        <span style="background: #ff5858;">512</span>
+                                    </div>
+                                </div>
+                                <span class="color-card-name">Siber Neon Taşlar ⚡</span>
+                                <div class="color-check-badge">✓</div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Reset Game Danger Button (Positioned comfortably lower down) -->
+                    <div class="settings-reset-wrapper">
+                        <button class="btn-reset-game-danger" id="btn-reset-data">
+                            <span class="btn-danger-icon">🔄</span>
+                            <span>OYUN İLERLEMESİNİ SIFIRLA</span>
+                        </button>
+                    </div>
+
+                    <!-- Settings Footer Info -->
+                    <div class="settings-footer-info">
+                        <div class="app-logo-badge">
+                            <span class="game-logo-icon">🧩</span>
+                            <strong>Gridoria 2048 Shooter</strong>
+                        </div>
+                        <small>Sürüm 1.4.1 (Build 2026) | All Rights Reserved</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 💎 ÖZEL FOTOĞRAF TEMASI SATIN ALMA MODAL'I -->
+        <div class="modal-overlay hidden" id="modal-custom-bg-confirm" style="z-index: 4500;">
+            <div class="modal-card premium-confirm-card">
+                <div class="confirm-icon-badge" id="confirm-custom-bg-icon">📸</div>
+                <h2 class="confirm-modal-title">Özel Fotoğraf Teması</h2>
+                <p class="confirm-modal-desc" id="confirm-custom-bg-desc">Galerinizden istediğiniz fotoğrafı seçip, boyutlandırarak oyun arka planı yapabilirsiniz.</p>
+                <div class="confirm-price-box">
+                    <span class="price-label" id="confirm-custom-bg-price-label">Yükleme Ücreti:</span>
+                    <span class="price-value" id="confirm-custom-bg-price-val">💎 500 Mücevher</span>
+                </div>
+                <div class="confirm-modal-actions">
+                    <button class="confirm-btn-cancel" id="btn-cancel-custom-bg">İptal</button>
+                    <button class="confirm-btn-buy" id="btn-buy-custom-bg">✨ 500 💎 Ver & Fotoğraf Seç</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚠️ ÖZEL ONAY MODALI (Native Browser Dialog Yerine Şık Oyun İçi Modal) -->
+        <div class="modal-overlay hidden" id="modal-confirm-dialog" style="z-index: 4700;">
+            <div class="modal-card premium-confirm-card">
+                <div class="confirm-icon-badge" id="confirm-dialog-icon">⚠️</div>
+                <h2 class="confirm-modal-title" id="confirm-dialog-title">Oyun İlerlemesini Sıfırla</h2>
+                <p class="confirm-modal-desc" id="confirm-dialog-desc">Oyun ilerlemeniz ve tahtanız sıfırlansın mı? (Elmaslarınız korunacaktır)</p>
+                <div class="confirm-modal-actions">
+                    <button class="confirm-btn-cancel" id="btn-confirm-dialog-cancel">İPTAL</button>
+                    <button class="confirm-btn-buy" id="btn-confirm-dialog-ok" style="background: linear-gradient(135deg, #ef4444, #dc2626);">EVET, SIFIRLA</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✂️ FOTOĞRAF KIRMA VE DÜZENLEME MODAL'I -->
+        <div class="modal-overlay hidden" id="modal-crop-photo" style="z-index: 4600;">
+            <div class="modal-card crop-modal-card">
+                <div class="crop-modal-header">
+                    <h3 id="crop-modal-title">✂️ Fotoğrafı Ayarla</h3>
+                    <button class="crop-close-btn" id="btn-close-crop">✕</button>
+                </div>
+
+                <div class="crop-view-container">
+                    <div class="crop-viewport" id="crop-viewport">
+                        <img id="crop-image-target" src="" alt="Crop Target">
+                        <div class="crop-overlay-frame" id="crop-overlay-frame"></div>
+                    </div>
+                </div>
+
+                <div class="crop-controls-wrapper">
+                    <div class="crop-control-row">
+                        <span class="control-label">🔍 Yakınlaştır:</span>
+                        <input type="range" id="crop-zoom-slider" min="1" max="3" step="0.05" value="1">
+                    </div>
+                    <div class="crop-control-buttons">
+                        <button class="crop-tool-btn" id="btn-crop-rotate">🔄 Döndür (90°)</button>
+                        <button class="crop-tool-btn" id="btn-crop-reset">↺ Sıfırla</button>
+                    </div>
+                </div>
+
+                <div class="crop-modal-actions">
+                    <button class="crop-action-btn cancel" id="btn-cancel-crop">İptal</button>
+                    <button class="crop-action-btn apply" id="btn-apply-crop">✨ Fotoğrafı Uygula</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🧭 ALT MENÜ ÇUBUĞU (BOTTOM NAVIGATION BAR - 5 TABS) -->
+        <nav id="bottom-nav-bar" class="bottom-nav-bar">
+            <!-- 1. TAB: MAĞAZA (EN SOLDA) -->
+            <button class="nav-tab-item" id="nav-tab-shop" data-tab="shop" title="Mağaza">
+                <div class="tab-icon-wrapper">
+                    <span class="tab-icon">🛒</span>
+                </div>
+                <span class="tab-label">MAĞAZA</span>
+            </button>
+
+            <!-- 2. TAB: LİDERLİK TABLOSU (MAĞAZANIN SAĞINDA) -->
+            <button class="nav-tab-item" id="nav-tab-leaderboard" data-tab="leaderboard" title="Liderlik Tablosu">
+                <div class="tab-icon-wrapper">
+                    <span class="tab-icon">📊</span>
+                </div>
+                <span class="tab-label">LİDERLİK</span>
+            </button>
+
+            <!-- 3. TAB: ANA SAYFA (TAM ORTADA - AKTİF) -->
+            <button class="nav-tab-item active" id="nav-tab-home" data-tab="home" title="Ana Sayfa">
+                <div class="tab-icon-wrapper home-highlight">
+                    <span class="tab-icon">🏠</span>
+                </div>
+                <span class="tab-label">ANA SAYFA</span>
+            </button>
+
+            <!-- 4. TAB: PROFİL (ORTADAN SONRA / SAĞ KÖŞEDE) -->
+            <button class="nav-tab-item" id="nav-tab-profile" data-tab="profile" title="Profil">
+                <div class="tab-icon-wrapper">
+                    <span class="tab-icon">👤</span>
+                </div>
+                <span class="tab-label">PROFİL</span>
+            </button>
+
+            <!-- 5. TAB: AYARLAR (EN SAĞDA) -->
+            <button class="nav-tab-item" id="nav-tab-settings" data-tab="settings" title="Ayarlar">
+                <div class="tab-icon-wrapper">
+                    <span class="tab-icon">⚙️</span>
+                </div>
+                <span class="tab-label">AYARLAR</span>
+            </button>
+        </nav>
+
+        <!-- Overlay Container -->
+        <div id="particles-container"></div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function updateVh() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        updateVh();
+        window.addEventListener('resize', updateVh);
+        window.addEventListener('orientationchange', updateVh);
+    </script>
+    <script src="bridge.js?v=3.1.0"></script>
+    <script src="audio.js?v=3.1.0"></script>
+    <script src="effects.js?v=3.1.0"></script>
+    <script src="powerups.js?v=3.1.0"></script>
+    <script src="game.js?v=3.1.0"></script>
+</body>
+</html>

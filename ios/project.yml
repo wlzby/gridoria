@@ -1,0 +1,27 @@
+name: Gridoria
+options:
+  bundleIdPrefix: com.mawelly
+  deploymentTarget:
+    iOS: "14.0"
+targets:
+  Gridoria:
+    type: application
+    platform: iOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Gridoria
+      - path: www
+        type: folder
+    info:
+      path: Gridoria/Info.plist
+      properties:
+        CFBundleDisplayName: Gridoria
+        CFBundleIdentifier: com.mawelly.gridoria
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        UIRequiresFullScreen: true
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.mawelly.gridoria
+      TARGETED_DEVICE_FAMILY: "1,2"
+      SWIFT_VERSION: "5.0"
+      CODE_SIGNING_ALLOWED: NO

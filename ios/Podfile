@@ -1,0 +1,9 @@
+platform :ios, '14.0'
+
+target 'Gridoria' do
+  use_frameworks!
+
+  # Google Mobile Ads SDK for iOS
+  pod 'Google-Mobile-Ads-SDK'
+
+end

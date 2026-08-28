@@ -1,0 +1,92 @@
+workflows:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 🍎 iOS Workflow (Builds Gridoria iOS App & IPA)
+  # ═══════════════════════════════════════════════════════════════════════════
+  ios-workflow:
+    name: Gridoria iOS Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: "com.mawelly.gridoria"
+        XCODE_WORKSPACE: "ios/Gridoria.xcworkspace"
+        XCODE_SCHEME: "Gridoria"
+    scripts:
+      - name: Prepare Assets & Generate Xcode Project
+        script: |
+          cd ios
+          # Ensure www folder is fresh and synced from Android assets
+          mkdir -p www
+          cp -r ../app/src/main/assets/www/* ./www/
+          brew install xcodegen || true
+          xcodegen generate
+      - name: Install CocoaPods Dependencies (AdMob SDK)
+        script: |
+          cd ios
+          pod install --repo-update
+      - name: Build iOS Application
+        script: |
+          cd ios
+          xcodebuild build \
+            -workspace Gridoria.xcworkspace \
+            -scheme Gridoria \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+      - name: Package .app / .ipa Artifacts
+        script: |
+          mkdir -p $CM_BUILD_DIR/output
+          cd ios
+          # Find the compiled .app bundle
+          APP_PATH=$(find build -name "Gridoria.app" | head -n 1)
+          if [ -n "$APP_PATH" ]; then
+            echo "Found app at: $APP_PATH"
+            # Package into payload for easy IPA creation
+            mkdir -p Payload
+            cp -r "$APP_PATH" Payload/
+            zip -r "$CM_BUILD_DIR/output/Gridoria.ipa" Payload
+            cp -r "$APP_PATH" "$CM_BUILD_DIR/output/"
+          fi
+    artifacts:
+      - output/*.ipa
+      - output/*.app
+      - ios/build/**/*.xcarchive
+    publishing:
+      email:
+        recipients:
+          - user@example.com # Replace with your email to receive build notifications
+        notify:
+          success: true
+          failure: true
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 🤖 Android Workflow (Builds Gridoria Android APK & AAB)
+  # ═══════════════════════════════════════════════════════════════════════════
+  android-workflow:
+    name: Gridoria Android Build
+    max_build_duration: 30
+    instance_type: linux_x2
+    environment:
+      java: 17
+    scripts:
+      - name: Grant Gradle Execute Permission
+        script: |
+          chmod +x gradlew
+      - name: Build Android Release APK & AAB
+        script: |
+          ./gradlew assembleRelease bundleRelease || ./gradlew assembleDebug
+    artifacts:
+      - app/build/outputs/apk/**/*.apk
+      - app/build/outputs/bundle/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: true
