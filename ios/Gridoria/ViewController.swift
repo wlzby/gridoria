@@ -8,15 +8,15 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
     private var webView: WKWebView!
     private var bannerView: BannerView?
-    private var bannerHeightConstraint: NSLayoutConstraint?
+    private var bannerBottomConstraint: NSLayoutConstraint?
     private var interstitialAd: InterstitialAd?
     private var rewardedAd: RewardedAd?
     private var pendingRewardType: String = ""
 
-    // ── AdMob Unit IDs (Replace with your live production AdMob iOS IDs) ──
-    private let BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/2934735716" // Test ID
-    private let INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/4411468910" // Test ID
-    private let REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/1712485313" // Test ID
+    // ── AdMob Unit IDs (Test IDs) ──
+    private let BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/2934735716"
+    private let INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/4411468910"
+    private let REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/1712485313"
 
     override var prefersStatusBarHidden: Bool {
         return true
@@ -49,10 +49,10 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         config.defaultWebpagePreferences.allowsContentJavaScript = true
 
-        webView = WKWebView(frame: .zero, configuration: config)
+        webView = WKWebView(frame: view.bounds, configuration: config)
         webView.navigationDelegate = self
         webView.uiDelegate = self
-        webView.backgroundColor = .clear
+        webView.backgroundColor = UIColor(red: 11/255, green: 21/255, blue: 54/255, alpha: 1.0)
         webView.isOpaque = false
         webView.scrollView.bounces = false
         webView.scrollView.isScrollEnabled = false
@@ -60,9 +60,17 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         webView.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(webView)
+
+        // Webview fills the whole screen
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
-    // MARK: - 📢 Setup Banner View
+    // MARK: - 📢 Setup Banner View (Overlay)
     private func setupBannerView() {
         bannerView = BannerView(adSize: AdSizeBanner)
         guard let bannerView = bannerView else { return }
@@ -75,60 +83,52 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         view.addSubview(bannerView)
 
-        // Auto Layout
+        // Center banner horizontally at safe area bottom
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
-            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: bannerView.topAnchor),
-
-            bannerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bannerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bannerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             bannerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
-
-        bannerHeightConstraint = bannerView.heightAnchor.constraint(equalToConstant: 0)
-        bannerHeightConstraint?.isActive = true
 
         bannerView.load(Request())
     }
 
     // MARK: - 📁 Load Game from Local Assets
     private func loadLocalGame() {
-        let bundleURL = Bundle.main.bundleURL
-        let resourceURL = Bundle.main.resourceURL ?? bundleURL
-        
-        var targetURL: URL?
+        let bundle = Bundle.main
+        var htmlURL: URL?
 
-        // 1. Check in 'www' subfolder
-        if let url = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "www") {
-            targetURL = url
-        } else if let url = Bundle.main.url(forResource: "index", withExtension: "html") {
-            targetURL = url
-        } else {
-            // Recursive scan
+        // Look in 'www' subfolder or root bundle
+        if let path = bundle.path(forResource: "index", ofType: "html", inDirectory: "www") {
+            htmlURL = URL(fileURLWithPath: path)
+        } else if let path = bundle.path(forResource: "index", ofType: "html") {
+            htmlURL = URL(fileURLWithPath: path)
+        } else if let resourceURL = bundle.resourceURL {
             let fileManager = FileManager.default
             if let enumerator = fileManager.enumerator(at: resourceURL, includingPropertiesForKeys: nil) {
-                for case let fileURL as URL in enumerator {
-                    if fileURL.lastPathComponent == "index.html" {
-                        targetURL = fileURL
+                for case let file as URL in enumerator {
+                    if file.lastPathComponent == "index.html" {
+                        htmlURL = file
                         break
                     }
                 }
             }
         }
 
-        if let htmlURL = targetURL {
-            print("🚀 Loading Gridoria HTML: \(htmlURL.path)")
-            webView.loadFileURL(htmlURL, allowingReadAccessTo: resourceURL)
-        } else {
-            print("⚠️ Error: index.html could not be found in iOS bundle.")
+        guard let targetURL = htmlURL else {
+            print("⚠️ Error: index.html not found in bundle.")
+            return
         }
+
+        let folderURL = targetURL.deletingLastPathComponent()
+        print("🚀 Loading Gridoria from: \(targetURL.path)")
+
+        // Load with full folder access
+        webView.loadFileURL(targetURL, allowingReadAccessTo: folderURL)
     }
 
     // MARK: - 🌐 WKNavigationDelegate
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("✅ Gridoria WKWebView finished loading successfully.")
+        print("✅ Gridoria WKWebView finished loading.")
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -194,7 +194,6 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         DispatchQueue.main.async { [weak self] in
             guard let self = self, let banner = self.bannerView else { return }
             banner.isHidden = !visible
-            self.bannerHeightConstraint?.constant = visible ? 50 : 0
             self.view.layoutIfNeeded()
         }
     }

@@ -3636,10 +3636,17 @@ window.addEventListener('orientationchange', () => {
 updateViewportHeight();
 
 let game;
-window.addEventListener('DOMContentLoaded', () => {
+function initGridoriaApp() {
+    if (window.game) return;
     updateViewportHeight();
     game = new GridoriaGame();
     window.game = game;
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGridoriaApp);
+} else {
+    initGridoriaApp();
+}
 
 
