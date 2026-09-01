@@ -50,11 +50,12 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         config.mediaTypesRequiringUserActionForPlayback = []
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         config.defaultWebpagePreferences.allowsContentJavaScript = true
+        config.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
 
         webView = WKWebView(frame: view.bounds, configuration: config)
         webView.navigationDelegate = self
         webView.uiDelegate = self
-        webView.backgroundColor = UIColor(red: 11/255, green: 21/255, blue: 54/255, alpha: 1.0)
+        webView.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
         webView.isOpaque = false
         webView.scrollView.bounces = false
         webView.scrollView.isScrollEnabled = false
@@ -129,14 +130,9 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             return
         }
 
-        let baseDir = htmlURL.deletingLastPathComponent()
-        print("🚀 Loading Gridoria HTML: \(htmlURL.path)")
-
-        if let htmlString = try? String(contentsOf: htmlURL, encoding: .utf8) {
-            webView.loadHTMLString(htmlString, baseURL: baseDir)
-        } else {
-            webView.loadFileURL(htmlURL, allowingReadAccessTo: bundle.bundleURL)
-        }
+        let accessURL = bundle.bundleURL
+        print("🚀 Loading Gridoria HTML: \(htmlURL.path) with read access to: \(accessURL.path)")
+        webView.loadFileURL(htmlURL, allowingReadAccessTo: accessURL)
     }
 
     // MARK: - 🌐 WKNavigationDelegate
