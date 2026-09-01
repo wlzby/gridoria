@@ -11,9 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Chakra+Petch:wght@700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- CSS Styling -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=8.4">
 </head>
-<body style="margin: 0; padding: 0; background-color: #0b1536; background: linear-gradient(160deg, #0b1536 0%, #1e3a8a 50%, #2563eb 100%);">
+<body data-bg-theme="forest" data-theme="forest" data-color-palette="default">
 
     <!-- 🚀 MAWELLY STUDIO SPLASH SCREEN -->
     <div id="splash-screen">
@@ -40,7 +40,7 @@
                     <!-- Sol Üst: Elmas Sayacı Pill Widget'ı -->
                     <div class="menu-gems-pill" id="btn-open-shop-top" title="Mağaza">
                         <span class="gem-icon">💎</span>
-                        <strong id="menu-top-gems-val">150</strong>
+                        <strong id="menu-top-gems-val">100</strong>
                         <span class="gem-add-btn">+</span>
                     </div>
 
@@ -95,9 +95,10 @@
                         <span class="play-btn-text">OYNAYIN</span>
                     </button>
 
-                    <!-- Alt Bilgi Metni -->
-                    <div class="menu-footer-hint">
-                        <span>Dokun ve Fırlat • 2048 Ahşap Bulmaca</span>
+                    <!-- 🧠 Günlük Zihin & Odaklanma Rozeti (Dinamik Değişen Sözler) -->
+                    <div class="menu-footer-hint brain-focus-badge" id="menu-brain-quote-badge">
+                        <span class="brain-icon" id="menu-brain-quote-icon">🧠</span>
+                        <span id="menu-brain-quote-text">Günde 20 dakika oyna, hafızanı ve zihnini geliştir!</span>
                     </div>
                 </div>
 
@@ -224,13 +225,6 @@
                     </div>
                 </button>
             </footer>
-
-            <!-- 📢 AdMob Banner Reklam Alanı (Banner Ad Reservation Slot) -->
-            <div id="banner-ad-container" class="banner-ad-container">
-                <div class="banner-ad-placeholder" id="banner-ad-placeholder">
-                    <span class="ad-label">📢 BANNER REKLAM ALANI</span>
-                </div>
-            </div>
         </div>
 
         <!-- Target Tile Selection Banner Overlay for Hammer/Bomb -->
@@ -315,7 +309,14 @@
                 <div class="theme-tab-content" id="tab-content-bg">
                     <div class="bg-themes-grid">
                         <!-- ⭐ GİRİŞ & VARSAYILAN ÜCRETSİZ TEMALAR -->
-                        <div class="bg-card active" data-bg="obsidian" data-cost="0">
+                        <div class="bg-card active" data-bg="forest" data-cost="0">
+                            <div class="bg-card-thumb forest-bg-thumb"></div>
+                            <span class="bg-card-name">Yeşil Orman 🌲</span>
+                            <div class="bg-check-badge">✓</div>
+                            <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
+                        </div>
+
+                        <div class="bg-card" data-bg="obsidian" data-cost="0">
                             <div class="bg-card-thumb obsidian-bg-thumb"></div>
                             <span class="bg-card-name">Gece Siyahı ✨</span>
                             <div class="bg-check-badge">✓</div>
@@ -325,13 +326,6 @@
                         <div class="bg-card" data-bg="walnut" data-cost="0">
                             <div class="bg-card-thumb walnut-bg-thumb"></div>
                             <span class="bg-card-name">Ceviz Ahşap 🪵</span>
-                            <div class="bg-check-badge">✓</div>
-                            <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
-                        </div>
-
-                        <div class="bg-card" data-bg="forest" data-cost="0">
-                            <div class="bg-card-thumb forest-bg-thumb"></div>
-                            <span class="bg-card-name">Yeşil Orman 🌲</span>
                             <div class="bg-check-badge">✓</div>
                             <div class="bg-price-badge free-badge">ÜCRETSİZ</div>
                         </div>
@@ -1007,7 +1001,8 @@
                     🎁 2X ELMAS KAZAN (+💎)
                 </button>
 
-                <button class="primary-btn" id="btn-restart">YENİDEN BAŞLA</button>
+                <button class="primary-btn" id="btn-restart" style="margin-bottom: 8px; width: 100%;">YENİDEN BAŞLA</button>
+                <button class="secondary-btn" id="btn-gameover-home" style="width: 100%; padding: 11px; font-weight: 700; border-radius: 14px; background: rgba(255, 255, 255, 0.12); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;">ANA MENÜ</button>
             </div>
         </div>
 
@@ -1186,7 +1181,7 @@
                         <span class="lb-edit-icon-badge">✏️</span>
                     </div>
                     <div class="lb-sticky-score-box">
-                        <strong class="lb-sticky-score" id="lb-sticky-score-val">107.244</strong>
+                        <strong class="lb-sticky-score" id="lb-sticky-score-val">0</strong>
                         <small>puan</small>
                     </div>
                 </div>
@@ -1673,10 +1668,10 @@
         window.addEventListener('resize', updateVh);
         window.addEventListener('orientationchange', updateVh);
     </script>
-    <script src="bridge.js"></script>
-    <script src="audio.js"></script>
-    <script src="effects.js"></script>
-    <script src="powerups.js"></script>
-    <script src="game.js"></script>
+    <script src="bridge.js?v=8.4"></script>
+    <script src="audio.js?v=8.4"></script>
+    <script src="effects.js?v=8.4"></script>
+    <script src="powerups.js?v=8.4"></script>
+    <script src="game.js?v=8.4"></script>
 </body>
 </html>

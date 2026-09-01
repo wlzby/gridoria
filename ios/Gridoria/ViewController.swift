@@ -30,7 +30,6 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         view.backgroundColor = UIColor(red: 11/255, green: 21/255, blue: 54/255, alpha: 1.0)
 
         setupWebView()
-        setupBannerView()
         loadLocalGame()
 
         // Safely load ads after UI is presented

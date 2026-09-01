@@ -19,8 +19,10 @@ class GridoriaGame {
         this._feverSecsLeft = 0;
 
         this.missionProgress = { merges: 0, maxTile: 0, score: 0, claimed: [], notified: [] };
-        this.unlockedThemes = ['obsidian', 'aurora', 'nebula', 'walnut', 'oak', 'cherry', 'ebony', 'forest', 'earth', 'clouds', 'ocean', 'puppy', 'cat'];
-        this.currentTheme = 'obsidian';
+        this.unlockedThemes = ['forest', 'obsidian', 'aurora', 'nebula', 'walnut', 'oak', 'cherry', 'ebony', 'earth', 'clouds', 'ocean', 'puppy', 'cat'];
+        this.currentTheme = 'forest';
+        this.currentBgTheme = 'forest';
+        this.currentColorPalette = 'default';
 
         this.currentShooterVal = 2;
         this.nextShooterVal = 4;
@@ -109,12 +111,33 @@ class GridoriaGame {
     }
 
     loadSavedData() {
-        const savedHigh = this.safeGet('gridoria_highscore');
-        if (savedHigh) this.highScore = parseInt(savedHigh, 10) || 0;
+        // 🧹 Yeni kurulum ve temiz başlangıç için eski takılı kalmış rekor puanı (107.244) sıfırla
+        const hasResetStuckHighScore = this.safeGet('gridoria_has_reset_highscore_v4');
+        if (!hasResetStuckHighScore) {
+            this.safeRemove('gridoria_highscore');
+            this.safeRemove('gridoria_active_game');
+            this.safeSet('gridoria_has_reset_highscore_v4', 'true');
+        }
 
-        const savedGems = this.safeGet('gridoria_gems');
-        this.gems = savedGems !== null ? Math.max(0, parseInt(savedGems, 10)) : 150;
-        this.safeSet('gridoria_gems', String(this.gems));
+        const savedHigh = this.safeGet('gridoria_highscore');
+        this.highScore = savedHigh ? (parseInt(savedHigh, 10) || 0) : 0;
+
+        const hasReceivedWelcome = this.safeGet('gridoria_has_received_welcome_bonus');
+        if (!hasReceivedWelcome) {
+            this.gems = 100;
+            this.safeSet('gridoria_gems', '100');
+            if (typeof powerups !== 'undefined') {
+                powerups.addFreeCount('hammer', 2);
+                powerups.addFreeCount('bomb', 2);
+                powerups.addFreeCount('swap', 2);
+                powerups.addFreeCount('undo', 2);
+            }
+            this.safeSet('gridoria_has_received_welcome_bonus', 'true');
+        } else {
+            const savedGems = this.safeGet('gridoria_gems');
+            this.gems = savedGems !== null ? Math.max(0, parseInt(savedGems, 10)) : 100;
+            this.safeSet('gridoria_gems', String(this.gems));
+        }
 
         const savedBest = this.safeGet('gridoria_best_tile');
         this.bestTile = savedBest ? (parseInt(savedBest, 10) || 2048) : 2048;
@@ -153,8 +176,19 @@ class GridoriaGame {
         const savedGameOverCount = this.safeGet('gridoria_gameover_count');
         this.gameOverCount = parseInt(savedGameOverCount || '0', 10);
 
-        this.currentBgTheme = this.safeGet('gridoria_bg_theme') || this.safeGet('gridoria_theme') || 'obsidian';
-        this.currentColorPalette = this.safeGet('gridoria_color_palette', 'default');
+        // 🌲 Orman Teması (Forest) & Varsayılan Renk Paleti (Default) Kesin Başlangıç:
+        const hasEnforcedForest = this.safeGet('gridoria_has_enforced_forest_v3');
+        if (!hasEnforcedForest) {
+            this.safeSet('gridoria_bg_theme', 'forest');
+            this.safeSet('gridoria_theme', 'forest');
+            this.safeSet('gridoria_color_palette', 'default');
+            this.safeSet('gridoria_has_enforced_forest_v3', 'true');
+        }
+
+        this.currentBgTheme = this.safeGet('gridoria_bg_theme') || 'forest';
+        this.currentTheme = this.currentBgTheme;
+        this.currentColorPalette = this.safeGet('gridoria_color_palette') || 'default';
+
         document.body.dataset.bgTheme = this.currentBgTheme;
         document.body.dataset.theme = this.currentBgTheme;
         document.body.dataset.colorPalette = this.currentColorPalette;
@@ -187,63 +221,35 @@ class GridoriaGame {
             card.classList.toggle('active', card.dataset.color === this.currentColorPalette);
         });
 
-        // Load active game state on startup so score & board tiles persist
-        const savedActive = this.safeGet('gridoria_active_game');
-        this.hasSavedActiveGame = false;
-        if (savedActive) {
-            try {
-                const parsed = JSON.parse(savedActive);
-                if (parsed && Array.isArray(parsed.grid) && parsed.grid.length === this.ROWS) {
-                    let hasTiles = false;
-                    for (let r = 0; r < this.ROWS; r++) {
-                        if (Array.isArray(parsed.grid[r])) {
-                            for (let c = 0; c < this.COLS; c++) {
-                                if (parsed.grid[r][c] > 0) hasTiles = true;
-                            }
-                        }
-                    }
-                    if (hasTiles || (parsed.score && parsed.score > 0)) {
-                        this.grid = parsed.grid.map(row => [...row]);
-                        if (Array.isArray(parsed.iceGrid)) {
-                            this.iceGrid = parsed.iceGrid.map(row => [...row]);
-                        } else {
-                            this.iceGrid = Array(this.ROWS).fill(null).map((_, r) =>
-                                Array(this.COLS).fill(0).map((_, c) => (this.grid[r][c] < 0 ? 3 : 0))
-                            );
-                        }
-                        this.score = Number(parsed.score || 0);
-                        this.currentShooterVal = Number(parsed.currentShooterVal || 2);
-                        this.nextShooterVal = Number(parsed.nextShooterVal || 4);
-                        this.comboMeter = Number(parsed.comboMeter || 0);
-                        this.comboMultiplier = Number(parsed.comboMultiplier || 1);
-                        this.hasSavedActiveGame = true;
-                    }
-                }
-            } catch (e) {
-                console.warn('Failed to parse saved active game:', e);
-            }
+        // 🧹 Eski takılı kalmış aktif oyunu ve skoru kesin olarak sıfırla (0 puandan ve boş tahtadan başla)
+        const hasClearedStuckGame = this.safeGet('gridoria_has_cleared_stuck_v2');
+        if (!hasClearedStuckGame) {
+            this.safeRemove('gridoria_active_game');
+            this.safeSet('gridoria_has_cleared_stuck_v2', 'true');
         }
+
+        this.hasSavedActiveGame = false;
+        this.score = 0;
+        this.grid = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
+        this.iceGrid = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
+        this.currentShooterVal = 2;
+        this.nextShooterVal = 4;
+        this.comboMeter = 0;
+        this.comboMultiplier = 1;
     }
 
     updateBannerVisibility() {
-        const gameView = document.getElementById('game-view');
-        const isGameActive = gameView && !gameView.classList.contains('hidden');
-        const isVip = this.isVip || (this.safeGet('gridoria_is_vip') === 'true');
-        const shouldShow = isGameActive && !isVip;
-
         const bannerContainer = document.getElementById('banner-ad-container');
         if (bannerContainer) {
-            bannerContainer.style.display = shouldShow ? 'flex' : 'none';
+            bannerContainer.style.display = 'none';
         }
 
         if (typeof NativeBridge !== 'undefined' && typeof NativeBridge.setBannerVisible === 'function') {
-            NativeBridge.setBannerVisible(shouldShow);
+            NativeBridge.setBannerVisible(false);
         } else if (window.AndroidBridge && typeof window.AndroidBridge.setBannerVisible === 'function') {
             try {
-                window.AndroidBridge.setBannerVisible(shouldShow);
-            } catch (e) {
-                console.warn('AndroidBridge banner toggle error:', e);
-            }
+                window.AndroidBridge.setBannerVisible(false);
+            } catch (e) {}
         }
     }
 
@@ -274,6 +280,7 @@ class GridoriaGame {
             this.clearActiveGameState();
             return;
         }
+        this.compactAllColumns();
         const hasTiles = this.grid.some(row => row.some(val => val > 0));
         if (hasTiles || this.score > 0) {
             const maxOnBoard = this.getMaxTileOnBoard();
@@ -328,11 +335,12 @@ class GridoriaGame {
     }
 
     initInitialBoard() {
-        if (!this.hasSavedActiveGame) {
-            this.currentShooterVal = 2;
-            this.nextShooterVal = 4;
-        }
+        this.grid = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
+        this.iceGrid = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
+        this.currentShooterVal = 2;
+        this.nextShooterVal = 4;
 
+        this.compactAllColumns();
         this.renderGrid();
         this.updateShooterTiles();
         this.highlightColumn(this.selectedCol);
@@ -344,6 +352,7 @@ class GridoriaGame {
     }
 
     renderGrid() {
+        this.compactAllColumns();
         const maxBoardTile = this.getMaxTileOnBoard();
 
         for (let r = 0; r < this.ROWS; r++) {
@@ -352,65 +361,104 @@ class GridoriaGame {
                 if (!cell) continue;
 
                 const rawVal = this.grid[r][c];
-                cell.innerHTML = '';
+                let tile = cell.querySelector('.tile');
 
-                if (rawVal !== 0) {
+                if (rawVal === 0) {
+                    if (tile) {
+                        tile.remove();
+                    }
+                } else {
                     const isFrozen = rawVal < 0;
                     const val = Math.abs(rawVal);
                     const isMaxCrownTile = val === maxBoardTile && val >= 16;
                     const hp = isFrozen ? (this.iceGrid[r][c] || 3) : 0;
-                    const tile = document.createElement('div');
-                    tile.className = `tile val-${val}${isFrozen ? ` is-frozen ice-hp-${hp}` : ''}${isMaxCrownTile ? ' is-king-crown' : ''}`;
+                    const baseClassName = `tile val-${val}${isFrozen ? ` is-frozen ice-hp-${hp}` : ''}${isMaxCrownTile ? ' is-king-crown' : ''}`;
                     const displayVal = this.formatTileVal(val);
+
+                    let targetInner = '';
                     if (isFrozen) {
                         const dots = '❄️'.repeat(hp);
-                        tile.innerHTML = `
-                            ${isMaxCrownTile ? '<span class="king-crown-badge">👑</span>' : ''}
-                            <span class="tile-number">${displayVal}</span>
-                            <span class="ice-hp-dots">${dots}</span>
-                        `;
+                        targetInner = `${isMaxCrownTile ? '<span class="king-crown-badge">👑</span>' : ''}<span class="tile-number">${displayVal}</span><span class="ice-hp-dots">${dots}</span>`;
                     } else {
-                        tile.innerHTML = `
-                            ${isMaxCrownTile ? '<span class="king-crown-badge">👑</span>' : ''}
-                            <span class="tile-number">${displayVal}</span>
-                        `;
+                        targetInner = `${isMaxCrownTile ? '<span class="king-crown-badge">👑</span>' : ''}<span class="tile-number">${displayVal}</span>`;
                     }
-                    cell.appendChild(tile);
+
+                    if (!tile) {
+                        tile = document.createElement('div');
+                        tile.className = baseClassName;
+                        tile.innerHTML = targetInner;
+                        cell.appendChild(tile);
+                    } else {
+                        // Sürükleme veya birleşme kalıntısı olan inline transformları sıfırla
+                        if (!tile.classList.contains('sliding-merge')) {
+                            tile.style.transform = '';
+                            tile.style.opacity = '';
+                            tile.style.borderRadius = '';
+                        }
+                        const isJelly = tile.classList.contains('tile-water-drop');
+                        tile.className = isJelly ? `${baseClassName} tile-water-drop` : baseClassName;
+                        if (tile.innerHTML !== targetInner) {
+                            tile.innerHTML = targetInner;
+                        }
+                    }
                 }
             }
         }
     }
 
     highlightColumn(col) {
+        if (this.selectedCol === col) return;
         this.selectedCol = col;
 
         // Bottom line indicators
         if (this.columnIndicators) {
-            this.columnIndicators.forEach((ind, index) => {
-                ind.classList.toggle('active', index === col);
-            });
+            for (let i = 0; i < this.columnIndicators.length; i++) {
+                this.columnIndicators[i].classList.toggle('active', i === col);
+            }
         }
 
         // Full Vertical Column Track Shaded Highlight
         if (this.gridBoardEl) {
             const allCells = this.gridBoardEl.querySelectorAll('.grid-cell');
-            allCells.forEach(cell => {
-                cell.classList.remove('landing-preview');
-                const cellCol = parseInt(cell.dataset.col, 10);
-                cell.classList.toggle('col-highlight', cellCol === col);
-            });
-
             const landingRow = this.getLandingRow(col);
-            if (landingRow !== -1) {
-                const landingCell = this.getCellElement(landingRow, col);
-                if (landingCell && this.grid[landingRow][col] === 0) {
-                    landingCell.classList.add('landing-preview');
+            for (let i = 0; i < allCells.length; i++) {
+                const cell = allCells[i];
+                const cellCol = parseInt(cell.dataset.col, 10);
+                const isCurrentCol = cellCol === col;
+                cell.classList.toggle('col-highlight', isCurrentCol);
+                if (isCurrentCol && landingRow !== -1 && parseInt(cell.dataset.row, 10) === landingRow && this.grid[landingRow][col] === 0) {
+                    cell.classList.add('landing-preview');
+                } else {
+                    cell.classList.remove('landing-preview');
+                }
+            }
+        }
+    }
+
+    compactAllColumns() {
+        for (let c = 0; c < this.COLS; c++) {
+            const nonZeroTiles = [];
+            const nonZeroIce = [];
+            for (let r = 0; r < this.ROWS; r++) {
+                if (this.grid[r][c] !== 0) {
+                    nonZeroTiles.push(this.grid[r][c]);
+                    nonZeroIce.push((this.iceGrid && this.iceGrid[r] && this.iceGrid[r][c]) ? this.iceGrid[r][c] : 0);
+                }
+            }
+            for (let r = 0; r < this.ROWS; r++) {
+                if (r < nonZeroTiles.length) {
+                    this.grid[r][c] = nonZeroTiles[r];
+                    if (this.iceGrid && this.iceGrid[r]) this.iceGrid[r][c] = nonZeroIce[r];
+                } else {
+                    this.grid[r][c] = 0;
+                    if (this.iceGrid && this.iceGrid[r]) this.iceGrid[r][c] = 0;
                 }
             }
         }
     }
 
     getLandingRow(col) {
+        this.compactAllColumns();
         for (let r = 0; r < this.ROWS; r++) {
             if (this.grid[r][col] === 0) return r;
         }
@@ -420,20 +468,40 @@ class GridoriaGame {
     bindEvents() {
         let activeTouch = false;
         let suppressClickUntil = 0;
+        let cachedBoardRect = null;
+        let cachedShooterRect = null;
+        let rafDragId = null;
+        let pendingDrag = null;
+
+        const refreshBoardMetrics = () => {
+            if (this.gridBoardEl) {
+                cachedBoardRect = this.gridBoardEl.getBoundingClientRect();
+            }
+            if (this.currentShooterEl) {
+                cachedShooterRect = this.currentShooterEl.getBoundingClientRect();
+            }
+        };
 
         const getColumnFromX = (clientX) => {
-            const rect = this.gridBoardEl.getBoundingClientRect();
-            const touchX = clientX - rect.left;
-            const colWidth = rect.width / this.COLS;
+            if (!cachedBoardRect && this.gridBoardEl) {
+                cachedBoardRect = this.gridBoardEl.getBoundingClientRect();
+            }
+            const left = cachedBoardRect ? cachedBoardRect.left : 0;
+            const width = cachedBoardRect ? cachedBoardRect.width : 300;
+            const touchX = clientX - left;
+            const colWidth = width / this.COLS;
             return Math.max(0, Math.min(this.COLS - 1, Math.floor(touchX / colWidth)));
         };
 
         const getCellFromPoint = (clientX, clientY) => {
-            const rect = this.gridBoardEl.getBoundingClientRect();
+            if (!cachedBoardRect && this.gridBoardEl) {
+                cachedBoardRect = this.gridBoardEl.getBoundingClientRect();
+            }
+            if (!cachedBoardRect) return null;
             const col = getColumnFromX(clientX);
-            const rowHeight = rect.height / this.ROWS;
-            const row = Math.floor((clientY - rect.top) / rowHeight);
-            if (clientY < rect.top || clientY > rect.bottom || row < 0 || row >= this.ROWS) return null;
+            const rowHeight = cachedBoardRect.height / this.ROWS;
+            const row = Math.floor((clientY - cachedBoardRect.top) / rowHeight);
+            if (clientY < cachedBoardRect.top || clientY > cachedBoardRect.bottom || row < 0 || row >= this.ROWS) return null;
             return { row, col };
         };
 
@@ -446,27 +514,52 @@ class GridoriaGame {
             return true;
         };
 
-        const updateShooterDrag = (clientX, clientY) => {
+        const applyDragTransform = () => {
+            if (!pendingDrag || !this.currentShooterEl) {
+                rafDragId = null;
+                return;
+            }
+            const { clientX, clientY } = pendingDrag;
             const col = getColumnFromX(clientX);
             this.highlightColumn(col);
 
-            const shooterRect = this.currentShooterEl.getBoundingClientRect();
             if (!this.initialShooterCenterX) {
-                this.initialShooterCenterX = shooterRect.left + shooterRect.width / 2;
-                this.initialShooterCenterY = shooterRect.top + shooterRect.height / 2;
+                if (!cachedShooterRect && this.currentShooterEl) {
+                    cachedShooterRect = this.currentShooterEl.getBoundingClientRect();
+                }
+                if (cachedShooterRect) {
+                    this.initialShooterCenterX = cachedShooterRect.left + cachedShooterRect.width / 2;
+                    this.initialShooterCenterY = cachedShooterRect.top + cachedShooterRect.height / 2;
+                } else {
+                    this.initialShooterCenterX = clientX;
+                    this.initialShooterCenterY = clientY;
+                }
             }
 
             const moveX = clientX - this.initialShooterCenterX;
             const moveY = (clientY - 75) - this.initialShooterCenterY;
 
             this.currentShooterEl.classList.add('dragging');
-            this.currentShooterEl.style.transform = `translate(${moveX}px, ${moveY}px) scale(1.08)`;
-            return col;
+            this.currentShooterEl.style.transform = `translate3d(${moveX}px, ${moveY}px, 0) scale(1.08)`;
+            rafDragId = null;
+        };
+
+        const updateShooterDrag = (clientX, clientY) => {
+            pendingDrag = { clientX, clientY };
+            if (!rafDragId) {
+                rafDragId = requestAnimationFrame(applyDragTransform);
+            }
         };
 
         const resetShooter = () => {
+            if (rafDragId) {
+                cancelAnimationFrame(rafDragId);
+                rafDragId = null;
+            }
+            pendingDrag = null;
             this.initialShooterCenterX = null;
             this.initialShooterCenterY = null;
+            cachedShooterRect = null;
             if (this.currentShooterEl) {
                 this.currentShooterEl.classList.remove('dragging');
                 this.currentShooterEl.style.transform = 'none';
@@ -501,7 +594,7 @@ class GridoriaGame {
                 const touch = e.changedTouches[0];
                 if (touch && consumePowerupBoardEvent(touch.clientX, touch.clientY, e)) {
                     activeTouch = false;
-                    suppressClickUntil = Date.now() + 700;
+                    suppressClickUntil = Date.now() + 500;
                     resetShooter();
                 }
             }, { capture: true, passive: false });
@@ -518,6 +611,7 @@ class GridoriaGame {
                 resetShooter();
                 return;
             }
+            refreshBoardMetrics();
             activeTouch = true;
             const touch = e.touches[0];
             if (typeof sounds !== 'undefined' && sounds.init) sounds.init();
@@ -534,7 +628,7 @@ class GridoriaGame {
         const onTouchEnd = (e) => {
             if (!activeTouch) return;
             activeTouch = false;
-            suppressClickUntil = Date.now() + 700;
+            suppressClickUntil = Date.now() + 500;
             const touch = e.changedTouches[0];
             handleFire(touch.clientX, touch.clientY);
         };
@@ -545,6 +639,7 @@ class GridoriaGame {
             boardWrapper.addEventListener('touchend', onTouchEnd, { passive: true });
             boardWrapper.addEventListener('click', (e) => {
                 if (activeTouch || Date.now() < suppressClickUntil || isInteractiveControl(e.target)) return;
+                refreshBoardMetrics();
                 handleFire(e.clientX, e.clientY);
             });
         }
@@ -555,6 +650,7 @@ class GridoriaGame {
             activeShooterBox.addEventListener('touchend', onTouchEnd, { passive: true });
             activeShooterBox.addEventListener('click', (e) => {
                 if (activeTouch || Date.now() < suppressClickUntil || isInteractiveControl(e.target)) return;
+                refreshBoardMetrics();
                 handleFire(e.clientX, e.clientY);
             });
         }
@@ -674,6 +770,15 @@ class GridoriaGame {
             if (modal) modal.classList.add('hidden');
             this.requestInterstitialAd();
             this.resetGame();
+            this.startGameView();
+        });
+
+        // Game Over - Return to Home
+        listen('btn-gameover-home', 'click', () => {
+            const modal = document.getElementById('modal-gameover');
+            if (modal) modal.classList.add('hidden');
+            this.resetGame();
+            this.showMainMenu();
         });
 
         // 🎁 AdMob Rewarded Actions
@@ -1360,6 +1465,7 @@ class GridoriaGame {
         const gameOverModal = document.getElementById('modal-gameover');
         if (gameOverModal && !gameOverModal.classList.contains('hidden')) {
             gameOverModal.classList.add('hidden');
+            this.resetGame();
             this.showMainMenu();
             return true;
         }
@@ -1386,6 +1492,7 @@ class GridoriaGame {
     showMainMenu() {
         this.saveActiveGameState();
         this.updateMainMenuStats();
+        this.updateRandomBrainQuote();
         const menuView = document.getElementById('main-menu-view');
         const gameView = document.getElementById('game-view');
         const navBar = document.getElementById('bottom-nav-bar');
@@ -1400,7 +1507,7 @@ class GridoriaGame {
         try {
             const activeState = this.getActiveGameState();
             let hasActive = false;
-            if (activeState && Array.isArray(activeState.grid) && activeState.grid.length === this.ROWS) {
+            if (!this.isGameOver && activeState && Array.isArray(activeState.grid) && activeState.grid.length === this.ROWS) {
                 for (let r = 0; r < this.ROWS; r++) {
                     if (Array.isArray(activeState.grid[r])) {
                         for (let c = 0; c < this.COLS; c++) {
@@ -1425,19 +1532,18 @@ class GridoriaGame {
                 this.updateShooterTiles();
                 this.updateScoreDisplay();
                 this.setStatus('Kaldığınız yerden devam ediliyor!', 'normal');
-            } else if (this.grid.some(row => row.some(val => val > 0)) || this.score > 0) {
-                this.renderGrid();
-                this.updateShooterTiles();
-                this.updateScoreDisplay();
             } else {
                 this.grid = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
                 this.iceGrid = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
                 this.score = 0;
                 this.comboMeter = 0;
                 this.comboMultiplier = 1;
+                this.currentShooterVal = 2;
+                this.nextShooterVal = 4;
                 this.isGameOver = false;
                 this.initInitialBoard();
                 this.updateScoreDisplay();
+                this.setStatus('Hedef sütunu seç ve fırlat!', 'ready');
             }
         } catch (err) {
             console.error('Game start error:', err);
@@ -1515,6 +1621,40 @@ class GridoriaGame {
             }
         } catch (e) {
             console.error('Menu stats error:', e);
+        }
+    }
+
+    updateRandomBrainQuote() {
+        const quotes = [
+            { icon: '🧠', text: 'Günde 20 dakika oyna, hafızanı ve zihnini geliştir!' },
+            { icon: '⚡', text: 'Hızlı düşün, stratejini kur, zihnini zinde tut!' },
+            { icon: '🎯', text: 'Her hamlede odaklanmanı ve problem çözmeni güçlendir!' },
+            { icon: '🧘‍♂️', text: 'Günün stresini atarken beynine harika bir egzersiz yaptır!' },
+            { icon: '🔥', text: 'Rakamlarla dans et, zeka ve mantık sınırlarını zorla!' },
+            { icon: '🧩', text: 'Her gün birkaç dakika oyna, analitik düşünceyi keskinleştir!' },
+            { icon: '✨', text: 'Zihinsel çeviklik kazan, her adımda daha uzağı planla!' },
+            { icon: '💡', text: 'Doğru stratejiyle zirveye ulaş, odaklanma gücünü kanıtla!' },
+            { icon: '🌟', text: 'Zihnini genç ve dinamik tutmak için harika bir mola!' },
+            { icon: '🏆', text: 'Sabır, dikkat ve mantık: Kendi rekorunu kırmaya hazır mısın?' },
+            { icon: '👑', text: 'Büyük sayıları birleştir, zihnindeki potansiyeli ortaya çıkar!' },
+            { icon: '🚀', text: 'Beyin jimnastiği yap, dikkatini ve reflekslerini tazele!' }
+        ];
+
+        const randomIndex = Math.floor(Math.random() * quotes.length);
+        const selected = quotes[randomIndex];
+
+        const iconEl = document.getElementById('menu-brain-quote-icon');
+        const textEl = document.getElementById('menu-brain-quote-text');
+        const badgeEl = document.getElementById('menu-brain-quote-badge');
+
+        if (iconEl && textEl && selected) {
+            iconEl.innerText = selected.icon;
+            textEl.innerText = selected.text;
+            if (badgeEl) {
+                badgeEl.style.animation = 'none';
+                void badgeEl.offsetWidth;
+                badgeEl.style.animation = 'brainBadgeFadeIn 0.35s ease-out';
+            }
         }
     }
 
@@ -1989,7 +2129,7 @@ class GridoriaGame {
         }
 
         // Add User Player
-        const userScore = this.highScore > 0 ? this.highScore : 107244;
+        const userScore = this.highScore || 0;
         const userTile = this.bestTile || 2048;
         list.push({
             name: this.username || 'Misafir_4982',
@@ -2158,6 +2298,7 @@ class GridoriaGame {
         this.currentShooterVal = this.previousState.currentShooterVal;
         this.nextShooterVal = this.previousState.nextShooterVal;
 
+        this.compactAllColumns();
         this.renderGrid();
         this.updateShooterTiles();
         this.updateUI();
@@ -2249,7 +2390,7 @@ class GridoriaGame {
                 this.checkGameOver();
                 if (!this.isAnimating) this.setStatus('Yeni hamle için bir sütuna dokun', 'ready');
             }, { r: targetRow, c: col });
-        }, 260);
+        }, 230);
     }
 
     generateNewShooterTile() {
@@ -2462,28 +2603,11 @@ class GridoriaGame {
     }
 
     applyCeilingGravityAndMerge(callback, activeCell = null) {
+        this.compactAllColumns();
+        this.renderGrid();
+
         let merged = false;
         let currentActive = activeCell ? { r: activeCell.r, c: activeCell.c } : null;
-
-        // Shift blocks UPWARDS towards Ceiling (Row 0)
-        for (let c = 0; c < this.COLS; c++) {
-            for (let r = 0; r < this.ROWS; r++) {
-                if (this.grid[r][c] === 0) {
-                    for (let belowR = r + 1; belowR < this.ROWS; belowR++) {
-                        if (this.grid[belowR][c] !== 0) {
-                            if (currentActive && currentActive.r === belowR && currentActive.c === c) {
-                                currentActive.r = r;
-                            }
-                            this.grid[r][c] = this.grid[belowR][c];
-                            this.iceGrid[r][c] = this.iceGrid[belowR][c];
-                            this.grid[belowR][c] = 0;
-                            this.iceGrid[belowR][c] = 0;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
 
         let mergeFound = false;
         let mergeTargetR = -1;
@@ -2498,11 +2622,6 @@ class GridoriaGame {
             const activeVal = this.grid[ar][ac];
 
             if (activeVal > 0) {
-                // Öncelik sırası:
-                // 1. ÜST (ar - 1, ac): Atılan taşın doğrudan çarptığı blok!
-                // 2. SOL (ar, ac - 1)
-                // 3. SAĞ (ar, ac + 1)
-                // 4. ALT (ar + 1, ac)
                 const priorityNeighbors = [
                     { r: ar - 1, c: ac, isAbove: true },
                     { r: ar, c: ac - 1, isAbove: false },
@@ -2515,13 +2634,11 @@ class GridoriaGame {
                         if (this.grid[n.r][n.c] === activeVal) {
                             mergeFound = true;
                             if (n.isAbove) {
-                                // Doğrudan çarptığı üstteki blok ile birleş (üstteki blok hedef, atılan taş kaynak)
                                 mergeTargetR = n.r;
                                 mergeTargetC = n.c;
                                 mergeSourceR = ar;
                                 mergeSourceC = ac;
                             } else {
-                                // Yan veya alttaki komşuyu aktif bloğa çek
                                 mergeTargetR = ar;
                                 mergeTargetC = ac;
                                 mergeSourceR = n.r;
@@ -2572,6 +2689,7 @@ class GridoriaGame {
                 this.applyCeilingGravityAndMerge(callback, nextActiveCell);
             }, 420);
         } else {
+            this.compactAllColumns();
             this.renderGrid();
             if (callback) callback();
         }
@@ -2594,13 +2712,19 @@ class GridoriaGame {
                 const sRect = sourceCell.getBoundingClientRect();
                 const moveX = tRect.left - sRect.left;
                 const moveY = tRect.top - sRect.top;
-                sourceTile.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                sourceTile.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
             }
         }
 
         setTimeout(() => {
+            if (sourceCell) {
+                const sTile = sourceCell.querySelector('.tile');
+                if (sTile) sTile.remove();
+            }
             this.grid[targetR][targetC] = newVal;
             this.grid[sourceR][sourceC] = 0;
+            this.compactAllColumns();
+            this.renderGrid();
 
             const directNeighbors = [
                 [targetR - 1, targetC],
@@ -2678,7 +2802,7 @@ class GridoriaGame {
             if (newVal >= this.currentTargetGoal) {
                 const reachedGoal = this.currentTargetGoal;
                 const step = Math.max(0, Math.round(Math.log2(reachedGoal / 256)));
-                const extraGems = 5 + (step * 2); // Her bir üst hedef aşamasında +2 elmas artar (5 💎 ➔ 7 💎 ➔ 9 💎 ➔ 11 💎...)
+                const extraGems = 5 + (step * 2);
 
                 this.gems += extraGems;
                 this.recalculateTargetGoal();
@@ -2716,29 +2840,27 @@ class GridoriaGame {
                     tileEl.classList.remove('tile-water-drop', 'water-drop-merge');
                     void tileEl.offsetWidth;
                     tileEl.classList.add('tile-water-drop');
-                    setTimeout(() => tileEl.classList.remove('tile-water-drop'), 480);
+                    setTimeout(() => tileEl.classList.remove('tile-water-drop'), 460);
                 }
 
                 if (typeof effects !== 'undefined') {
                     const tRect = updatedTargetCell.getBoundingClientRect();
                     const pc = document.getElementById('particles-container');
                     const containerRect = pc ? pc.getBoundingClientRect() : { left: 0, top: 0 };
-                    const rippleX = tRect.left + tRect.width / 2 - containerRect.left;
-                    const rippleY = tRect.top + tRect.height / 2 - containerRect.top;
+                    const popupX = tRect.left + tRect.width / 2 - containerRect.left;
+                    const popupY = tRect.top + tRect.height / 2 - containerRect.top;
 
-                    effects.showWaterRipple(rippleX, rippleY, color);
-                    effects.showSparkles(rippleX, rippleY, color);
-
-                    const scoreText = fireMultiplier > 1
-                        ? `+${pointsGained} ATEŞ MODU x2!`
+                    const isFever = typeof this.isFeverActive !== 'undefined' && this.isFeverActive;
+                    const scoreText = isFever
+                        ? `+${pointsGained} ATEŞ x2!`
                         : this.comboMultiplier > 1 ? `+${pointsGained} x${this.comboMultiplier}!` : `+${pointsGained}`;
-                    effects.showScorePopup(rippleX, rippleY, scoreText, fireMultiplier > 1);
+                    effects.showScorePopup(popupX, popupY, scoreText, isFever);
                 }
             }
 
             this.saveData();
             this.updateUI();
-        }, 220);
+        }, 230);
     }
 
     getTileColorHex(val) {
@@ -3443,7 +3565,17 @@ class GridoriaGame {
 
         if (isFull) {
             this.isGameOver = true;
+
+            // 👑 En Yüksek Skoru Güncelle ve Kaydet
+            if (this.score > this.highScore) {
+                this.highScore = this.score;
+                this.safeSet('gridoria_highscore', String(this.highScore));
+                if (typeof effects !== 'undefined') effects.showHighScorePop();
+            }
+
+            // Aktif oyun durumunu sıfırla (Böylece bir sonraki açılışta temiz tahtadan başlar)
             this.clearActiveGameState();
+
             if (typeof sounds !== 'undefined') sounds.playGameOver();
             if (typeof effects !== 'undefined') effects.triggerHaptic('heavy');
 
@@ -3492,10 +3624,14 @@ class GridoriaGame {
         this.score = 0;
         this.comboMeter = 0;
         this.comboMultiplier = 1;
+        this.currentShooterVal = 2;
+        this.nextShooterVal = 4;
         this.isGameOver = false;
         this.previousState = null;
         this.initInitialBoard();
+        this.updateScoreDisplay();
         this.updateUI();
+        this.updateMainMenuStats();
     }
 
     // ── 🎁 AdMob Rewarded & Interstitial Engine ───────────────────────
@@ -3550,6 +3686,7 @@ class GridoriaGame {
         }
 
         this.isGameOver = false;
+        this.compactAllColumns();
         this.renderGrid();
         this.updateUI();
         this.saveActiveGameState();

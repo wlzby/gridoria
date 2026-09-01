@@ -40,6 +40,10 @@ class MainActivity : Activity() {
 
             // Set modern blue splash background for window to eliminate white flash
             window.decorView.setBackgroundColor(Color.parseColor("#0b1536"))
+            window.setFlags(
+                android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+            )
 
             webView = WebView(this).apply {
                 setBackgroundColor(Color.TRANSPARENT)
@@ -48,6 +52,7 @@ class MainActivity : Activity() {
                 isHapticFeedbackEnabled = true
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
+                isNestedScrollingEnabled = false
 
                 settings.apply {
                     javaScriptEnabled = true
@@ -60,6 +65,9 @@ class MainActivity : Activity() {
                     useWideViewPort = true
                     loadWithOverviewMode = true
                     layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        offscreenPreRaster = true
+                    }
                 }
 
                 // Add JavaScript Bridge Interface
@@ -96,41 +104,8 @@ class MainActivity : Activity() {
                 }
             }
 
-            val rootLayout = android.widget.LinearLayout(this).apply {
-                orientation = android.widget.LinearLayout.VERTICAL
-                setBackgroundColor(Color.parseColor("#0b1536"))
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-            }
-
-            val webViewParams = android.widget.LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                0,
-                1f
-            )
-            rootLayout.addView(webView, webViewParams)
-
-            val bannerHeightPx = (50 * resources.displayMetrics.density).toInt()
-            val bContainer = android.widget.FrameLayout(this).apply {
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    bannerHeightPx
-                ).apply {
-                    gravity = android.view.Gravity.CENTER_HORIZONTAL
-                }
-                setBackgroundColor(Color.parseColor("#070A12"))
-                visibility = View.GONE
-            }
-            this.bannerContainer = bContainer
-            rootLayout.addView(bContainer)
-
-            setContentView(rootLayout)
+            setContentView(webView)
             webView.loadUrl("file:///android_asset/www/index.html")
-
-            // Preload AdMob Banner into container
-            AdManager.loadBannerAd(this, bContainer)
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -158,25 +133,7 @@ class MainActivity : Activity() {
 
         @JavascriptInterface
         fun setBannerVisible(visible: Boolean) {
-            runOnUiThread {
-                try {
-                    isBannerEnabled = visible
-                    val container = bannerContainer ?: return@runOnUiThread
-                    val bannerHeightPx = (50 * resources.displayMetrics.density).toInt()
-                    if (visible) {
-                        container.layoutParams.height = bannerHeightPx
-                        container.visibility = View.VISIBLE
-                        if (container.childCount == 0) {
-                            AdManager.loadBannerAd(this@MainActivity, container)
-                        }
-                    } else {
-                        container.visibility = View.GONE
-                    }
-                    container.requestLayout()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
+            isBannerEnabled = false
         }
 
         @JavascriptInterface

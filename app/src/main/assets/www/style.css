@@ -30,7 +30,7 @@
 html, body {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-    touch-action: manipulation;
+    touch-action: none;
     width: 100%;
     height: 100%;
 }
@@ -646,9 +646,26 @@ body {
     position: relative;
     z-index: 10;
     will-change: transform;
+    transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+    contain: layout style;
+    transition: transform 0.23s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.tile.sliding-merge {
+    transition: transform 0.23s cubic-bezier(0.25, 1, 0.5, 1), border-radius 0.23s ease, opacity 0.23s ease !important;
+    border-radius: 40% 60% 60% 40% / 50% 30% 70% 50% !important;
+    opacity: 0.9 !important;
+    z-index: 30 !important;
+    pointer-events: none;
+}
+
+.active-shooter-box.dragging, #current-shooter.dragging {
+    transition: none !important;
+    will-change: transform;
+    z-index: 999 !important;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
 }
 
 /* 👑 KING CROWN TILE BADGE (Tahtadaki En Yüksek Taşa Şampiyon Tacı) */
@@ -834,18 +851,48 @@ body {
     opacity: 0.85;
 }
 
-/* Merge pop — TileSpark's tile-water-drop (fast 0.48s) */
-.tile.tile-water-drop {
-    animation: waterDropMorphFast 0.48s cubic-bezier(0.25, 1, 0.35, 1) forwards !important;
-    z-index: 10 !important;
+/* 🍮💧 Organic Liquid Jelly Merge Animation (Sıvı Jel Birleşmesi) */
+.tile.tile-water-drop, .tile.water-drop-merge, .tile.jelly-merge {
+    animation: liquidJellyMerge 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) forwards !important;
+    z-index: 35 !important;
+    will-change: transform, border-radius;
 }
 
-@keyframes waterDropMorphFast {
-    0%   { transform: scale(1);         border-radius: 16px; }
-    25%  { transform: scale(1.35, 0.75) rotate(-2deg); border-radius: 50% 50% 35% 65% / 60% 40% 60% 40%; }
-    50%  { transform: scale(0.85, 1.2)  rotate(1deg);  border-radius: 40% 60% 60% 40% / 50% 35% 65% 50%; }
-    75%  { transform: scale(1.08, 0.95); border-radius: 18px; }
-    100% { transform: scale(1, 1);       border-radius: 16px; }
+@keyframes liquidJellyMerge {
+    0% {
+        transform: scale(1);
+        border-radius: 12px;
+    }
+    25% {
+        /* Sıvı jel damlası gibi basılır ve yayılır (Squash) */
+        transform: scale(1.3, 0.74);
+        border-radius: 45% 55% 35% 65% / 60% 40% 60% 40%;
+        filter: brightness(1.28);
+    }
+    50% {
+        /* Jel yukarı doğru esner ve uzar (Stretch) */
+        transform: scale(0.84, 1.25);
+        border-radius: 55% 45% 65% 35% / 40% 60% 40% 60%;
+        filter: brightness(1.18);
+    }
+    75% {
+        /* Tatlı sıvı yaylanması */
+        transform: scale(1.1, 0.93);
+        border-radius: 35% 65% 55% 45% / 50% 45% 55% 50%;
+        filter: brightness(1.06);
+    }
+    90% {
+        /* Son mikro dalgalanma */
+        transform: scale(0.97, 1.03);
+        border-radius: 14px;
+        filter: brightness(1);
+    }
+    100% {
+        /* Kusursuz normal taş formuna oturur */
+        transform: scale(1, 1);
+        border-radius: 12px;
+        filter: brightness(1);
+    }
 }
 
 /* Legacy — Gridoria's own 0.88s slower version (kept for compatibility) */
@@ -5112,7 +5159,7 @@ body[data-color-palette] .demo-flying-tile {
 
 @keyframes demoMergePop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.25); box-shadow: 0 0 25px rgba(0, 242, 254, 0.9); }
+    50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(251, 191, 36, 0.7); }
     100% { transform: scale(1); }
 }
 
@@ -5142,7 +5189,7 @@ body[data-color-palette] .demo-flying-tile {
 
 .demo-arrow-indicator {
     font-size: 0.85rem;
-    color: rgba(0, 242, 254, 0.6);
+    color: rgba(255, 255, 255, 0.6);
     animation: demoArrowMove 1.2s ease-in-out infinite;
 }
 
@@ -5249,10 +5296,43 @@ body[data-color-palette] .demo-flying-tile {
 }
 
 .menu-footer-hint {
-    font-size: 0.7rem;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.brain-focus-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #f1f5f9;
+    font-size: 0.78rem;
     font-weight: 700;
-    color: #b8976b;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.brain-focus-badge .brain-icon {
+    font-size: 1.1rem;
+    animation: brainPulse 2.2s infinite ease-in-out;
+}
+
+@keyframes brainPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.22); }
+}
+
+@keyframes brainBadgeFadeIn {
+    0% { opacity: 0; transform: translateY(4px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ==========================================================================
@@ -7324,22 +7404,9 @@ body[data-color-palette="relaxing"] .undo-bg   { background: linear-gradient(135
     100% { transform: rotate(360deg); }
 }
 
-/* 🚫 REMOVE ALL SLOT BORDERS & BACKGROUNDS AROUND POWERUPS ACROSS ALL THEMES */
+/* 🚫 POWERUP BUTTONS TRANSPARENCY */
 body .powerup-btn,
-body[data-theme] .powerup-btn,
-body[data-theme="walnut"] .powerup-btn,
-body[data-theme="wood"] .powerup-btn,
-body[data-theme="oak"] .powerup-btn,
-body[data-theme="cherry"] .powerup-btn,
-body[data-theme="ebony"] .powerup-btn,
-body[data-theme="forest"] .powerup-btn,
-body[data-theme="earth"] .powerup-btn,
-body[data-theme="clouds"] .powerup-btn,
-body[data-theme="ocean"] .powerup-btn,
-body[data-theme="puppy"] .powerup-btn,
-body[data-theme="cat"] .powerup-btn,
-body[data-theme="lake"] .powerup-btn,
-body[data-theme="cyber"] .powerup-btn {
+body[data-theme] .powerup-btn {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -7352,4 +7419,6 @@ body[data-theme] .powerup-btn:hover {
     border: none !important;
     box-shadow: none !important;
 }
+
+
 

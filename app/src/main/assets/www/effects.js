@@ -109,7 +109,7 @@ class EffectsManager {
     // ── Motion Trail ──────────────────────────────────────────────────────
     createMotionTrail(startX, startY, endX, endY, color = '#00f2fe') {
         if (!this.container) return;
-        const steps = 5;
+        const steps = 3;
         for (let i = 0; i < steps; i++) {
             setTimeout(() => {
                 const p = i / (steps - 1);
@@ -124,8 +124,8 @@ class EffectsManager {
                 this.container.appendChild(el);
                 setTimeout(() => {
                     if (el.parentNode) el.remove();
-                }, 220);
-            }, i * 22);
+                }, 160);
+            }, i * 16);
         }
     }
 
@@ -141,13 +141,13 @@ class EffectsManager {
         this.container.appendChild(el);
         setTimeout(() => {
             if (el.parentNode) el.remove();
-        }, 420);
+        }, 320);
     }
 
     // ── Sparkles ──────────────────────────────────────────────────────────
     showSparkles(left, top, color = '#ffb703') {
         if (!this.container) return;
-        const count = 7;
+        const count = 4;
         for (let i = 0; i < count; i++) {
             const star = document.createElement('div');
             star.className = 'sparkle-star';
@@ -155,13 +155,13 @@ class EffectsManager {
             star.style.top = `${top}px`;
             star.style.setProperty('--sparkle-color', color);
             const angle = (i / count) * Math.PI * 2;
-            const dist = 24 + Math.random() * 18;
+            const dist = 20 + Math.random() * 14;
             star.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
             star.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
             this.container.appendChild(star);
             setTimeout(() => {
                 if (star.parentNode) star.remove();
-            }, 380);
+            }, 300);
         }
     }
 
