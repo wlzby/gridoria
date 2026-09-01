@@ -130,12 +130,32 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         guard let htmlURL = targetURL else {
             print("⚠️ Critical Error: index.html not found in bundle.")
+            showBundleErrorFallback()
             return
         }
 
-        let accessURL = bundle.bundleURL
-        print("🚀 Loading Gridoria HTML: \(htmlURL.path) with read access to: \(accessURL.path)")
-        webView.loadFileURL(htmlURL, allowingReadAccessTo: accessURL)
+        let baseDir = htmlURL.deletingLastPathComponent()
+        print("🚀 Loading Gridoria HTML: \(htmlURL.path) with base: \(baseDir.path)")
+
+        if let htmlData = try? Data(contentsOf: htmlURL),
+           let htmlString = String(data: htmlData, encoding: .utf8) {
+            webView.loadHTMLString(htmlString, baseURL: baseDir)
+        } else {
+            webView.loadFileURL(htmlURL, allowingReadAccessTo: bundle.bundleURL)
+        }
+    }
+
+    private func showBundleErrorFallback() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let errorLabel = UILabel(frame: self.view.bounds)
+            errorLabel.numberOfLines = 0
+            errorLabel.textAlignment = .center
+            errorLabel.textColor = .white
+            errorLabel.backgroundColor = UIColor(red: 0.1, green: 0.1, blue: 0.2, alpha: 1.0)
+            errorLabel.text = "⚠️ Gridoria Yüklenemedi!\nBundle içinde index.html bulunamadı.\nLütfen uygulamayı yeniden başlatın."
+            self.view.addSubview(errorLabel)
+        }
     }
 
     // MARK: - 🌐 WKNavigationDelegate
@@ -157,6 +177,10 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         let action = body["action"] as? String ?? ""
 
         switch action {
+        case "jsError":
+            let msg = body["message"] as? String ?? "Unknown JS Error"
+            print("🚨 JS ERROR: \(msg)")
+
         case "haptic":
             let type = body["type"] as? String ?? "medium"
             triggerHaptic(type: type)
