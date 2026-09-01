@@ -40,6 +40,7 @@ body {
     background: radial-gradient(circle at 50% 30%, #111a2e 0%, #060911 100%);
     color: var(--text-white);
     overflow: hidden;
+    /* Fill full screen including safe areas */
     height: 100vh;
     height: calc(var(--vh, 1vh) * 100);
     height: 100dvh;
@@ -52,6 +53,25 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
+    /* Extend background behind notch and home bar */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    box-sizing: border-box;
+}
+
+#app-container {
+    width: 100%;
+    max-width: 480px;
+    /* Full height minus safe areas already consumed by body padding */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* AAA Screen Shake Animation */
@@ -66,25 +86,6 @@ body {
     60% { transform: translate(-2px, 2px); }
     80% { transform: translate(2px, -1px); }
     100% { transform: translate(0, 0); }
-}
-
-#app-container {
-    width: 100%;
-    max-width: 480px;
-    height: 100%;
-    height: calc(var(--vh, 1vh) * 100);
-    height: 100dvh;
-    max-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding-top: var(--sat);
-    padding-bottom: var(--sab);
-    padding-left: var(--sal);
-    padding-right: var(--sar);
-    position: relative;
-    box-sizing: border-box;
-    overflow: hidden;
 }
 
 /* 👑 Main Menu Logo Header Badge */

@@ -18,6 +18,9 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
+        // Extend layout under status bar and home indicator
+        edgesForExtendedLayout = .all
+        extendedLayoutIncludesOpaqueBars = true
         setupWebView()
         loadLocalGame()
     }
@@ -26,6 +29,25 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     private func setupWebView() {
         let contentController = WKUserContentController()
         contentController.add(self, name: "iosBridge")
+
+        // Inject real safe area values as CSS variables before page loads
+        let safeAreaScript = """
+            (function() {
+                function updateSafeArea() {
+                    var style = document.documentElement.style;
+                    style.setProperty('--sat', 'env(safe-area-inset-top, 0px)');
+                    style.setProperty('--sab', 'env(safe-area-inset-bottom, 0px)');
+                    style.setProperty('--sal', 'env(safe-area-inset-left, 0px)');
+                    style.setProperty('--sar', 'env(safe-area-inset-right, 0px)');
+                }
+                updateSafeArea();
+                window.addEventListener('resize', updateSafeArea);
+            })();
+        """
+        let userScript = WKUserScript(source: safeAreaScript,
+                                      injectionTime: .atDocumentStart,
+                                      forMainFrameOnly: true)
+        contentController.addUserScript(userScript)
 
         let config = WKWebViewConfiguration()
         config.userContentController = contentController
@@ -41,10 +63,15 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         wv.isOpaque = false
         wv.scrollView.bounces = false
         wv.scrollView.isScrollEnabled = false
+        // Critical: never adjust insets so WebView fills under notch and home bar
         wv.scrollView.contentInsetAdjustmentBehavior = .never
+        if #available(iOS 13.0, *) {
+            wv.scrollView.automaticallyAdjustsScrollIndicatorInsets = false
+        }
         wv.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(wv)
+        // Pin to view edges (NOT safeAreaLayoutGuide) so it goes under notch & home bar
         NSLayoutConstraint.activate([
             wv.topAnchor.constraint(equalTo: view.topAnchor),
             wv.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -99,6 +126,14 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     // MARK: - WKNavigationDelegate
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("✅ WebView loaded successfully")
+        // Inject safe area values after load too (for CSS env() fallback)
+        let js = """
+            document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top, 0px)');
+            document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom, 0px)');
+            document.documentElement.style.setProperty('--sal', 'env(safe-area-inset-left, 0px)');
+            document.documentElement.style.setProperty('--sar', 'env(safe-area-inset-right, 0px)');
+        """
+        webView.evaluateJavaScript(js, completionHandler: nil)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
