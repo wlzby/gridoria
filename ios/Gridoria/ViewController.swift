@@ -48,9 +48,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         config.userContentController = contentController
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
-        config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         config.defaultWebpagePreferences.allowsContentJavaScript = true
-        config.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
 
         webView = WKWebView(frame: view.bounds, configuration: config)
         if #available(iOS 16.4, *) {

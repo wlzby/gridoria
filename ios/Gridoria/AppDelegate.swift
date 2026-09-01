@@ -20,8 +20,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("Failed to set AVAudioSession category: \(error)")
         }
 
-        // 2. Initialize Google Mobile Ads SDK on Main Thread
-        MobileAds.shared.start(completionHandler: nil)
+        // 2. Initialize Google Mobile Ads SDK safely in background
+        DispatchQueue.main.async {
+            MobileAds.shared.start(completionHandler: nil)
+        }
 
         // 3. Guarantee UIWindow & Root ViewController setup
         let win = UIWindow(frame: UIScreen.main.bounds)
