@@ -102,11 +102,14 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         let bundle = Bundle.main
         var targetURL: URL?
 
+        // Priority 1: Check standard subdirectory and direct paths
         let candidates = [
             bundle.url(forResource: "index", withExtension: "html", subdirectory: "www"),
             bundle.url(forResource: "index", withExtension: "html"),
             bundle.bundleURL.appendingPathComponent("www").appendingPathComponent("index.html"),
-            bundle.bundleURL.appendingPathComponent("index.html")
+            bundle.bundleURL.appendingPathComponent("index.html"),
+            bundle.resourceURL?.appendingPathComponent("www").appendingPathComponent("index.html"),
+            bundle.resourceURL?.appendingPathComponent("index.html")
         ]
 
         for url in candidates {
@@ -116,6 +119,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             }
         }
 
+        // Priority 2: Recursive search across entire bundle
         if targetURL == nil, let resourceURL = bundle.resourceURL {
             let fileManager = FileManager.default
             if let enumerator = fileManager.enumerator(at: resourceURL, includingPropertiesForKeys: nil) {
@@ -130,31 +134,23 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         guard let htmlURL = targetURL else {
             print("⚠️ Critical Error: index.html not found in bundle.")
-            showBundleErrorFallback()
+            showDebugScreen(message: "⚠️ index.html dosyası bulunamadı!\nBundle: \(bundle.bundlePath)")
             return
         }
 
         let baseDir = htmlURL.deletingLastPathComponent()
         print("🚀 Loading Gridoria HTML: \(htmlURL.path) with base: \(baseDir.path)")
 
-        if let htmlData = try? Data(contentsOf: htmlURL),
-           let htmlString = String(data: htmlData, encoding: .utf8) {
-            webView.loadHTMLString(htmlString, baseURL: baseDir)
-        } else {
-            webView.loadFileURL(htmlURL, allowingReadAccessTo: bundle.bundleURL)
-        }
+        // Primary loading: loadFileURL with read access to the entire bundle directory
+        webView.loadFileURL(htmlURL, allowingReadAccessTo: bundle.bundleURL)
     }
 
-    private func showBundleErrorFallback() {
+    private func showDebugScreen(message: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            let errorLabel = UILabel(frame: self.view.bounds)
-            errorLabel.numberOfLines = 0
-            errorLabel.textAlignment = .center
-            errorLabel.textColor = .white
-            errorLabel.backgroundColor = UIColor(red: 0.1, green: 0.1, blue: 0.2, alpha: 1.0)
-            errorLabel.text = "⚠️ Gridoria Yüklenemedi!\nBundle içinde index.html bulunamadı.\nLütfen uygulamayı yeniden başlatın."
-            self.view.addSubview(errorLabel)
+            let alert = UIAlertController(title: "Gridoria", message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Tamam", style: .default))
+            self.present(alert, animated: true)
         }
     }
 
@@ -165,10 +161,12 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         print("❌ Gridoria WKWebView failed navigation: \(error.localizedDescription)")
+        showDebugScreen(message: "Yükleme Hatası: \(error.localizedDescription)")
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         print("❌ Gridoria WKWebView failed provisional navigation: \(error.localizedDescription)")
+        showDebugScreen(message: "Sayfa Başlatma Hatası: \(error.localizedDescription)")
     }
 
     // MARK: - 🌉 WKScriptMessageHandler (Bridge with JavaScript)
