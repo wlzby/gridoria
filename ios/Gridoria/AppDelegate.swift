@@ -12,16 +12,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         
-        // 1. Audio Session: Playback category ensures sound works even if mute switch is ON
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            print("Failed to set AVAudioSession category: \(error)")
+        // 1. Audio Session: Playback category (safely on background queue)
+        DispatchQueue.global(qos: .background).async {
+            do {
+                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+                try AVAudioSession.sharedInstance().setActive(true)
+            } catch {
+                print("AVAudioSession error: \(error)")
+            }
         }
 
         // 2. Initialize Google Mobile Ads SDK safely in background
-        DispatchQueue.main.async {
+        DispatchQueue.global(qos: .background).async {
             MobileAds.shared.start(completionHandler: nil)
         }
 

@@ -23,9 +23,9 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     
-    <!-- Google AdMob App ID (Replace with your live AdMob iOS App ID) -->
+    <!-- Google AdMob App ID -->
     <key>GADApplicationIdentifier</key>
-    <string>ca-app-pub-3940256099942544~1458002511</string>
+    <string>ca-app-pub-7719335438184188~3285326194</string>
     
     <!-- SKAdNetwork items for AdMob -->
     <key>SKAdNetworkItems</key>
