@@ -23,6 +23,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 2. Initialize Google Mobile Ads SDK on Main Thread
         MobileAds.shared.start(completionHandler: nil)
 
+        // 3. Guarantee UIWindow & Root ViewController setup
+        let win = UIWindow(frame: UIScreen.main.bounds)
+        win.rootViewController = ViewController()
+        win.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
+        self.window = win
+        win.makeKeyAndVisible()
+
         return true
     }
 
