@@ -1,6 +1,5 @@
 import UIKit
 import AVFoundation
-import GoogleMobileAds
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -11,44 +10,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        
-        // 1. Audio Session: Playback category (safely on background queue)
-        DispatchQueue.global(qos: .background).async {
-            do {
-                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
-                try AVAudioSession.sharedInstance().setActive(true)
-            } catch {
-                print("AVAudioSession error: \(error)")
-            }
+
+        // Audio session – must run on main thread
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("AVAudioSession error: \(error)")
         }
 
-        // 2. Initialize Google Mobile Ads SDK safely in background
-        DispatchQueue.global(qos: .background).async {
-            MobileAds.shared.start(completionHandler: nil)
-        }
-
-        // 3. Guarantee UIWindow & Root ViewController setup
+        // Window setup
         let win = UIWindow(frame: UIScreen.main.bounds)
-        win.rootViewController = ViewController()
         win.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
+        win.rootViewController = ViewController()
         self.window = win
         win.makeKeyAndVisible()
 
         return true
-    }
-
-    // MARK: UISceneSession Lifecycle
-    func application(
-        _ application: UIApplication,
-        configurationForConnecting connectingSceneSession: UISceneSession,
-        options: UIScene.ConnectionOptions
-    ) -> UISceneConfiguration {
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
-
-    func application(
-        _ application: UIApplication,
-        didDiscardSceneSessions sceneSessions: Set<UISceneSession>
-    ) {
     }
 }

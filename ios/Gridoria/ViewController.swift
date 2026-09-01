@@ -1,45 +1,28 @@
 import UIKit
 import WebKit
-import AVFoundation
 import AudioToolbox
-import GoogleMobileAds
 
-class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate, BannerViewDelegate, FullScreenContentDelegate {
+// ──────────────────────────────────────────────
+// Gridoria ViewController – Minimal, crash-safe
+// AdMob removed to isolate iOS launch issues
+// ──────────────────────────────────────────────
+class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
 
     private var webView: WKWebView!
-    private var bannerView: BannerView?
-    private var interstitialAd: InterstitialAd?
-    private var rewardedAd: RewardedAd?
-    private var pendingRewardType: String = ""
 
-    // ── AdMob Unit IDs (Test IDs) ──
-    private let BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/2934735716"
-    private let INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/4411468910"
-    private let REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/1712485313"
+    // MARK: - Status Bar / Home Indicator
+    override var prefersStatusBarHidden: Bool { return true }
+    override var prefersHomeIndicatorAutoHidden: Bool { return true }
 
-    override var prefersStatusBarHidden: Bool {
-        return true
-    }
-
-    override var prefersHomeIndicatorAutoHidden: Bool {
-        return true
-    }
-
+    // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
-
         setupWebView()
         loadLocalGame()
-
-        // Safely load ads after UI is presented
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.loadInterstitialAd()
-            self?.loadRewardedAd()
-        }
     }
 
-    // MARK: - 🌐 Setup WKWebView
+    // MARK: - WKWebView Setup
     private func setupWebView() {
         let contentController = WKUserContentController()
         contentController.add(self, name: "iosBridge")
@@ -50,257 +33,116 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         config.mediaTypesRequiringUserActionForPlayback = []
         config.defaultWebpagePreferences.allowsContentJavaScript = true
 
-        webView = WKWebView(frame: view.bounds, configuration: config)
-        if #available(iOS 16.4, *) {
-            webView.isInspectable = true
-        }
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
-        webView.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
-        webView.isOpaque = false
-        webView.scrollView.bounces = false
-        webView.scrollView.isScrollEnabled = false
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
-        webView.translatesAutoresizingMaskIntoConstraints = false
+        let wv = WKWebView(frame: view.bounds, configuration: config)
+        if #available(iOS 16.4, *) { wv.isInspectable = true }
+        wv.navigationDelegate = self
+        wv.uiDelegate = self
+        wv.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
+        wv.isOpaque = false
+        wv.scrollView.bounces = false
+        wv.scrollView.isScrollEnabled = false
+        wv.scrollView.contentInsetAdjustmentBehavior = .never
+        wv.translatesAutoresizingMaskIntoConstraints = false
 
-        view.addSubview(webView)
-
-        // Webview fills entire view
+        view.addSubview(wv)
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
-            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            wv.topAnchor.constraint(equalTo: view.topAnchor),
+            wv.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            wv.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            wv.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        self.webView = wv
     }
 
-    // MARK: - 📢 Setup Banner View (Overlay)
-    private func setupBannerView() {
-        bannerView = BannerView(adSize: AdSizeBanner)
-        guard let bannerView = bannerView else { return }
-
-        bannerView.adUnitID = BANNER_AD_UNIT_ID
-        bannerView.rootViewController = self
-        bannerView.delegate = self
-        bannerView.translatesAutoresizingMaskIntoConstraints = false
-        bannerView.isHidden = true
-
-        view.addSubview(bannerView)
-
-        NSLayoutConstraint.activate([
-            bannerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            bannerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-        ])
-
-        bannerView.load(Request())
-    }
-
-    // MARK: - 📁 Load Game from Local Assets
+    // MARK: - Load Game HTML
     private func loadLocalGame() {
         let bundle = Bundle.main
-        var targetURL: URL?
+        let fm = FileManager.default
 
-        // Priority 1: Check standard subdirectory and direct paths
-        let candidates = [
+        // All possible locations for index.html
+        let candidates: [URL?] = [
             bundle.url(forResource: "index", withExtension: "html", subdirectory: "www"),
             bundle.url(forResource: "index", withExtension: "html"),
-            bundle.bundleURL.appendingPathComponent("www").appendingPathComponent("index.html"),
-            bundle.bundleURL.appendingPathComponent("index.html"),
-            bundle.resourceURL?.appendingPathComponent("www").appendingPathComponent("index.html"),
-            bundle.resourceURL?.appendingPathComponent("index.html")
+            bundle.resourceURL?.appendingPathComponent("www/index.html"),
+            bundle.bundleURL.appendingPathComponent("www/index.html"),
+            bundle.bundleURL.appendingPathComponent("index.html")
         ]
 
-        for url in candidates {
-            if let url = url, FileManager.default.fileExists(atPath: url.path) {
-                targetURL = url
+        var htmlURL: URL?
+        for candidate in candidates {
+            if let url = candidate, fm.fileExists(atPath: url.path) {
+                htmlURL = url
                 break
             }
         }
 
-        // Priority 2: Recursive search across entire bundle
-        if targetURL == nil, let resourceURL = bundle.resourceURL {
-            let fileManager = FileManager.default
-            if let enumerator = fileManager.enumerator(at: resourceURL, includingPropertiesForKeys: nil) {
-                for case let file as URL in enumerator {
-                    if file.lastPathComponent == "index.html" {
-                        targetURL = file
-                        break
-                    }
+        // Fallback: scan entire bundle
+        if htmlURL == nil, let resourceURL = bundle.resourceURL {
+            let enumerator = fm.enumerator(at: resourceURL, includingPropertiesForKeys: nil)
+            while let file = enumerator?.nextObject() as? URL {
+                if file.lastPathComponent == "index.html" {
+                    htmlURL = file
+                    break
                 }
             }
         }
 
-        guard let htmlURL = targetURL else {
-            print("⚠️ Critical Error: index.html not found in bundle.")
-            showDebugScreen(message: "⚠️ index.html dosyası bulunamadı!\nBundle: \(bundle.bundlePath)")
+        guard let url = htmlURL else {
+            print("❌ FATAL: index.html not found in bundle at \(bundle.bundlePath)")
             return
         }
 
-        let baseDir = htmlURL.deletingLastPathComponent()
-        print("🚀 Loading Gridoria HTML: \(htmlURL.path) with base: \(baseDir.path)")
-
-        // Primary loading: loadFileURL with read access to the entire bundle directory
-        webView.loadFileURL(htmlURL, allowingReadAccessTo: bundle.bundleURL)
+        print("✅ Loading: \(url.path)")
+        webView.loadFileURL(url, allowingReadAccessTo: bundle.bundleURL)
     }
 
-    private func showDebugScreen(message: String) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            let alert = UIAlertController(title: "Gridoria", message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Tamam", style: .default))
-            self.present(alert, animated: true)
-        }
-    }
-
-    // MARK: - 🌐 WKNavigationDelegate
+    // MARK: - WKNavigationDelegate
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("✅ Gridoria WKWebView finished loading successfully.")
+        print("✅ WebView loaded successfully")
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        print("❌ Gridoria WKWebView failed navigation: \(error.localizedDescription)")
-        showDebugScreen(message: "Yükleme Hatası: \(error.localizedDescription)")
+        print("❌ WebView navigation failed: \(error)")
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        print("❌ Gridoria WKWebView failed provisional navigation: \(error.localizedDescription)")
-        showDebugScreen(message: "Sayfa Başlatma Hatası: \(error.localizedDescription)")
+        print("❌ WebView provisional navigation failed: \(error)")
     }
 
-    // MARK: - 🌉 WKScriptMessageHandler (Bridge with JavaScript)
+    // MARK: - JS Bridge (WKScriptMessageHandler)
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == "iosBridge", let body = message.body as? [String: Any] else { return }
-        let action = body["action"] as? String ?? ""
+        guard message.name == "iosBridge",
+              let body = message.body as? [String: Any],
+              let action = body["action"] as? String else { return }
 
         switch action {
-        case "jsError":
-            let msg = body["message"] as? String ?? "Unknown JS Error"
-            print("🚨 JS ERROR: \(msg)")
-
         case "haptic":
-            let type = body["type"] as? String ?? "medium"
-            triggerHaptic(type: type)
-
+            triggerHaptic(type: body["type"] as? String ?? "medium")
         case "setBannerVisible":
-            let visible = body["visible"] as? Bool ?? false
-            setBannerVisible(visible)
-
+            break // Ads disabled in this build
         case "showRewardedAd":
             let rewardType = body["rewardType"] as? String ?? "reward"
-            showRewardedAd(rewardType: rewardType)
-
+            webView.evaluateJavaScript(
+                "if(typeof window.onRewardedAdFailed==='function') window.onRewardedAdFailed('\(rewardType)','Ads disabled');",
+                completionHandler: nil)
         case "showInterstitialAd":
-            showInterstitialAd()
-
+            break
         default:
-            print("Unknown bridge action: \(action)")
+            print("Bridge: unknown action '\(action)'")
         }
     }
 
-    // MARK: - 📳 Haptic Engine (Taptic Feedback)
+    // MARK: - Haptic
     private func triggerHaptic(type: String) {
-        DispatchQueue.main.async {
-            switch type {
-            case "light":
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.prepare()
-                generator.impactOccurred()
-            case "heavy":
-                let generator = UIImpactFeedbackGenerator(style: .heavy)
-                generator.prepare()
-                generator.impactOccurred()
-            case "success":
-                let generator = UINotificationFeedbackGenerator()
-                generator.prepare()
-                generator.notificationOccurred(.success)
-            default:
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.prepare()
-                generator.impactOccurred()
-            }
-        }
-    }
-
-    // MARK: - 📢 Banner Visibility Control
-    private func setBannerVisible(_ visible: Bool) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self, let banner = self.bannerView else { return }
-            banner.isHidden = !visible
-            self.view.layoutIfNeeded()
-        }
-    }
-
-    // MARK: - 🎬 Interstitial Ads
-    private func loadInterstitialAd() {
-        let request = Request()
-        InterstitialAd.load(with: INTERSTITIAL_AD_UNIT_ID, request: request) { [weak self] ad, error in
-            if let error = error {
-                print("Interstitial load failed: \(error.localizedDescription)")
-                return
-            }
-            self?.interstitialAd = ad
-            self?.interstitialAd?.fullScreenContentDelegate = self
-        }
-    }
-
-    private func showInterstitialAd() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self, let interstitial = self.interstitialAd else {
-                self?.loadInterstitialAd()
-                return
-            }
-            interstitial.present(from: self)
-        }
-    }
-
-    // MARK: - 🎁 Rewarded Ads
-    private func loadRewardedAd() {
-        let request = Request()
-        RewardedAd.load(with: REWARDED_AD_UNIT_ID, request: request) { [weak self] ad, error in
-            if let error = error {
-                print("Rewarded ad load failed: \(error.localizedDescription)")
-                return
-            }
-            self?.rewardedAd = ad
-            self?.rewardedAd?.fullScreenContentDelegate = self
-        }
-    }
-
-    private func showRewardedAd(rewardType: String) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self, let rewardedAd = self.rewardedAd else {
-                self?.webView.evaluateJavaScript("if (typeof window.onRewardedAdFailed === 'function') window.onRewardedAdFailed('\(rewardType)', 'Ad not ready');", completionHandler: nil)
-                self?.loadRewardedAd()
-                return
-            }
-
-            self.pendingRewardType = rewardType
-            rewardedAd.present(from: self) { [weak self] in
-                guard let self = self else { return }
-                let type = self.pendingRewardType
-                self.webView.evaluateJavaScript("if (typeof window.onRewardedAdSuccess === 'function') window.onRewardedAdSuccess('\(type)');", completionHandler: nil)
-            }
-        }
-    }
-
-    // MARK: - 🔄 FullScreenContentDelegate
-    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
-        if ad is RewardedAd {
-            let type = pendingRewardType
-            webView.evaluateJavaScript("if (typeof window.onRewardedAdDismissed === 'function') window.onRewardedAdDismissed('\(type)');", completionHandler: nil)
-            loadRewardedAd()
-        } else if ad is InterstitialAd {
-            loadInterstitialAd()
-        }
-    }
-
-    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        if ad is RewardedAd {
-            let type = pendingRewardType
-            webView.evaluateJavaScript("if (typeof window.onRewardedAdFailed === 'function') window.onRewardedAdFailed('\(type)', '\(error.localizedDescription)');", completionHandler: nil)
-            loadRewardedAd()
-        } else if ad is InterstitialAd {
-            loadInterstitialAd()
+        switch type {
+        case "light":
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        case "heavy":
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        case "success":
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        default:
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
     }
 }

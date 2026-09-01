@@ -17,20 +17,28 @@ workflows:
       - name: Prepare Assets & Generate Xcode Project
         script: |
           cd ios
-          # Ensure www folder is fresh and synced from Android assets
           mkdir -p www
           cp -r ../app/src/main/assets/www/* ./www/
           brew install xcodegen || true
           xcodegen generate
-      - name: Install CocoaPods Dependencies (AdMob SDK)
+
+      - name: Install CocoaPods (no pods required for WebView-only build)
         script: |
           cd ios
-          pod install --repo-update
+          pod install --repo-update || echo "No pods to install"
+
       - name: Build iOS Application (Simulator for Appetize.io)
         script: |
           cd ios
+          # Try workspace first (CocoaPods), fall back to project
+          if [ -f "Gridoria.xcworkspace/contents.xcworkspacedata" ]; then
+            BUILD_FLAG="-workspace Gridoria.xcworkspace"
+          else
+            BUILD_FLAG="-project Gridoria.xcodeproj"
+          fi
+
           xcodebuild build \
-            -workspace Gridoria.xcworkspace \
+            $BUILD_FLAG \
             -scheme Gridoria \
             -configuration Release \
             -sdk iphonesimulator \
@@ -43,8 +51,14 @@ workflows:
       - name: Build iOS Application for Real Devices (Sideloadly IPA)
         script: |
           cd ios
+          if [ -f "Gridoria.xcworkspace/contents.xcworkspacedata" ]; then
+            BUILD_FLAG="-workspace Gridoria.xcworkspace"
+          else
+            BUILD_FLAG="-project Gridoria.xcodeproj"
+          fi
+
           xcodebuild build \
-            -workspace Gridoria.xcworkspace \
+            $BUILD_FLAG \
             -scheme Gridoria \
             -configuration Release \
             -sdk iphoneos \
