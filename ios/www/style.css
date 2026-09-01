@@ -27,12 +27,13 @@
     --sar: env(safe-area-inset-right, 0px);
 }
 
-/* html covers EVERY pixel — background fills behind notch and home bar */
+/* html covers EVERY pixel — native Swift sets the actual background color/image */
 html {
     overscroll-behavior: none;
     width: 100%;
     height: 100%;
-    background-color: #08140c;
+    /* Transparent: native UIImageView in Swift fills the full screen */
+    background: transparent !important;
 }
 
 html, body {
@@ -53,13 +54,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: radial-gradient(circle at 50% 30%, #111a2e 0%, #060911 100%);
+    /* Transparent on iOS — native layer provides the background */
+    background: transparent !important;
     margin: 0;
     padding: 0;
 }
 
-/* App container: full height, content inset by native safe-area values
-   --sat/--sab/--sal/--sar are injected from Swift with real pixel values */
+/* App container fills the body, content pushed away from safe areas */
 #app-container {
     width: 100%;
     max-width: 480px;
@@ -70,7 +71,7 @@ body {
     position: relative;
     box-sizing: border-box;
     overflow: hidden;
-    /* Use Swift-injected values (real pixels) not env() which may return 0 for file:// URLs */
+    /* Swift injects real pixel values for --sat, --sab, --sal, --sar */
     padding-top: var(--sat, 0px);
     padding-bottom: var(--sab, 0px);
     padding-left: var(--sal, 0px);

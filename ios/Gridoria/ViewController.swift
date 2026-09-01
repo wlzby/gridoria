@@ -5,51 +5,76 @@ import AudioToolbox
 class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
 
     private var webView: WKWebView!
+    private var bgImageView: UIImageView!
 
     override var prefersStatusBarHidden: Bool { return true }
     override var prefersHomeIndicatorAutoHidden: Bool { return true }
+    override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { return .fade }
 
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
-        edgesForExtendedLayout = .all
-        extendedLayoutIncludesOpaqueBars = true
+
+        // 1. Native full-screen background (fills BEHIND notch & home bar)
+        setupNativeBackground()
+
+        // 2. WKWebView on top (transparent background)
         setupWebView()
+
+        // 3. Load game
         loadLocalGame()
     }
 
-    // Inject REAL native safe area pixel values after layout is finalized
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
-        injectNativeSafeAreaInsets()
+        injectSafeAreaValues()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        injectNativeSafeAreaInsets()
+        injectSafeAreaValues()
     }
 
-    // MARK: - Inject native safe area into CSS
-    private func injectNativeSafeAreaInsets() {
-        let top = view.safeAreaInsets.top
-        let bottom = view.safeAreaInsets.bottom
-        let left = view.safeAreaInsets.left
-        let right = view.safeAreaInsets.right
+    // MARK: - Native Background Layer
+    private func setupNativeBackground() {
+        // Dark forest green base — fills the entire view including behind notch/home bar
+        view.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
 
-        let js = """
-            (function() {
-                var r = document.documentElement;
-                r.style.setProperty('--sat', '\(top)px');
-                r.style.setProperty('--sab', '\(bottom)px');
-                r.style.setProperty('--sal', '\(left)px');
-                r.style.setProperty('--sar', '\(right)px');
-                // Also update --vh based on real inner height
-                var vh = window.innerHeight * 0.01;
-                r.style.setProperty('--vh', vh + 'px');
-            })();
-        """
-        webView?.evaluateJavaScript(js, completionHandler: nil)
+        // Try to load forest background image from bundle
+        let forestImageURL = Bundle.main.url(forResource: "forest_theme_bg", withExtension: "png", subdirectory: "www")
+            ?? Bundle.main.url(forResource: "forest_theme_bg", withExtension: "jpg", subdirectory: "www")
+            ?? Bundle.main.url(forResource: "forest_theme_bg", withExtension: "webp", subdirectory: "www")
+            ?? Bundle.main.url(forResource: "forest_theme_bg", withExtension: "png")
+
+        bgImageView = UIImageView(frame: view.bounds)
+        bgImageView.contentMode = .scaleAspectFill
+        bgImageView.clipsToBounds = true
+        bgImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        if let imgURL = forestImageURL, let img = UIImage(contentsOfFile: imgURL.path) {
+            bgImageView.image = img
+        } else {
+            // Fallback gradient layer if image not found
+            let gradient = CAGradientLayer()
+            gradient.frame = view.bounds
+            gradient.colors = [
+                UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0).cgColor,
+                UIColor(red: 5/255, green: 46/255, blue: 22/255, alpha: 1.0).cgColor,
+                UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0).cgColor
+            ]
+            gradient.locations = [0.0, 0.5, 1.0]
+            bgImageView.layer.addSublayer(gradient)
+        }
+
+        view.addSubview(bgImageView)
+        // Stretch to ALL edges — not safe area — so it fills behind notch & home bar
+        bgImageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            bgImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            bgImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bgImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bgImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
     // MARK: - WKWebView Setup
@@ -63,14 +88,14 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         config.mediaTypesRequiringUserActionForPlayback = []
         config.defaultWebpagePreferences.allowsContentJavaScript = true
 
-        // WKWebView must fill the ENTIRE screen including safe areas
-        let wv = WKWebView(frame: UIScreen.main.bounds, configuration: config)
+        let wv = WKWebView(frame: view.bounds, configuration: config)
         if #available(iOS 16.4, *) { wv.isInspectable = true }
         wv.navigationDelegate = self
         wv.uiDelegate = self
-        // Forest dark green matches the game background
-        wv.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
-        wv.isOpaque = true  // opaque so background color shows immediately
+        // Transparent — native bgImageView shows through
+        wv.isOpaque = false
+        wv.backgroundColor = .clear
+        wv.scrollView.backgroundColor = .clear
         wv.scrollView.bounces = false
         wv.scrollView.isScrollEnabled = false
         wv.scrollView.contentInsetAdjustmentBehavior = .never
@@ -80,8 +105,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         wv.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(wv)
-        // Pin to ROOT view edges — NOT safeAreaLayoutGuide
-        // This makes the WebView extend behind notch and home indicator
+        // Fill the full view (not safeAreaLayoutGuide)
         NSLayoutConstraint.activate([
             wv.topAnchor.constraint(equalTo: view.topAnchor),
             wv.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -89,6 +113,27 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             wv.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         self.webView = wv
+    }
+
+    // MARK: - Inject Native Safe Area Values
+    private func injectSafeAreaValues() {
+        guard webView != nil else { return }
+        let top = view.safeAreaInsets.top
+        let bottom = view.safeAreaInsets.bottom
+        let left = view.safeAreaInsets.left
+        let right = view.safeAreaInsets.right
+        let js = """
+            (function() {
+                var r = document.documentElement.style;
+                r.setProperty('--sat', '\(top)px');
+                r.setProperty('--sab', '\(bottom)px');
+                r.setProperty('--sal', '\(left)px');
+                r.setProperty('--sar', '\(right)px');
+                var vh = window.innerHeight * 0.01;
+                r.setProperty('--vh', vh + 'px');
+            })();
+        """
+        webView.evaluateJavaScript(js, completionHandler: nil)
     }
 
     // MARK: - Load Game HTML
@@ -134,8 +179,13 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     // MARK: - WKNavigationDelegate
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("✅ WebView loaded successfully")
-        // Inject actual native safe area values now that page is ready
-        injectNativeSafeAreaInsets()
+        injectSafeAreaValues()
+        // Make HTML & body transparent so native bgImageView shows through
+        let transparentJS = """
+            document.documentElement.style.setProperty('background', 'transparent', 'important');
+            document.body.style.setProperty('background', 'transparent', 'important');
+        """
+        webView.evaluateJavaScript(transparentJS, completionHandler: nil)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -155,15 +205,13 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         switch action {
         case "haptic":
             triggerHaptic(type: body["type"] as? String ?? "medium")
-        case "setBannerVisible":
+        case "setBannerVisible", "showInterstitialAd":
             break
         case "showRewardedAd":
             let rewardType = body["rewardType"] as? String ?? "reward"
             webView.evaluateJavaScript(
                 "if(typeof window.onRewardedAdFailed==='function') window.onRewardedAdFailed('\(rewardType)','Ads disabled');",
                 completionHandler: nil)
-        case "showInterstitialAd":
-            break
         default:
             print("Bridge: unknown action '\(action)'")
         }
