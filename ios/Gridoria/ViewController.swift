@@ -2,7 +2,7 @@ import UIKit
 import WebKit
 import AudioToolbox
 
-class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
+class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate {
 
     private var webView: WKWebView!
     private var bgImageView: UIImageView!
@@ -111,9 +111,21 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         wv.scrollView.bounces = false
         wv.scrollView.isScrollEnabled = false
         wv.scrollView.panGestureRecognizer.isEnabled = false
+        wv.scrollView.delegate = self
+        wv.scrollView.minimumZoomScale = 1.0
+        wv.scrollView.maximumZoomScale = 1.0
+        wv.scrollView.bouncesZoom = false
         wv.scrollView.contentInsetAdjustmentBehavior = .never
         if #available(iOS 13.0, *) {
             wv.scrollView.automaticallyAdjustsScrollIndicatorInsets = false
+        }
+        for gesture in wv.scrollView.gestureRecognizers ?? [] {
+            if let tap = gesture as? UITapGestureRecognizer, tap.numberOfTapsRequired == 2 {
+                tap.isEnabled = false
+            }
+            if let pinch = gesture as? UIPinchGestureRecognizer {
+                pinch.isEnabled = false
+            }
         }
         wv.translatesAutoresizingMaskIntoConstraints = false
 
@@ -126,6 +138,11 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             wv.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         self.webView = wv
+    }
+
+    // MARK: - UIScrollViewDelegate (Block any zooming / scaling)
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return nil
     }
 
     // MARK: - Inject Native Safe Area Values

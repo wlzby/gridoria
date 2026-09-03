@@ -537,7 +537,7 @@ class GridoriaGame {
             }
 
             const moveX = clientX - this.initialShooterCenterX;
-            const moveY = (clientY - 75) - this.initialShooterCenterY;
+            const moveY = Math.max(-420, Math.min(20, (clientY - 75) - this.initialShooterCenterY));
 
             this.currentShooterEl.classList.add('dragging');
             this.currentShooterEl.style.transform = `translate3d(${moveX}px, ${moveY}px, 0) scale(1.08)`;
@@ -568,6 +568,8 @@ class GridoriaGame {
 
         const handleFire = (clientX, clientY) => {
             resetShooter();
+            if (Date.now() < suppressClickUntil) return;
+            suppressClickUntil = Date.now() + 500;
             if (this.isAnimating) return;
 
             const col = getColumnFromX(clientX);
@@ -658,12 +660,16 @@ class GridoriaGame {
             });
         }
 
-        // Global gesture protection: Prevent WKWebView rubber-band scrolling
+        // Global gesture protection: Prevent WKWebView rubber-band scrolling and zoom gestures
         document.addEventListener('touchmove', (e) => {
             if (!e.target.closest('.modal-body, .scrollable-area, .lb-list-scroll, .shop-tab-content')) {
                 if (e.cancelable) e.preventDefault();
             }
         }, { passive: false });
+
+        document.addEventListener('gesturestart', (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+        document.addEventListener('gesturechange', (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+        document.addEventListener('gestureend', (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
 
         const listen = (id, event, fn) => {
             const el = document.getElementById(id);

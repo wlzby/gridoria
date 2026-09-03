@@ -441,8 +441,10 @@ body {
 
 .grid-board-wrapper {
     width: 100% !important;
+    max-width: 360px !important;
     height: auto !important;
     flex-grow: 0 !important;
+    flex-shrink: 0 !important;
     min-height: 0;
     background: rgba(16, 22, 37, 0.95);
     border: 2.5px solid #1c2840;
@@ -575,12 +577,15 @@ body {
     grid-template-rows: repeat(6, 1fr) !important;
     gap: 4px !important;
     width: 100% !important;
+    aspect-ratio: 5 / 6 !important;
     height: auto !important;
     max-width: 100% !important;
-    margin: 0 auto;
-    overflow: hidden;
+    max-height: 52vh !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
     align-content: center !important;
     justify-content: center !important;
+    box-sizing: border-box !important;
 }
 
 .grid-cell {
@@ -592,9 +597,10 @@ body {
     align-items: center;
     justify-content: center;
     width: 100% !important;
+    height: 100% !important;
     aspect-ratio: 1 / 1 !important;
-    height: auto !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
     transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
