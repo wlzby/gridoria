@@ -568,8 +568,6 @@ class GridoriaGame {
 
         const handleFire = (clientX, clientY) => {
             resetShooter();
-            if (Date.now() < suppressClickUntil) return;
-            suppressClickUntil = Date.now() + 500;
             if (this.isAnimating) return;
 
             const col = getColumnFromX(clientX);
