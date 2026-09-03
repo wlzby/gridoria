@@ -433,6 +433,10 @@ body {
     width: 100%;
     flex-grow: 1;
     min-height: 0;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    overscroll-behavior: none !important;
 }
 
 .grid-board-wrapper {
@@ -452,6 +456,10 @@ body {
     box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.6), 0 10px 28px rgba(0, 0, 0, 0.5);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    overscroll-behavior: none !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -1489,7 +1497,7 @@ body {
     -webkit-backdrop-filter: none !important;
     border: none !important;
     border-radius: 0 !important;
-    padding: 2px 0 !important;
+    padding: 2px 0 max(var(--sab, 0px), 10px) 0 !important;
     margin-top: 2px !important;
     margin-bottom: 2px !important;
     box-shadow: none !important;
@@ -5121,8 +5129,11 @@ body[data-theme="cyber"] .mission-toast-text-group strong { color: #f472b6; }
 .demo-target-tile,
 .demo-launcher-tile,
 .demo-flying-tile {
-    width: 76px;
-    height: 76px;
+    width: 76px !important;
+    height: 76px !important;
+    max-width: 76px !important;
+    max-height: 76px !important;
+    aspect-ratio: 1 / 1 !important;
     border-radius: 20px;
     display: flex;
     align-items: center;
@@ -5143,6 +5154,9 @@ body[data-color-palette] .demo-target-tile,
 body[data-color-palette] .demo-launcher-tile {
     width: 76px !important;
     height: 76px !important;
+    max-width: 76px !important;
+    max-height: 76px !important;
+    aspect-ratio: 1 / 1 !important;
     position: relative !important;
     top: auto !important;
     left: auto !important;

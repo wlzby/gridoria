@@ -611,6 +611,7 @@ class GridoriaGame {
                 resetShooter();
                 return;
             }
+            if (e.cancelable) e.preventDefault();
             refreshBoardMetrics();
             activeTouch = true;
             const touch = e.touches[0];
@@ -621,12 +622,14 @@ class GridoriaGame {
         const onTouchMove = (e) => {
             if (typeof powerups !== 'undefined' && powerups.activeMode) return;
             if (!activeTouch) return;
+            if (e.cancelable) e.preventDefault();
             const touch = e.touches[0];
             updateShooterDrag(touch.clientX, touch.clientY);
         };
 
         const onTouchEnd = (e) => {
             if (!activeTouch) return;
+            if (e.cancelable) e.preventDefault();
             activeTouch = false;
             suppressClickUntil = Date.now() + 500;
             const touch = e.changedTouches[0];
@@ -634,9 +637,9 @@ class GridoriaGame {
         };
 
         if (boardWrapper) {
-            boardWrapper.addEventListener('touchstart', onTouchStart, { passive: true });
-            boardWrapper.addEventListener('touchmove', onTouchMove, { passive: true });
-            boardWrapper.addEventListener('touchend', onTouchEnd, { passive: true });
+            boardWrapper.addEventListener('touchstart', onTouchStart, { passive: false });
+            boardWrapper.addEventListener('touchmove', onTouchMove, { passive: false });
+            boardWrapper.addEventListener('touchend', onTouchEnd, { passive: false });
             boardWrapper.addEventListener('click', (e) => {
                 if (activeTouch || Date.now() < suppressClickUntil || isInteractiveControl(e.target)) return;
                 refreshBoardMetrics();
@@ -645,15 +648,22 @@ class GridoriaGame {
         }
 
         if (activeShooterBox) {
-            activeShooterBox.addEventListener('touchstart', onTouchStart, { passive: true });
-            activeShooterBox.addEventListener('touchmove', onTouchMove, { passive: true });
-            activeShooterBox.addEventListener('touchend', onTouchEnd, { passive: true });
+            activeShooterBox.addEventListener('touchstart', onTouchStart, { passive: false });
+            activeShooterBox.addEventListener('touchmove', onTouchMove, { passive: false });
+            activeShooterBox.addEventListener('touchend', onTouchEnd, { passive: false });
             activeShooterBox.addEventListener('click', (e) => {
                 if (activeTouch || Date.now() < suppressClickUntil || isInteractiveControl(e.target)) return;
                 refreshBoardMetrics();
                 handleFire(e.clientX, e.clientY);
             });
         }
+
+        // Global gesture protection: Prevent WKWebView rubber-band scrolling
+        document.addEventListener('touchmove', (e) => {
+            if (!e.target.closest('.modal-body, .scrollable-area, .lb-list-scroll, .shop-tab-content')) {
+                if (e.cancelable) e.preventDefault();
+            }
+        }, { passive: false });
 
         const listen = (id, event, fn) => {
             const el = document.getElementById(id);
