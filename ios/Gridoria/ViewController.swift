@@ -151,8 +151,8 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     private func injectSafeAreaValues() {
         guard webView != nil else { return }
         let windowInsets = view.window?.safeAreaInsets ?? view.safeAreaInsets
-        let top = max(windowInsets.top, view.safeAreaInsets.top)
-        let bottom = max(windowInsets.bottom, view.safeAreaInsets.bottom)
+        let top = max(windowInsets.top, view.safeAreaInsets.top, 24.0)
+        let bottom = max(windowInsets.bottom, view.safeAreaInsets.bottom, 28.0)
         let left = max(windowInsets.left, view.safeAreaInsets.left)
         let right = max(windowInsets.right, view.safeAreaInsets.right)
         let currentInsets = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
