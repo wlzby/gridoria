@@ -10,6 +10,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     override var prefersStatusBarHidden: Bool { return true }
     override var prefersHomeIndicatorAutoHidden: Bool { return true }
     override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { return .fade }
+    override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge { return .all }
 
     // MARK: - View Lifecycle
     override func viewDidLoad() {
@@ -23,6 +24,17 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         // 3. Load game
         loadLocalGame()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setNeedsStatusBarAppearanceUpdate()
+        setNeedsUpdateOfHomeIndicatorAutoHidden()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        injectSafeAreaValues()
     }
 
     override func viewSafeAreaInsetsDidChange() {

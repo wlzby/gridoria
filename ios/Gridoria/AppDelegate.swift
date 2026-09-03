@@ -19,12 +19,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("AVAudioSession error: \(error)")
         }
 
-        // Window setup
-        let win = UIWindow(frame: UIScreen.main.bounds)
-        win.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
-        win.rootViewController = ViewController()
-        self.window = win
-        win.makeKeyAndVisible()
+        // If scenes are not supported, fallback to window creation here
+        if #available(iOS 13.0, *) {
+            // SceneDelegate will handle window creation
+        } else {
+            let win = UIWindow(frame: UIScreen.main.bounds)
+            win.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
+            win.rootViewController = ViewController()
+            self.window = win
+            win.makeKeyAndVisible()
+        }
 
         return true
     }
