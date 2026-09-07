@@ -455,8 +455,7 @@ body {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: center !important;
-    gap: clamp(4px, 1vh, 8px) !important;
+    justify-content: flex-start !important;
     width: 100% !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
@@ -468,16 +467,17 @@ body {
 }
 
 .grid-board-wrapper {
-    width: min(338px, 86vw, calc((43vh) * 5 / 6)) !important;
-    max-width: min(338px, 86vw) !important;
+    width: min(365px, 92vw, calc((47vh) * 5 / 6)) !important;
+    max-width: min(365px, 92vw) !important;
     height: auto !important;
     flex-grow: 0 !important;
     flex-shrink: 0 !important;
     min-height: 0 !important;
+    margin-top: clamp(2px, 0.6vh, 6px) !important;
     background: rgba(16, 22, 37, 0.95);
     border: 2.5px solid #1c2840;
-    border-radius: 20px;
-    padding: clamp(4px, 1.2vw, 7px) !important;
+    border-radius: 22px;
+    padding: clamp(4px, 1.2vw, 8px) !important;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -603,12 +603,12 @@ body {
     display: grid !important;
     grid-template-columns: repeat(5, 1fr) !important;
     grid-template-rows: repeat(6, 1fr) !important;
-    gap: 4px !important;
+    gap: clamp(3px, 1vw, 5px) !important;
     width: 100% !important;
     aspect-ratio: 5 / 6 !important;
     height: auto !important;
     max-width: 100% !important;
-    max-height: 46vh !important;
+    max-height: 48vh !important;
     margin: 0 auto !important;
     overflow: hidden !important;
     align-content: center !important;
@@ -1128,8 +1128,11 @@ body {
     align-items: center !important;
     justify-items: center !important;
     width: 100% !important;
-    max-width: min(338px, 86vw, calc((43vh) * 5 / 6)) !important;
-    margin: clamp(4px, 1vh, 8px) auto 0 auto !important;
+    max-width: min(365px, 92vw) !important;
+    margin-top: auto !important;
+    margin-bottom: clamp(6px, 1.2vh, 12px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
     transform: none !important;
     box-sizing: border-box !important;
     flex-shrink: 0 !important;
@@ -1546,8 +1549,8 @@ body {
     justify-content: space-around !important;
     gap: clamp(4px, 1.2vw, 7px) !important;
     width: 100% !important;
-    max-width: min(348px, 92vw) !important;
-    margin: 2px auto clamp(2px, 0.6vh, 6px) auto !important;
+    max-width: min(356px, 93vw) !important;
+    margin: 0 auto clamp(2px, 0.6vh, 6px) auto !important;
     padding: clamp(5px, 0.8vh, 7px) clamp(8px, 2vw, 12px) clamp(4px, 0.6vh, 6px) clamp(8px, 2vw, 12px) !important;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.22) !important;
@@ -6864,8 +6867,8 @@ body[data-color-palette="relaxing"] .undo-bg   { background: linear-gradient(135
 }
 
 .shooter-area {
-    margin-top: clamp(2px, 0.6vh, 6px);
-    margin-bottom: 0;
+    margin-top: auto !important;
+    margin-bottom: clamp(6px, 1.2vh, 10px) !important;
 }
 
 .active-shooter-box {
