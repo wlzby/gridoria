@@ -16,7 +16,7 @@ class AdManagerIOS: NSObject {
     }
 
     // MARK: - App Tracking Transparency (ATT)
-    func requestATTTrackingPermission(completion: (() -> Void)? = null) {
+    func requestATTTrackingPermission(completion: (() -> Void)? = nil) {
         if #available(iOS 14.5, *) {
             ATTrackingManager.requestTrackingAuthorization { status in
                 DispatchQueue.main.async {
