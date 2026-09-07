@@ -52,15 +52,10 @@ class NotificationReceiver : BroadcastReceiver() {
                     }
                 }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-                } else {
-                    alarmManager.setInexactRepeating(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        AlarmManager.INTERVAL_DAY,
-                        pendingIntent
-                    )
+                try {
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

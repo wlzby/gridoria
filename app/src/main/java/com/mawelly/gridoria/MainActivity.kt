@@ -108,12 +108,16 @@ class MainActivity : Activity() {
             webView.loadUrl("file:///android_asset/www/index.html")
 
             // 🔔 Schedule Daily Notification (24h Smart Cycle at 19:30)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1002)
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1002)
+                    }
                 }
+                NotificationReceiver.scheduleNextNotification(this)
+            } catch (t: Throwable) {
+                t.printStackTrace()
             }
-            NotificationReceiver.scheduleNextNotification(this)
 
         } catch (e: Exception) {
             e.printStackTrace()
