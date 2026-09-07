@@ -658,10 +658,19 @@ class GridoriaGame {
             });
         }
 
-        // Global gesture protection: Prevent WKWebView rubber-band scrolling and zoom gestures
+        // Global gesture protection: Prevent WKWebView rubber-band scrolling while allowing all modal lists to scroll smoothly
         document.addEventListener('touchmove', (e) => {
-            if (!e.target.closest('.modal-body, .scrollable-area, .lb-list-scroll, .shop-tab-content')) {
-                if (e.cancelable) e.preventDefault();
+            const scrollable = e.target.closest(
+                '.shop-content-scroll, .profile-content-scroll, .settings-content-scroll, ' +
+                '.theme-tab-content, .bg-themes-grid, .palette-themes-grid, ' +
+                '.modal-card, .modal-body, .missions-panel, .daily-grid-container, ' +
+                '.lb-list-scroll, #leaderboard-list, .scrollable-area, .crop-modal-card'
+            );
+            if (scrollable) {
+                return; // Allow native touch scrolling in modals!
+            }
+            if (e.cancelable) {
+                e.preventDefault();
             }
         }, { passive: false });
 

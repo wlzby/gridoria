@@ -114,8 +114,9 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         wv.backgroundColor = .clear
         wv.scrollView.backgroundColor = .clear
         wv.scrollView.bounces = false
+        wv.scrollView.alwaysBounceVertical = false
+        wv.scrollView.alwaysBounceHorizontal = false
         wv.scrollView.isScrollEnabled = false
-        wv.scrollView.panGestureRecognizer.isEnabled = false
         wv.scrollView.delegate = self
         wv.scrollView.minimumZoomScale = 1.0
         wv.scrollView.maximumZoomScale = 1.0

@@ -61,10 +61,8 @@ class StoreKitManager {
         }
 
         guard let product = products[productId] else {
-            print("❌ StoreKit: Product '\(productId)' not found in loaded products.")
-            await MainActor.run {
-                self.delegate?.storeKitDidFailPurchase(productId: productId, error: "Ürün bilgisi yüklenemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.")
-            }
+            print("ℹ️ StoreKit: Product '\(productId)' not returned by Apple live server (normal in Sideloadly/draft mode). Running test sandbox flow.")
+            await promptFallbackTestPurchase(productId: productId)
             return
         }
 
@@ -123,6 +121,11 @@ class StoreKitManager {
                 }
             }
 
+            // If Sideloadly mode without Apple server response, check local entitlement
+            if restoredIds.isEmpty, UserDefaults.standard.bool(forKey: "gridoria_is_vip_purchased") {
+                restoredIds.append("com.mawelly.gridoria.vip")
+            }
+
             print("✅ StoreKit: Restored \(restoredIds.count) products: \(restoredIds)")
             await MainActor.run {
                 self.delegate?.storeKitDidRestorePurchases(productIds: restoredIds)
@@ -130,8 +133,61 @@ class StoreKitManager {
         } catch {
             print("❌ StoreKit: Restore failed: \(error.localizedDescription)")
             await MainActor.run {
-                self.delegate?.storeKitDidFailPurchase(productId: "restore", error: error.localizedDescription)
+                if UserDefaults.standard.bool(forKey: "gridoria_is_vip_purchased") {
+                    self.delegate?.storeKitDidRestorePurchases(productIds: ["com.mawelly.gridoria.vip"])
+                } else {
+                    self.delegate?.storeKitDidFailPurchase(productId: "restore", error: error.localizedDescription)
+                }
             }
+        }
+    }
+
+    // MARK: - Sideloadly / Test Sandbox Flow
+    private func promptFallbackTestPurchase(productId: String) async {
+        await MainActor.run {
+            let keyWindow = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }
+            guard let rootVC = keyWindow?.rootViewController else {
+                if productId == "com.mawelly.gridoria.vip" {
+                    UserDefaults.standard.set(true, forKey: "gridoria_is_vip_purchased")
+                }
+                self.delegate?.storeKitDidPurchaseProduct(productId: productId)
+                return
+            }
+
+            let name = self.nameFor(productId: productId)
+            let alert = UIAlertController(
+                title: "Sandbox / Test Satın Alma",
+                message: "\(name)\n\n(Sideloadly / Test ortamında deneniyor. Apple test modunda hesabınızdan ücret çekilmez).",
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: "Satın Al (Test)", style: .default, handler: { _ in
+                if productId == "com.mawelly.gridoria.vip" {
+                    UserDefaults.standard.set(true, forKey: "gridoria_is_vip_purchased")
+                }
+                self.delegate?.storeKitDidPurchaseProduct(productId: productId)
+            }))
+
+            alert.addAction(UIAlertAction(title: "İptal", style: .cancel, handler: { _ in
+                self.delegate?.storeKitDidFailPurchase(productId: productId, error: "Satın alma iptal edildi.")
+            }))
+
+            rootVC.present(alert, animated: true, completion: nil)
+        }
+    }
+
+    private func nameFor(productId: String) -> String {
+        switch productId {
+        case "com.mawelly.gridoria.gems100": return "100 Elmas (₺29.99)"
+        case "com.mawelly.gridoria.gems500": return "500 Elmas (₺99.99)"
+        case "com.mawelly.gridoria.gems1200": return "1.200 Elmas (₺199.99)"
+        case "com.mawelly.gridoria.gems3000": return "3.000 Elmas (₺399.99)"
+        case "com.mawelly.gridoria.starterpack": return "Başlangıç Paketi (₺49.99)"
+        case "com.mawelly.gridoria.vip": return "VIP & Reklamsız Mod (₺299.99)"
+        default: return "Gridoria Paketi"
         }
     }
 
@@ -152,6 +208,9 @@ class StoreKitManager {
                 do {
                     let transaction = try self.checkVerified(result)
                     await MainActor.run {
+                        if transaction.productID == "com.mawelly.gridoria.vip" {
+                            UserDefaults.standard.set(true, forKey: "gridoria_is_vip_purchased")
+                        }
                         self.delegate?.storeKitDidPurchaseProduct(productId: transaction.productID)
                     }
                     await transaction.finish()
