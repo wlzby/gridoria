@@ -1,6 +1,7 @@
 import UIKit
 import WebKit
 import AudioToolbox
+import UserNotifications
 
 class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, StoreKitManagerDelegate {
 
@@ -27,7 +28,10 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             StoreKitManager.shared.delegate = self
         }
 
-        // 4. Load game
+        // 4. Setup Daily Local Notifications
+        setupLocalNotifications()
+
+        // 5. Load game
         loadLocalGame()
     }
 
@@ -310,6 +314,37 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         case "heavy":   UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         case "success": UINotificationFeedbackGenerator().notificationOccurred(.success)
         default:        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
+    }
+
+    // MARK: - Local Daily Notifications (24h Cycle at 19:30)
+    private func setupLocalNotifications() {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if granted {
+                center.removeAllPendingNotificationRequests()
+                let messages = [
+                    "🎁 Günlük 100 Elmas hediyen hazır! Hemen gir ve ödülünü topla!",
+                    "🔥 Yeni bir rekor kırabilir misin? Bugün 2048 taşını patlatma sırası sende!",
+                    "🧠 Günde 20 dakika Gridoria oyna, zihnini ve hafızanı zinde tut!",
+                    "⚡ Ateş Modu (Fever Mode) hazır! Hemen oyuna gir ve komboları patlat!"
+                ]
+
+                for (idx, msg) in messages.enumerated() {
+                    let content = UNMutableNotificationContent()
+                    content.title = "Gridoria 2048 🌲"
+                    content.body = msg
+                    content.sound = .default
+
+                    var dateComponents = DateComponents()
+                    dateComponents.hour = 19
+                    dateComponents.minute = 30
+
+                    let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+                    let request = UNNotificationRequest(identifier: "gridoria_daily_notif_\(idx)", content: content, trigger: trigger)
+                    center.add(request, withCompletionHandler: nil)
+                }
+            }
         }
     }
 }

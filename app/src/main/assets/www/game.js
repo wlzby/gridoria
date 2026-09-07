@@ -52,6 +52,11 @@ class GridoriaGame {
         this.updateUI();
         this.showMainMenu();
         this.setupLifecycleListeners();
+        if (window.NativeBridge && typeof window.NativeBridge.scheduleDailyNotification === 'function') {
+            try {
+                window.NativeBridge.scheduleDailyNotification();
+            } catch (e) {}
+        }
     }
 
     // ── Safe LocalStorage Helpers ─────────────────────────────────────

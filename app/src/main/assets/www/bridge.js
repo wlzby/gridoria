@@ -118,6 +118,23 @@ const NativeBridge = {
         }
         console.log('NativeBridge.restorePurchases called');
         return false;
+    },
+
+    // ── 🔔 Schedule Daily Local Notifications (24h Cycle at 19:30) ──
+    scheduleDailyNotification() {
+        if (this.isIOS()) {
+            this.sendToNative('scheduleNotification');
+            return true;
+        }
+        if (this.isAndroid() && typeof window.AndroidBridge.scheduleDailyNotification === 'function') {
+            try {
+                window.AndroidBridge.scheduleDailyNotification();
+                return true;
+            } catch (e) {
+                console.warn('AndroidBridge scheduleDailyNotification error:', e);
+            }
+        }
+        return false;
     }
 };
 

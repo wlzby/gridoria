@@ -3,7 +3,5 @@ platform :ios, '14.0'
 target 'Gridoria' do
   use_frameworks!
 
-  # AdMob removed for stable WebView-only build
-  # pod 'Google-Mobile-Ads-SDK'
-
+  pod 'Google-Mobile-Ads-SDK'
 end

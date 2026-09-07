@@ -106,10 +106,11 @@ body {
     height: 95px;
     border-radius: 24px;
     box-shadow: 
-        0 10px 25px rgba(255, 69, 0, 0.45),
+        0 10px 25px rgba(0, 229, 255, 0.4),
+        0 0 25px rgba(168, 85, 247, 0.35),
         0 0 20px rgba(0, 0, 0, 0.6),
-        inset 0 2px 4px rgba(255, 255, 255, 0.6);
-    border: 2.5px solid rgba(255, 255, 255, 0.4);
+        inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    border: 2.5px solid rgba(0, 229, 255, 0.35);
     object-fit: cover;
     animation: logoFloat 3s infinite ease-in-out alternate;
 }
@@ -439,15 +440,19 @@ body {
 
 /* Game Screen Responsive Framework */
 #game-view {
-    height: 100% !important;
-    max-height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 0 clamp(6px, 2vw, 12px) 2px clamp(6px, 2vw, 12px) !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 clamp(6px, 2vw, 12px) 2px clamp(6px, 2vw, 12px);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#game-view.hidden {
+    display: none !important;
 }
 
 /* Game Body & Grid Board */
@@ -455,7 +460,7 @@ body {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: flex-start !important;
+    justify-content: space-between !important;
     width: 100% !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
@@ -467,15 +472,18 @@ body {
 }
 
 .grid-board-wrapper {
-    width: min(365px, 92vw, calc((47vh) * 5 / 6)) !important;
-    max-width: min(365px, 92vw) !important;
+    width: min(390px, 94vw, calc((54vh) * 5 / 6)) !important;
+    max-width: min(390px, 94vw) !important;
     height: auto !important;
     flex-grow: 0 !important;
     flex-shrink: 0 !important;
     min-height: 0 !important;
-    margin-top: clamp(2px, 0.6vh, 6px) !important;
-    background: rgba(16, 22, 37, 0.95);
-    border: 2.5px solid #1c2840;
+    margin-top: clamp(2px, 0.6vh, 8px) !important;
+    margin-bottom: clamp(4px, 0.8vh, 8px) !important;
+    background: rgba(0, 10, 5, 0.2);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 3px solid #2ecc71;
     border-radius: 22px;
     padding: clamp(4px, 1.2vw, 8px) !important;
     position: relative;
@@ -483,7 +491,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.6), 0 10px 28px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4), 0 0 16px rgba(46, 204, 113, 0.35), 0 10px 28px rgba(0, 0, 0, 0.5);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
     touch-action: none !important;
@@ -608,7 +616,7 @@ body {
     aspect-ratio: 5 / 6 !important;
     height: auto !important;
     max-width: 100% !important;
-    max-height: 48vh !important;
+    max-height: 54vh !important;
     margin: 0 auto !important;
     overflow: hidden !important;
     align-content: center !important;
@@ -617,9 +625,10 @@ body {
 }
 
 .grid-cell {
-    background: #131a2a;
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 12px;
-    border: 1px solid #1b253c;
+    border: 1.5px solid rgba(46, 204, 113, 0.65);
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
     position: relative;
     display: flex;
     align-items: center;
@@ -1128,9 +1137,9 @@ body {
     align-items: center !important;
     justify-items: center !important;
     width: 100% !important;
-    max-width: min(365px, 92vw) !important;
+    max-width: min(390px, 94vw) !important;
     margin-top: auto !important;
-    margin-bottom: clamp(6px, 1.2vh, 12px) !important;
+    margin-bottom: auto !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transform: none !important;
@@ -1146,9 +1155,9 @@ body {
 }
 
 .active-shooter-box {
-    width: clamp(58px, 14.5vw, 68px) !important;
-    height: clamp(58px, 14.5vw, 68px) !important;
-    border-radius: 19px !important;
+    width: clamp(67px, 16.7vw, 78px) !important;
+    height: clamp(67px, 16.7vw, 78px) !important;
+    border-radius: 22px !important;
     position: relative !important;
     display: flex !important;
     justify-content: center !important;
@@ -1159,10 +1168,10 @@ body {
 }
 
 .shooter-tile {
-    width: clamp(54px, 13.5vw, 64px) !important;
-    height: clamp(54px, 13.5vw, 64px) !important;
-    border-radius: 17px !important;
-    font-size: clamp(24px, 6vw, 30px) !important;
+    width: clamp(62px, 15.5vw, 74px) !important;
+    height: clamp(62px, 15.5vw, 74px) !important;
+    border-radius: 20px !important;
+    font-size: clamp(28px, 7vw, 35px) !important;
     box-shadow: 0 10px 24px rgba(0, 119, 246, 0.55), inset 0 4px 3px rgba(255, 255, 255, 0.65), inset 0 -4px 5px rgba(0, 0, 0, 0.3) !important;
     cursor: pointer;
     transition: transform 0.15s ease;
@@ -1199,10 +1208,10 @@ body {
 }
 
 .shooter-next-box {
-    width: clamp(40px, 10vw, 48px) !important;
-    height: clamp(40px, 10vw, 48px) !important;
+    width: clamp(46px, 11.5vw, 55px) !important;
+    height: clamp(46px, 11.5vw, 55px) !important;
     background: transparent;
-    border-radius: 14px !important;
+    border-radius: 16px !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -4151,12 +4160,16 @@ body[data-theme="walnut"] .main-menu-container {
     border: none !important; box-shadow: none !important;
 }
 body[data-theme="walnut"] .grid-board-wrapper {
-    background: #120b05 url('wooden_board_bg.png') center/cover no-repeat !important;
+    background: rgba(18, 11, 5, 0.5) url('wooden_board_bg.png') center/cover no-repeat !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border: 3.5px solid #8b5a2b !important;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7), 0 0 16px rgba(139, 90, 43, 0.35) !important;
 }
 body[data-theme="walnut"] .grid-cell {
-    background: rgba(12, 7, 4, 0.9) !important;
-    border: 1.5px solid rgba(139, 90, 43, 0.5) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1.5px solid rgba(139, 90, 43, 0.65) !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 body[data-theme="walnut"] .pill-badge,
 body[data-theme="walnut"] .powerup-btn,
@@ -4193,12 +4206,16 @@ body[data-theme="oak"] .main-menu-container {
     border: none !important; box-shadow: none !important;
 }
 body[data-theme="oak"] .grid-board-wrapper {
-    background: #1c1409 url('wooden_board_bg.png') center/cover no-repeat !important;
+    background: rgba(28, 20, 10, 0.5) url('wooden_board_bg.png') center/cover no-repeat !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border: 3.5px solid #c8963e !important;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7), 0 0 16px rgba(200, 150, 62, 0.35) !important;
 }
 body[data-theme="oak"] .grid-cell {
-    background: rgba(28, 20, 10, 0.9) !important;
-    border: 1.5px solid rgba(200, 150, 62, 0.5) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1.5px solid rgba(200, 150, 62, 0.65) !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 body[data-theme="oak"] .pill-badge,
 body[data-theme="oak"] .powerup-btn,
@@ -4235,12 +4252,16 @@ body[data-theme="cherry"] .main-menu-container {
     border: none !important; box-shadow: none !important;
 }
 body[data-theme="cherry"] .grid-board-wrapper {
-    background: #1a0807 url('wooden_board_bg.png') center/cover no-repeat !important;
+    background: rgba(26, 8, 7, 0.5) url('wooden_board_bg.png') center/cover no-repeat !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border: 3.5px solid #b84030 !important;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7), 0 0 16px rgba(184, 64, 48, 0.35) !important;
 }
 body[data-theme="cherry"] .grid-cell {
-    background: rgba(26, 8, 7, 0.9) !important;
-    border: 1.5px solid rgba(224, 122, 95, 0.5) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1.5px solid rgba(224, 122, 95, 0.65) !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 body[data-theme="cherry"] .pill-badge,
 body[data-theme="cherry"] .powerup-btn,
@@ -4277,12 +4298,16 @@ body[data-theme="ebony"] .main-menu-container {
     border: none !important; box-shadow: none !important;
 }
 body[data-theme="ebony"] .grid-board-wrapper {
-    background: #0a0806 url('wooden_board_bg.png') center/cover no-repeat !important;
+    background: rgba(10, 8, 8, 0.5) url('wooden_board_bg.png') center/cover no-repeat !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border: 3.5px solid #6b6357 !important;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7), 0 0 16px rgba(107, 99, 87, 0.35) !important;
 }
 body[data-theme="ebony"] .grid-cell {
-    background: rgba(10, 8, 8, 0.92) !important;
-    border: 1.5px solid rgba(163, 155, 139, 0.4) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1.5px solid rgba(163, 155, 139, 0.6) !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 body[data-theme="ebony"] .pill-badge,
 body[data-theme="ebony"] .powerup-btn,
@@ -4324,16 +4349,17 @@ body[data-theme="forest"] .main-menu-container {
 }
 
 body[data-theme="forest"] .grid-board-wrapper {
-    background: rgba(8, 22, 14, 0.72) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 2.5px solid #2ecc71 !important;
-    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.6), 0 0 16px rgba(46, 204, 113, 0.25), 0 12px 32px rgba(0, 0, 0, 0.7) !important;
+    background: rgba(0, 10, 5, 0.2) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    border: 3px solid #2ecc71 !important;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4), 0 0 16px rgba(46, 204, 113, 0.4), 0 12px 32px rgba(0, 0, 0, 0.6) !important;
 }
 
 body[data-theme="forest"] .grid-cell {
-    background: rgba(7, 20, 12, 0.68) !important;
-    border: 1.5px solid rgba(46, 204, 113, 0.45) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1.5px solid rgba(46, 204, 113, 0.65) !important;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4) !important;
 }
 
 body[data-theme="forest"] .pill-badge,
@@ -4372,13 +4398,16 @@ body[data-theme="earth"] .main-menu-container {
     border: none !important; box-shadow: none !important;
 }
 body[data-theme="earth"] .grid-board-wrapper {
-    background: rgba(6, 14, 28, 0.88) url('theme_earth.png') center/cover no-repeat !important;
+    background: rgba(6, 14, 28, 0.5) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border: 3px solid #00c6ff !important;
-    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9), 0 12px 35px rgba(0, 198, 255, 0.35) !important;
+    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8), 0 0 18px rgba(0, 198, 255, 0.4) !important;
 }
 body[data-theme="earth"] .grid-cell {
-    background: rgba(5, 12, 24, 0.9) !important;
-    border: 1.5px solid rgba(0, 198, 255, 0.45) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1.5px solid rgba(0, 198, 255, 0.65) !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 body[data-theme="earth"] .pill-badge,
 body[data-theme="earth"] .powerup-btn,
@@ -4416,13 +4445,16 @@ body[data-theme="clouds"] .main-menu-container {
     border: none !important; box-shadow: none !important;
 }
 body[data-theme="clouds"] .grid-board-wrapper {
-    background: rgba(20, 15, 10, 0.88) url('theme_clouds.png') center/cover no-repeat !important;
+    background: rgba(20, 15, 10, 0.5) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border: 3px solid #d4af37 !important;
-    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9), 0 12px 35px rgba(212, 175, 55, 0.35) !important;
+    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8), 0 0 18px rgba(212, 175, 55, 0.4) !important;
 }
 body[data-theme="clouds"] .grid-cell {
-    background: rgba(16, 12, 8, 0.9) !important;
-    border: 1.5px solid rgba(212, 175, 55, 0.45) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1.5px solid rgba(212, 175, 55, 0.65) !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 body[data-theme="clouds"] .pill-badge,
 body[data-theme="clouds"] .powerup-btn,
@@ -4460,13 +4492,16 @@ body[data-theme="ocean"] .main-menu-container {
     border: none !important; box-shadow: none !important;
 }
 body[data-theme="ocean"] .grid-board-wrapper {
-    background: rgba(6, 26, 38, 0.88) url('theme_ocean.png') center/cover no-repeat !important;
+    background: rgba(6, 26, 38, 0.5) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border: 3px solid #00f2fe !important;
-    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9), 0 12px 35px rgba(0, 242, 254, 0.35) !important;
+    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8), 0 0 18px rgba(0, 242, 254, 0.4) !important;
 }
 body[data-theme="ocean"] .grid-cell {
-    background: rgba(5, 20, 30, 0.9) !important;
-    border: 1.5px solid rgba(0, 242, 254, 0.45) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1.5px solid rgba(0, 242, 254, 0.65) !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 body[data-theme="ocean"] .pill-badge,
 body[data-theme="ocean"] .powerup-btn,
@@ -4675,14 +4710,17 @@ body:not([data-theme]) .main-menu-container {
 }
 body[data-theme="obsidian"] .grid-board-wrapper,
 body:not([data-theme]) .grid-board-wrapper {
-    background: rgba(10, 15, 26, 0.88) url('night_sky_option_a.png') center/cover no-repeat !important;
+    background: rgba(10, 15, 26, 0.5) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border: 3px solid #38bdf8 !important;
-    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.95), 0 12px 40px rgba(56, 189, 248, 0.3) !important;
+    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8), 0 0 18px rgba(56, 189, 248, 0.4) !important;
 }
 body[data-theme="obsidian"] .grid-cell,
 body:not([data-theme]) .grid-cell {
-    background: rgba(15, 23, 42, 0.85) !important;
-    border: 1.5px solid rgba(56, 189, 248, 0.25) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1.5px solid rgba(56, 189, 248, 0.55) !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 body[data-theme="obsidian"] .pill-badge,
 body[data-theme="obsidian"] .powerup-btn,
@@ -6868,23 +6906,23 @@ body[data-color-palette="relaxing"] .undo-bg   { background: linear-gradient(135
 
 .shooter-area {
     margin-top: auto !important;
-    margin-bottom: clamp(6px, 1.2vh, 10px) !important;
+    margin-bottom: auto !important;
 }
 
 .active-shooter-box {
-    width: clamp(56px, 14vw, 66px);
-    height: clamp(56px, 14vw, 66px);
+    width: clamp(67px, 16.7vw, 78px);
+    height: clamp(67px, 16.7vw, 78px);
 }
 
 .shooter-tile {
-    width: clamp(52px, 13vw, 62px);
-    height: clamp(52px, 13vw, 62px);
-    font-size: clamp(22px, 5.5vw, 28px);
+    width: clamp(62px, 15.5vw, 74px);
+    height: clamp(62px, 15.5vw, 74px);
+    font-size: clamp(28px, 7vw, 35px);
 }
 
 .shooter-next-box {
-    width: clamp(38px, 9.5vw, 44px);
-    height: clamp(38px, 9.5vw, 44px);
+    width: clamp(46px, 11.5vw, 55px);
+    height: clamp(46px, 11.5vw, 55px);
 }
 
 .powerups-footer {
