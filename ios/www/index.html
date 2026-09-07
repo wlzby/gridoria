@@ -821,7 +821,7 @@
                         </div>
 
                         <!-- ⚡ Starter Pack Banner -->
-                        <div class="shop-card starter-pack-card" id="btn-buy-starter-pack">
+                        <div class="shop-card starter-pack-card" id="btn-buy-starter-pack" data-product-id="com.mawelly.gridoria.starterpack" data-price="49.99">
                             <div class="starter-card-badge">%70 İNDİRİM</div>
                             <div class="starter-card-body">
                                 <span class="starter-icon">📦</span>
@@ -833,7 +833,7 @@
                                 </div>
                             </div>
                             <button class="shop-buy-btn special-price-btn" data-pack="starter">
-                                <span>₺19.99</span>
+                                <span>₺49.99</span>
                             </button>
                         </div>
                     </section>
@@ -846,7 +846,7 @@
                         <div class="shop-items-grid">
                             
                             <!-- Pack 1: 100 Gems (Avuç Dolusu Elmas) -->
-                            <div class="shop-card gem-card" data-gems="100" data-price="9.99">
+                            <div class="shop-card gem-card" data-gems="100" data-price="29.99" data-product-id="com.mawelly.gridoria.gems100">
                                 <div class="gem-img-wrapper">
                                     <img src="gem_pouch.jpg" alt="Avuç Dolusu Elmas" class="gem-pack-img">
                                 </div>
@@ -854,11 +854,11 @@
                                     <span class="gem-amount">100 💎</span>
                                 </div>
                                 <div class="gem-card-subtitle">Avuç Dolusu Elmas</div>
-                                <button class="shop-buy-btn gem-buy-btn">₺9.99</button>
+                                <button class="shop-buy-btn gem-buy-btn">₺29.99</button>
                             </div>
 
                             <!-- Pack 2: 500 Gems (Elmas Kesi) -->
-                            <div class="shop-card gem-card featured-card" data-gems="500" data-price="39.99">
+                            <div class="shop-card gem-card featured-card" data-gems="500" data-price="99.99" data-product-id="com.mawelly.gridoria.gems500">
                                 <div class="card-ribbon ribbon-popular">POPÜLER</div>
                                 <div class="gem-img-wrapper">
                                     <img src="gem_sack.jpg" alt="Elmas Kesi" class="gem-pack-img">
@@ -868,11 +868,11 @@
                                 </div>
                                 <div class="gem-bonus-tag">+%20 EKSTRA BONUS</div>
                                 <div class="gem-card-subtitle">Elmas Kesi</div>
-                                <button class="shop-buy-btn gem-buy-btn">₺39.99</button>
+                                <button class="shop-buy-btn gem-buy-btn">₺99.99</button>
                             </div>
 
                             <!-- Pack 3: 1,200 Gems (Elmas Sandığı) -->
-                            <div class="shop-card gem-card featured-card" data-gems="1200" data-price="79.99">
+                            <div class="shop-card gem-card featured-card" data-gems="1200" data-price="199.99" data-product-id="com.mawelly.gridoria.gems1200">
                                 <div class="card-ribbon ribbon-bestseller">EN ÇOK SATAN</div>
                                 <div class="gem-img-wrapper">
                                     <img src="gem_chest.jpg" alt="Elmas Sandığı" class="gem-pack-img">
@@ -882,11 +882,11 @@
                                 </div>
                                 <div class="gem-bonus-tag">+%50 EKSTRA BONUS</div>
                                 <div class="gem-card-subtitle">Elmas Sandığı</div>
-                                <button class="shop-buy-btn gem-buy-btn">₺79.99</button>
+                                <button class="shop-buy-btn gem-buy-btn">₺199.99</button>
                             </div>
 
                             <!-- Pack 4: 3,000 Gems (Elmas Hazinesi) -->
-                            <div class="shop-card gem-card featured-card" data-gems="3000" data-price="179.99">
+                            <div class="shop-card gem-card featured-card" data-gems="3000" data-price="399.99" data-product-id="com.mawelly.gridoria.gems3000">
                                 <div class="card-ribbon ribbon-bestvalue">EN İYİ DEĞER</div>
                                 <div class="gem-img-wrapper">
                                     <img src="gem_vault.jpg" alt="Elmas Hazinesi" class="gem-pack-img">
@@ -896,7 +896,7 @@
                                 </div>
                                 <div class="gem-bonus-tag">+%100 EKSTRA BONUS</div>
                                 <div class="gem-card-subtitle">Elmas Hazinesi</div>
-                                <button class="shop-buy-btn gem-buy-btn">₺179.99</button>
+                                <button class="shop-buy-btn gem-buy-btn">₺399.99</button>
                             </div>
 
                         </div>
@@ -971,7 +971,7 @@
 
                     <!-- SECTION 4: 👑 VIP & REKLAMSIZ MOD -->
                     <section class="shop-section">
-                        <div class="shop-card vip-card" id="btn-buy-vip">
+                        <div class="shop-card vip-card" id="btn-buy-vip" data-product-id="com.mawelly.gridoria.vip" data-price="299.99">
                             <div class="vip-glow"></div>
                             <div class="vip-header">
                                 <span class="vip-crown">👑</span>
@@ -987,8 +987,19 @@
                                 <li>🏆 Profilinizde Özel VIP Altın Rozeti</li>
                             </ul>
                             <button class="shop-buy-btn vip-buy-btn">
-                                <span>👑 VIP OL • ₺99.99</span>
+                                <span>👑 VIP OL • ₺299.99</span>
                             </button>
+                        </div>
+                    </section>
+
+                    <!-- SECTION 5: 🔄 RESTORE PURCHASES (Apple App Store Requirement) -->
+                    <section class="shop-section shop-restore-section">
+                        <div class="shop-restore-card">
+                            <button class="shop-restore-btn" id="btn-restore-purchases">
+                                <span class="restore-icon">🔄</span>
+                                <span>Satın Alımları Geri Yükle</span>
+                            </button>
+                            <p class="shop-restore-hint">Daha önce satın aldığınız VIP üyeliğinizi bu cihaza aktarmak için tıklayın.</p>
                         </div>
                     </section>
 

@@ -706,16 +706,21 @@ class GridoriaGame {
         listen('btn-open-shop-top', 'click', openShopModal);
         listen('btn-close-shop', 'click', closeShopModal);
 
-        // Gem Card Purchase Handlers
+        // Gem Card Purchase Handlers (Using StoreKit on iOS, fallback in Web)
         document.querySelectorAll('.gem-card').forEach(card => {
             const gemsAmount = parseInt(card.dataset.gems, 10) || 0;
+            const productId = card.dataset.productId || `com.mawelly.gridoria.gems${gemsAmount}`;
             const buyBtn = card.querySelector('.gem-buy-btn');
             if (buyBtn && gemsAmount > 0) {
                 buyBtn.addEventListener('click', () => {
-                    this.addGems(gemsAmount);
-                    const shopGemsVal = document.getElementById('shop-gems-val');
-                    if (shopGemsVal) shopGemsVal.innerText = this.gems.toLocaleString('tr-TR');
-                    this.showToast(`${gemsAmount.toLocaleString('tr-TR')} Elmas Hesabınıza Eklenmiştir!`, '💎');
+                    if (typeof NativeBridge !== 'undefined' && NativeBridge.isIOS()) {
+                        NativeBridge.triggerHaptic('medium');
+                        this.showToast('Apple ile satın alma başlatılıyor...', '⏳', 'BEKLEYİN');
+                        NativeBridge.buyProduct(productId);
+                        return;
+                    }
+                    // Web / Dev Fallback
+                    this.onPurchaseSuccess(productId);
                 });
             }
         });
@@ -757,25 +762,39 @@ class GridoriaGame {
 
         // Starter Pack Handler
         listen('btn-buy-starter-pack', 'click', () => {
-            this.addGems(500);
-            if (typeof powerups !== 'undefined') {
-                powerups.addFreeCount('hammer', 3);
-                powerups.addFreeCount('bomb', 3);
+            const productId = 'com.mawelly.gridoria.starterpack';
+            if (typeof NativeBridge !== 'undefined' && NativeBridge.isIOS()) {
+                NativeBridge.triggerHaptic('medium');
+                this.showToast('Apple ile satın alma başlatılıyor...', '⏳', 'BEKLEYİN');
+                NativeBridge.buyProduct(productId);
+                return;
             }
-            const shopGemsVal = document.getElementById('shop-gems-val');
-            if (shopGemsVal) shopGemsVal.innerText = this.gems.toLocaleString('tr-TR');
-            this.showToast('Başlangıç Hoş Geldin Paketi Eklendi! (+500 💎, 3x Çekiç, 3x Bomba)', '📦', 'PAKET ALINDI');
+            // Web / Dev Fallback
+            this.onPurchaseSuccess(productId);
         });
 
         // VIP Pack Handler
         listen('btn-buy-vip', 'click', () => {
-            this.isVip = true;
-            this.safeSet('gridoria_is_vip', 'true');
-            this.addGems(1000);
-            const shopGemsVal = document.getElementById('shop-gems-val');
-            if (shopGemsVal) shopGemsVal.innerText = this.gems.toLocaleString('tr-TR');
-            this.updateCustomBgCardPreview();
-            this.showToast('VIP Üyelik Aktif Edildi! Sınırsız Fotoğraf Teması & +1,000 💎 Eklenmiştir!', '👑');
+            const productId = 'com.mawelly.gridoria.vip';
+            if (typeof NativeBridge !== 'undefined' && NativeBridge.isIOS()) {
+                NativeBridge.triggerHaptic('medium');
+                this.showToast('Apple ile satın alma başlatılıyor...', '⏳', 'BEKLEYİN');
+                NativeBridge.buyProduct(productId);
+                return;
+            }
+            // Web / Dev Fallback
+            this.onPurchaseSuccess(productId);
+        });
+
+        // Restore Purchases Handler (Required by Apple App Store Review)
+        listen('btn-restore-purchases', 'click', () => {
+            if (typeof NativeBridge !== 'undefined' && NativeBridge.isIOS()) {
+                NativeBridge.triggerHaptic('medium');
+                this.showToast('Satın alımlarınız Apple sunucularından kontrol ediliyor...', '⏳', 'GERİ YÜKLEME');
+                NativeBridge.restorePurchases();
+                return;
+            }
+            this.showToast('Satın alımlarınız kontrol edildi ve güncellendi! 👑', '✅', 'GERİ YÜKLENDİ');
         });
 
         // Restart Game
@@ -3678,6 +3697,70 @@ class GridoriaGame {
         }
     }
 
+    // ── 💎 In-App Purchases (StoreKit 2 / Google Play Callbacks) ───────
+    onPurchaseSuccess(productId) {
+        console.log('IAP Success:', productId);
+        if (productId === 'com.mawelly.gridoria.gems100') {
+            this.addGems(100);
+            this.showToast('+100 💎 Elmas Hesabınıza Eklenmiştir!', '💎', 'TEBRİKLER');
+        } else if (productId === 'com.mawelly.gridoria.gems500') {
+            this.addGems(500);
+            this.showToast('+500 💎 Elmas Hesabınıza Eklenmiştir!', '💎', 'TEBRİKLER');
+        } else if (productId === 'com.mawelly.gridoria.gems1200') {
+            this.addGems(1200);
+            this.showToast('+1,200 💎 Elmas Hesabınıza Eklenmiştir!', '💎', 'TEBRİKLER');
+        } else if (productId === 'com.mawelly.gridoria.gems3000') {
+            this.addGems(3000);
+            this.showToast('+3,000 💎 Elmas Hesabınıza Eklenmiştir!', '💎', 'TEBRİKLER');
+        } else if (productId === 'com.mawelly.gridoria.starterpack') {
+            this.addGems(500);
+            if (typeof powerups !== 'undefined' && typeof powerups.addFreeCount === 'function') {
+                powerups.addFreeCount('hammer', 3);
+                powerups.addFreeCount('bomb', 3);
+            }
+            this.showToast('Başlangıç Paketi Tanımlandı! (+500 💎, 3x Çekiç, 3x Bomba)', '📦', 'PAKET ALINDI');
+        } else if (productId === 'com.mawelly.gridoria.vip') {
+            this.isVip = true;
+            this.safeSet('gridoria_is_vip', 'true');
+            this.addGems(1000);
+            this.updateCustomBgCardPreview();
+            this.showToast('VIP Üyelik Aktif Edildi! Reklamsız Deneyim & +1,000 💎!', '👑', 'VIP ÜYE');
+        } else {
+            this.showToast('Satın alma başarıyla tamamlandı!', '✅', 'TEBRİKLER');
+        }
+
+        const shopGemsVal = document.getElementById('shop-gems-val');
+        if (shopGemsVal) shopGemsVal.innerText = this.gems.toLocaleString('tr-TR');
+
+        if (typeof NativeBridge !== 'undefined') {
+            NativeBridge.triggerHaptic('success');
+        }
+    }
+
+    onPurchaseFailed(productId, error) {
+        console.warn('IAP Failed:', productId, error);
+        this.showToast(error || 'Satın alma tamamlanamadı veya iptal edildi.', '⚠️', 'BİLGİ');
+        if (typeof NativeBridge !== 'undefined') {
+            NativeBridge.triggerHaptic('heavy');
+        }
+    }
+
+    onPurchasesRestored(productIds) {
+        console.log('IAP Restored:', productIds);
+        const ids = Array.isArray(productIds) ? productIds : [];
+        if (ids.includes('com.mawelly.gridoria.vip')) {
+            this.isVip = true;
+            this.safeSet('gridoria_is_vip', 'true');
+            this.updateCustomBgCardPreview();
+            this.showToast('VIP & Reklamsız üyeliğiniz başarıyla geri yüklendi!', '👑', 'GERİ YÜKLENDİ');
+        } else {
+            this.showToast('Geri yüklenecek aktif bir satın alım bulunamadı.', 'ℹ️', 'BİLGİ');
+        }
+        if (typeof NativeBridge !== 'undefined') {
+            NativeBridge.triggerHaptic('success');
+        }
+    }
+
     reviveFromRewardedAd() {
         const modalGameOver = document.getElementById('modal-gameover');
         if (modalGameOver) modalGameOver.classList.add('hidden');
@@ -3765,6 +3848,25 @@ window.onRewardedAdFailed = function(rewardType, error) {
     console.warn('Rewarded ad failed:', rewardType, error);
     if (window.game && typeof window.game.setStatus === 'function') {
         window.game.setStatus('⚠️ Reklam yüklenemedi, lütfen tekrar deneyin.', 'normal');
+    }
+};
+
+// ── Global JavaScript Bridges for Apple StoreKit & Google Play IAP ──
+window.onPurchaseSuccess = function(productId) {
+    if (window.game && typeof window.game.onPurchaseSuccess === 'function') {
+        window.game.onPurchaseSuccess(productId);
+    }
+};
+
+window.onPurchaseFailed = function(productId, error) {
+    if (window.game && typeof window.game.onPurchaseFailed === 'function') {
+        window.game.onPurchaseFailed(productId, error);
+    }
+};
+
+window.onPurchasesRestored = function(productIds) {
+    if (window.game && typeof window.game.onPurchasesRestored === 'function') {
+        window.game.onPurchasesRestored(productIds);
     }
 };
 

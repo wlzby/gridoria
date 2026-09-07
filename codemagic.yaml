@@ -10,7 +10,7 @@ workflows:
       xcode: latest
       cocoapods: default
       vars:
-        BUNDLE_ID: "com.mawelly.gridoria"
+        BUNDLE_ID: "com.mawelly.gridoria.JGF9X5ACM5"
         XCODE_WORKSPACE: "ios/Gridoria.xcworkspace"
         XCODE_SCHEME: "Gridoria"
     scripts:

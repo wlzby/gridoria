@@ -100,6 +100,25 @@ const NativeBridge = {
             }
         }
         return false;
+    },
+
+    // ── 💎 In-App Purchases (StoreKit 2) ──
+    buyProduct(productId) {
+        if (this.isIOS()) {
+            return this.sendToNative('buyProduct', { productId });
+        }
+        // Fallback for Android or Web if not yet connected to billing
+        console.log('NativeBridge.buyProduct called for:', productId);
+        return false;
+    },
+
+    // ── 🔄 Restore Purchases (Required by Apple) ──
+    restorePurchases() {
+        if (this.isIOS()) {
+            return this.sendToNative('restorePurchases');
+        }
+        console.log('NativeBridge.restorePurchases called');
+        return false;
     }
 };
 

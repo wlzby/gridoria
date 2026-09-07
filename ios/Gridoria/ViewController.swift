@@ -2,7 +2,7 @@ import UIKit
 import WebKit
 import AudioToolbox
 
-class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate {
+class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, StoreKitManagerDelegate {
 
     private var webView: WKWebView!
     private var bgImageView: UIImageView!
@@ -22,7 +22,12 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         // 2. WKWebView on top (transparent background)
         setupWebView()
 
-        // 3. Load game
+        // 3. Setup StoreKit Manager
+        if #available(iOS 15.0, *) {
+            StoreKitManager.shared.delegate = self
+        }
+
+        // 4. Load game
         loadLocalGame()
     }
 
@@ -242,16 +247,59 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         switch action {
         case "haptic":
             triggerHaptic(type: body["type"] as? String ?? "medium")
+
         case "setBannerVisible", "showInterstitialAd":
             break
+
         case "showRewardedAd":
             let rewardType = body["rewardType"] as? String ?? "reward"
             webView.evaluateJavaScript(
                 "if(typeof window.onRewardedAdFailed==='function') window.onRewardedAdFailed('\(rewardType)','Ads disabled');",
                 completionHandler: nil)
+
+        case "buyProduct":
+            if let productId = body["productId"] as? String {
+                if #available(iOS 15.0, *) {
+                    Task {
+                        await StoreKitManager.shared.purchase(productId: productId)
+                    }
+                } else {
+                    storeKitDidFailPurchase(productId: productId, error: "iOS 15.0 veya üzeri gereklidir.")
+                }
+            }
+
+        case "restorePurchases":
+            if #available(iOS 15.0, *) {
+                Task {
+                    await StoreKitManager.shared.restorePurchases()
+                }
+            } else {
+                storeKitDidFailPurchase(productId: "restore", error: "iOS 15.0 veya üzeri gereklidir.")
+            }
+
         default:
             print("Bridge: unknown action '\(action)'")
         }
+    }
+
+    // MARK: - StoreKitManagerDelegate
+    func storeKitDidPurchaseProduct(productId: String) {
+        let escapedId = productId.replacingOccurrences(of: "'", with: "\\'")
+        let js = "if(typeof window.onPurchaseSuccess==='function') window.onPurchaseSuccess('\(escapedId)');"
+        webView.evaluateJavaScript(js, completionHandler: nil)
+    }
+
+    func storeKitDidFailPurchase(productId: String, error: String) {
+        let escapedId = productId.replacingOccurrences(of: "'", with: "\\'")
+        let escapedErr = error.replacingOccurrences(of: "'", with: "\\'").replacingOccurrences(of: "\n", with: " ")
+        let js = "if(typeof window.onPurchaseFailed==='function') window.onPurchaseFailed('\(escapedId)','\(escapedErr)');"
+        webView.evaluateJavaScript(js, completionHandler: nil)
+    }
+
+    func storeKitDidRestorePurchases(productIds: [String]) {
+        let jsonStr = (try? String(data: JSONSerialization.data(withJSONObject: productIds), encoding: .utf8)) ?? "[]"
+        let js = "if(typeof window.onPurchasesRestored==='function') window.onPurchasesRestored(\(jsonStr));"
+        webView.evaluateJavaScript(js, completionHandler: nil)
     }
 
     // MARK: - Haptic
