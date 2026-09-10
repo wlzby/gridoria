@@ -11,15 +11,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
-        let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        let window = appDelegate?.window ?? UIWindow(windowScene: windowScene)
-        window.windowScene = windowScene
-        if window.rootViewController == nil {
-            window.rootViewController = ViewController()
-        }
+        let window = UIWindow(windowScene: windowScene)
         window.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
+        window.rootViewController = ViewController()
         self.window = window
-        appDelegate?.window = window
+
+        // Sync with AppDelegate if needed
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            appDelegate.window = window
+        }
+
         window.makeKeyAndVisible()
     }
 

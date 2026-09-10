@@ -22,10 +22,10 @@ workflows:
           brew install xcodegen || true
           xcodegen generate
 
-      - name: Install CocoaPods (no pods required for WebView-only build)
+      - name: Verify Project (Standalone WebView Build)
         script: |
           cd ios
-          pod install --repo-update || echo "No pods to install"
+          echo "Standalone native build with StoreKit 2 & WebKit - CocoaPods not required"
 
       - name: Build iOS Application (Simulator for Appetize.io)
         script: |

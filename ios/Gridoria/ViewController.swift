@@ -171,7 +171,9 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         let js = """
             (function() {
+                if (!document || !document.documentElement) return;
                 var r = document.documentElement.style;
+                if (!r) return;
                 r.setProperty('--sat', '\(top)px');
                 r.setProperty('--sab', '\(bottom)px');
                 r.setProperty('--sal', '\(left)px');
@@ -229,8 +231,8 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         injectSafeAreaValues()
         // Make HTML & body transparent so native bgImageView shows through
         let transparentJS = """
-            document.documentElement.style.setProperty('background', 'transparent', 'important');
-            document.body.style.setProperty('background', 'transparent', 'important');
+            if (document.documentElement) document.documentElement.style.setProperty('background', 'transparent', 'important');
+            if (document.body) document.body.style.setProperty('background', 'transparent', 'important');
         """
         webView.evaluateJavaScript(transparentJS, completionHandler: nil)
     }
@@ -241,6 +243,11 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         print("❌ WebView provisional navigation failed: \(error)")
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        print("⚠️ WKWebView WebContent process terminated (memory pressure). Reloading game...")
+        loadLocalGame()
     }
 
     // MARK: - JS Bridge
@@ -321,30 +328,21 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     private func setupLocalNotifications() {
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                center.removeAllPendingNotificationRequests()
-                let messages = [
-                    "🎁 Günlük 100 Elmas hediyen hazır! Hemen gir ve ödülünü topla!",
-                    "🔥 Yeni bir rekor kırabilir misin? Bugün 2048 taşını patlatma sırası sende!",
-                    "🧠 Günde 20 dakika Gridoria oyna, zihnini ve hafızanı zinde tut!",
-                    "⚡ Ateş Modu (Fever Mode) hazır! Hemen oyuna gir ve komboları patlat!"
-                ]
+            guard granted else { return }
+            center.removeAllPendingNotificationRequests()
 
-                for (idx, msg) in messages.enumerated() {
-                    let content = UNMutableNotificationContent()
-                    content.title = "Gridoria 2048 🌲"
-                    content.body = msg
-                    content.sound = .default
+            let content = UNMutableNotificationContent()
+            content.title = "Gridoria 2048 🌲"
+            content.body = "🎁 Günlük 100 Elmas hediyen hazır! Hemen gir ve ödülünü topla!"
+            content.sound = .default
 
-                    var dateComponents = DateComponents()
-                    dateComponents.hour = 19
-                    dateComponents.minute = 30
+            var dateComponents = DateComponents()
+            dateComponents.hour = 19
+            dateComponents.minute = 30
 
-                    let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-                    let request = UNNotificationRequest(identifier: "gridoria_daily_notif_\(idx)", content: content, trigger: trigger)
-                    center.add(request, withCompletionHandler: nil)
-                }
-            }
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let request = UNNotificationRequest(identifier: "gridoria_daily_reminder", content: content, trigger: trigger)
+            center.add(request, withCompletionHandler: nil)
         }
     }
 }

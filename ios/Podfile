@@ -1,7 +1,7 @@
-platform :ios, '14.0'
+platform :ios, '15.0'
 
 target 'Gridoria' do
-  use_frameworks!
-
-  pod 'Google-Mobile-Ads-SDK'
+  # Standalone WebView-only build with native StoreKit 2 & WebKit
+  # CocoaPods AdMob dynamic frameworks removed to prevent dyld signing launch crashes on physical devices
+  # pod 'Google-Mobile-Ads-SDK'
 end

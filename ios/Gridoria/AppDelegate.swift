@@ -19,13 +19,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("AVAudioSession error: \(error)")
         }
 
-        // Window setup - Always initialize so ViewController is guaranteed to load
-        let win = UIWindow(frame: UIScreen.main.bounds)
-        win.backgroundColor = UIColor(red: 8/255, green: 20/255, blue: 12/255, alpha: 1.0)
-        win.rootViewController = ViewController()
-        self.window = win
-        win.makeKeyAndVisible()
-
         return true
     }
+
+    // MARK: - UISceneSession Lifecycle
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        configuration.delegateClass = SceneDelegate.self
+        return configuration
+    }
+
+    func application(
+        _ application: UIApplication,
+        didDiscardSceneSessions sceneSessions: Set<UISceneSession>
+    ) {}
 }

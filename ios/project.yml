@@ -22,7 +22,6 @@ targets:
         CFBundleVersion: "1"
         UIRequiresFullScreen: true
         UILaunchStoryboardName: LaunchScreen
-        UILaunchScreen: {}
         UIViewControllerBasedStatusBarAppearance: true
         UIStatusBarHidden: true
     settings:

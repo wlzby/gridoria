@@ -22,47 +22,6 @@
     <string>1</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
-    
-    <!-- Google AdMob App ID -->
-    <key>GADApplicationIdentifier</key>
-    <string>ca-app-pub-7719335438184188~3285326194</string>
-    
-    <!-- SKAdNetwork items for AdMob -->
-    <key>SKAdNetworkItems</key>
-    <array>
-        <dict>
-            <key>SKAdNetworkIdentifier</key>
-            <string>cstr6suwn9.skadnetwork</string>
-        </dict>
-        <dict>
-            <key>SKAdNetworkIdentifier</key>
-            <string>4fzdc2evr5.skadnetwork</string>
-        </dict>
-        <dict>
-            <key>SKAdNetworkIdentifier</key>
-            <string>2fnua5tdw4.skadnetwork</string>
-        </dict>
-        <dict>
-            <key>SKAdNetworkIdentifier</key>
-            <string>ydx93a7ass.skadnetwork</string>
-        </dict>
-        <dict>
-            <key>SKAdNetworkIdentifier</key>
-            <string>5a6flpkh64.skadnetwork</string>
-        </dict>
-        <dict>
-            <key>SKAdNetworkIdentifier</key>
-            <string>p78axxw29g.skadnetwork</string>
-        </dict>
-        <dict>
-            <key>SKAdNetworkIdentifier</key>
-            <string>v72qych544.skadnetwork</string>
-        </dict>
-    </array>
-
-    <key>NSUserTrackingUsageDescription</key>
-    <string>Size daha alakalı reklamlar sunabilmek ve oyun deneyiminizi iyileştirmek için izninize ihtiyaç duyuyoruz.</string>
-
     <key>UIApplicationSceneManifest</key>
     <dict>
         <key>UIApplicationSupportsMultipleScenes</key>
@@ -83,8 +42,6 @@
 
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
-    <key>UILaunchScreen</key>
-    <dict/>
     <key>UIRequiresFullScreen</key>
     <true/>
     <key>UIViewControllerBasedStatusBarAppearance</key>
