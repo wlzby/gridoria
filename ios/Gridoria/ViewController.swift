@@ -31,10 +31,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         // 4. Setup Daily Local Notifications
         setupLocalNotifications()
 
-        // 5. Setup AdMob Ads safely
-        AdManagerIOS.shared.initialize()
-
-        // 6. Load game
+        // 5. Load game
         loadLocalGame()
     }
 
@@ -57,6 +54,9 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         injectSafeAreaValues()
+
+        // Safely initialize AdMob only after window is key & visible and app is active
+        AdManagerIOS.shared.initialize()
     }
 
     // MARK: - Native Background Layer

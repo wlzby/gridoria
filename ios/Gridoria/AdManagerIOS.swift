@@ -1,7 +1,5 @@
 import UIKit
 import GoogleMobileAds
-import AppTrackingTransparency
-import AdSupport
 
 class AdManagerIOS: NSObject, GADFullScreenContentDelegate {
     static let shared = AdManagerIOS()
@@ -14,7 +12,6 @@ class AdManagerIOS: NSObject, GADFullScreenContentDelegate {
 
     private var rewardedAd: GADRewardedAd?
     private var interstitialAd: GADInterstitialAd?
-    private var bannerView: GADBannerView?
 
     private var isLoadingRewarded = false
     private var isLoadingInterstitial = false
@@ -33,29 +30,11 @@ class AdManagerIOS: NSObject, GADFullScreenContentDelegate {
         isInitialized = true
 
         DispatchQueue.main.async {
-            // Request ATT on iOS 14.5+
-            self.requestATT {
-                // Initialize AdMob SDK
-                GADMobileAds.sharedInstance().start { status in
-                    print("✅ AdMob: Google Mobile Ads SDK initialized successfully.")
-                    // Preload initial ads
-                    self.loadRewardedAd()
-                    self.loadInterstitialAd()
-                }
+            GADMobileAds.sharedInstance().start { status in
+                print("✅ AdMob: Google Mobile Ads SDK initialized successfully.")
+                self.loadRewardedAd()
+                self.loadInterstitialAd()
             }
-        }
-    }
-
-    // MARK: - App Tracking Transparency (ATT)
-    private func requestATT(completion: @escaping () -> Void) {
-        if #available(iOS 14.5, *) {
-            ATTrackingManager.requestTrackingAuthorization { _ in
-                DispatchQueue.main.async {
-                    completion()
-                }
-            }
-        } else {
-            completion()
         }
     }
 

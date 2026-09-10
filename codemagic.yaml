@@ -84,7 +84,7 @@ workflows:
             
             mkdir -p ipa_temp/Payload
             cp -r "$DEVICE_APP_PATH" ipa_temp/Payload/
-            (cd ipa_temp && zip -r -9 "$CM_BUILD_DIR/output/Gridoria.ipa" Payload)
+            (cd ipa_temp && zip -y -r -9 "$CM_BUILD_DIR/output/Gridoria.ipa" Payload)
             rm -rf ipa_temp
           fi
 
@@ -97,7 +97,7 @@ workflows:
             cp -r www/* "$SIM_APP_PATH/"
             SIM_DIR=$(dirname "$SIM_APP_PATH")
             SIM_NAME=$(basename "$SIM_APP_PATH")
-            (cd "$SIM_DIR" && zip -r "$CM_BUILD_DIR/output/Gridoria_Simulator.zip" "$SIM_NAME")
+            (cd "$SIM_DIR" && zip -y -r "$CM_BUILD_DIR/output/Gridoria_Simulator.zip" "$SIM_NAME")
             cp -r "$SIM_APP_PATH" "$CM_BUILD_DIR/output/"
           fi
     artifacts:
