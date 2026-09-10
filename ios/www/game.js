@@ -40,6 +40,10 @@ class GridoriaGame {
         this.animSafetyTimer = null;
         this.hasSavedActiveGame = false;
 
+        if (window.i18n && typeof window.i18n.init === 'function') {
+            window.i18n.init();
+        }
+
         this.initDOM();
         if (typeof powerups !== 'undefined' && powerups.createBoardShield) {
             powerups.createBoardShield();
@@ -1578,7 +1582,7 @@ class GridoriaGame {
                 this.renderGrid();
                 this.updateShooterTiles();
                 this.updateScoreDisplay();
-                this.setStatus('Kaldığınız yerden devam ediliyor!', 'normal');
+                this.setStatus(window.i18n ? window.i18n.t('status_resumed') : 'Kaldığınız yerden devam ediliyor!', 'normal');
             } else {
                 this.grid = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
                 this.iceGrid = Array(this.ROWS).fill(null).map(() => Array(this.COLS).fill(0));
@@ -1590,7 +1594,7 @@ class GridoriaGame {
                 this.isGameOver = false;
                 this.initInitialBoard();
                 this.updateScoreDisplay();
-                this.setStatus('Hedef sütunu seç ve fırlat!', 'ready');
+                this.setStatus(window.i18n ? window.i18n.t('status_ready') : 'Hedef sütunu seç ve fırlat!', 'ready');
             }
         } catch (err) {
             console.error('Game start error:', err);
@@ -1656,15 +1660,18 @@ class GridoriaGame {
                 if (heroTileBox) {
                     heroTileBox.className = `hero-block-box val-${activeMax}`;
                 }
-                if (heroLabel) heroLabel.innerText = `KALDIĞINIZ TAŞ: ${activeMax} (SKOR: ${activeScore.toLocaleString('tr-TR')})`;
-                if (playBtnText) playBtnText.innerText = 'OYNAYIN';
+                const resumedLabel = window.i18n ? window.i18n.t('resumed_tile') : 'KALDIĞINIZ TAŞ';
+                const scoreLabel = window.i18n ? window.i18n.t('score') : 'SKOR';
+                const locale = window.i18n ? window.i18n.getLocale() : 'tr-TR';
+                if (heroLabel) heroLabel.innerText = `${resumedLabel}: ${activeMax} (${scoreLabel}: ${activeScore.toLocaleString(locale)})`;
+                if (playBtnText) playBtnText.innerText = window.i18n ? window.i18n.t('continue') : 'DEVAM ET';
             } else {
                 if (menuBestTile) menuBestTile.innerText = this.formatTileVal(this.bestTile);
                 if (heroTileBox) {
                     heroTileBox.className = `hero-block-box val-${this.bestTile}`;
                 }
-                if (heroLabel) heroLabel.innerText = 'EN YÜKSEK BLOK';
-                if (playBtnText) playBtnText.innerText = 'OYNAYIN';
+                if (heroLabel) heroLabel.innerText = window.i18n ? window.i18n.t('highest_block') : 'EN YÜKSEK BLOK';
+                if (playBtnText) playBtnText.innerText = window.i18n ? window.i18n.t('play') : 'OYNA';
             }
         } catch (e) {
             console.error('Menu stats error:', e);
@@ -1687,16 +1694,24 @@ class GridoriaGame {
             { icon: '🚀', text: 'Beyin jimnastiği yap, dikkatini ve reflekslerini tazele!' }
         ];
 
-        const randomIndex = Math.floor(Math.random() * quotes.length);
-        const selected = quotes[randomIndex];
+        let selectedText = quotes[Math.floor(Math.random() * quotes.length)].text;
+        if (window.i18n && typeof window.i18n.getQuotes === 'function') {
+            const list = window.i18n.getQuotes();
+            if (Array.isArray(list) && list.length > 0) {
+                selectedText = list[Math.floor(Math.random() * list.length)];
+            }
+        }
+
+        const icons = ['🧠', '⚡', '🎯', '🧘‍♂️', '🔥', '🧩', '✨', '💡', '🌟', '🏆', '👑', '🚀'];
+        const selectedIcon = icons[Math.floor(Math.random() * icons.length)];
 
         const iconEl = document.getElementById('menu-brain-quote-icon');
         const textEl = document.getElementById('menu-brain-quote-text');
         const badgeEl = document.getElementById('menu-brain-quote-badge');
 
-        if (iconEl && textEl && selected) {
-            iconEl.innerText = selected.icon;
-            textEl.innerText = selected.text;
+        if (iconEl && textEl) {
+            iconEl.innerText = selectedIcon;
+            textEl.innerText = selectedText;
             if (badgeEl) {
                 badgeEl.style.animation = 'none';
                 void badgeEl.offsetWidth;

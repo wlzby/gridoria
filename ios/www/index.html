@@ -36,6 +36,8 @@
 
     <!-- CSS Styling -->
     <link rel="stylesheet" href="style.css">
+    <!-- i18n Multi-Language Engine -->
+    <script src="i18n.js"></script>
 </head>
 <body data-bg-theme="forest" data-theme="forest" data-color-palette="default">
 
@@ -62,15 +64,15 @@
                 <!-- Üst Bar: Sol - Elmas Sayacı | Sağ - Daily Ödül -->
                 <div class="menu-top-bar">
                     <!-- Sol Üst: Elmas Sayacı Pill Widget'ı -->
-                    <div class="menu-gems-pill" id="btn-open-shop-top" title="Mağaza">
+                    <div class="menu-gems-pill" id="btn-open-shop-top" title="Mağaza" data-i18n-title="nav_shop">
                         <span class="gem-icon">💎</span>
                         <strong id="menu-top-gems-val">100</strong>
                         <span class="gem-add-btn">+</span>
                     </div>
 
                     <!-- Sağ Üst: Daily Giriş Takvimi Widget'ı -->
-                    <div class="daily-calendar-widget" id="menu-btn-daily-widget" title="Günlük Ödül">
-                        <div class="calendar-top-tag">DAILY</div>
+                    <div class="daily-calendar-widget" id="menu-btn-daily-widget" title="Günlük Ödül" data-i18n-title="daily_reward_title">
+                        <div class="calendar-top-tag" data-i18n="daily_tag">DAILY</div>
                         <div class="calendar-body">
                             <span class="check-icon">✓</span>
                         </div>
@@ -109,14 +111,14 @@
                             <span id="demo-flying-val" class="demo-tile-num tile-number">2</span>
                         </div>
                     </div>
-                    <div class="hero-block-label" id="demo-widget-label">DOKUN &amp; BİRLEŞTİR</div>
+                    <div class="hero-block-label" id="demo-widget-label" data-i18n="touch_merge">DOKUN &amp; BİRLEŞTİR</div>
                 </div>
 
                 <!-- Gridoria Aksiyon Butonları -->
                 <div class="menu-actions-bottom">
-                    <!-- OYUNA BAŞLA / STAGE 1 OYNAYIN Yeşil Oval Buton -->
+                    <!-- OYUNA BAŞLA / OYNA Yeşil Oval Buton -->
                     <button class="main-stage-play-btn" id="btn-start-game">
-                        <span class="play-btn-text">OYNAYIN</span>
+                        <span class="play-btn-text" data-i18n="play">OYNA</span>
                     </button>
 
                     <!-- 🧠 Günlük Zihin & Odaklanma Rozeti (Dinamik Değişen Sözler) -->
@@ -136,8 +138,8 @@
                 <div class="header-top">
                     <!-- Sol Üst Grubu: Ev İkonu & Elmas Bakiyesi Yana Yana -->
                     <div class="header-left-group">
-                        <button class="icon-btn" id="btn-home-menu" title="Ana Menü">🏠</button>
-                        <div class="pill-badge diamond-pill" id="btn-open-shop" title="Elmas Mağazası">
+                        <button class="icon-btn" id="btn-home-menu" title="Ana Menü" data-i18n-title="nav_home">🏠</button>
+                        <div class="pill-badge diamond-pill" id="btn-open-shop" title="Elmas Mağazası" data-i18n-title="nav_shop">
                             <span class="diamond-icon">💎</span>
                             <span id="diamond-count">0</span>
                             <div class="plus-btn">+</div>
@@ -145,7 +147,7 @@
                     </div>
 
                     <!-- Sağ Üst: En Yüksek Skor -->
-                    <div class="pill-badge crown-pill" id="btn-crown-high" title="En Yüksek Skor">
+                    <div class="pill-badge crown-pill" id="btn-crown-high" title="En Yüksek Skor" data-i18n-title="high_score">
                         <span class="crown-icon">👑</span>
                         <span id="high-score">0</span>
                     </div>
@@ -161,13 +163,13 @@
                 <!-- 🎯 DİNAMİK HEDEF TAŞ ROZETİ (256 ➔ 512 ➔ 1024 ➔ 2048) -->
                 <div class="target-goal-capsule" id="target-goal-box" title="Şimdiki Hedef Taş">
                     <span class="target-icon">🎯</span>
-                    <span class="target-text">HEDEF:</span>
+                    <span class="target-text" data-i18n="target">HEDEF:</span>
                     <span class="target-badge-val" id="target-goal-val">256</span>
                 </div>
 
                 <div class="play-status" aria-live="polite">
                     <span class="status-dot"></span>
-                    <span id="play-status-text">Hedef sütunu seç ve taşı fırlat</span>
+                    <span id="play-status-text" data-i18n="status_ready">Hedef sütunu seç ve taşı fırlat</span>
                 </div>
 
             </header>
@@ -212,7 +214,7 @@
 
             <!-- Footer: Power-up Boosters Bar -->
             <footer class="powerups-footer">
-                <button class="powerup-btn" id="powerup-bomb" title="Bomba Patlat">
+                <button class="powerup-btn" id="powerup-bomb" title="Bomba Patlat" data-i18n-title="booster_bomb">
                     <div class="booster-icon-box bomb-bg">
                         <span class="powerup-icon">💣</span>
                     </div>
@@ -222,7 +224,7 @@
                     </div>
                 </button>
 
-                <button class="powerup-btn" id="powerup-hammer" title="Çekiç (Bloğu Kır)">
+                <button class="powerup-btn" id="powerup-hammer" title="Çekiç (Bloğu Kır)" data-i18n-title="booster_hammer">
                     <div class="booster-icon-box hammer-bg">
                         <span class="powerup-icon">🔨</span>
                     </div>
@@ -232,7 +234,7 @@
                     </div>
                 </button>
 
-                <button class="powerup-btn" id="powerup-swap" title="Taşı Değiştir">
+                <button class="powerup-btn" id="powerup-swap" title="Taşı Değiştir" data-i18n-title="booster_swap">
                     <div class="booster-icon-box swap-bg">
                         <span class="powerup-icon">⇄</span>
                     </div>
@@ -242,7 +244,7 @@
                     </div>
                 </button>
 
-                <button class="powerup-btn" id="powerup-undo" title="Geri Al">
+                <button class="powerup-btn" id="powerup-undo" title="Geri Al" data-i18n-title="booster_undo">
                     <div class="booster-icon-box undo-bg">
                         <span class="powerup-icon">↩️</span>
                     </div>
@@ -256,8 +258,8 @@
 
         <!-- Target Tile Selection Banner Overlay for Hammer/Bomb -->
         <div class="powerup-banner hidden" id="powerup-banner">
-            <span id="powerup-banner-text">Yok etmek istediğin taşı seç</span>
-            <button class="cancel-btn" id="btn-cancel-powerup">İptal</button>
+            <span id="powerup-banner-text" data-i18n="powerup_select_tile">Yok etmek istediğin taşı seç</span>
+            <button class="cancel-btn" id="btn-cancel-powerup" data-i18n="cancel">İptal</button>
         </div>
 
         <!-- Main Wood Menu Modal Overlay -->
@@ -298,8 +300,8 @@
         <div class="modal-overlay hidden" id="modal-daily">
             <div class="modal-card daily-modal-card">
                 <button class="modal-close-icon" id="btn-close-daily" title="Kapat">✕</button>
-                <h2 class="daily-modal-title">Günlük Ödül</h2>
-                <p class="daily-modal-subtitle" id="daily-reward-subtitle">Progress kaybedilecek bir gün kaybolmamalıdır.</p>
+                <h2 class="daily-modal-title" data-i18n="daily_reward_title">Günlük Ödül</h2>
+                <p class="daily-modal-subtitle" id="daily-reward-subtitle" data-i18n="daily_reward_subtitle">Her gün giriş yap, elmas ve joker ödüllerini topla!</p>
 
                 <!-- 7-Day Rewards Grid Container -->
                 <div class="daily-grid-container" id="daily-grid-container">
@@ -308,11 +310,11 @@
 
                 <!-- Countdown Timer -->
                 <div class="daily-countdown-box" id="daily-countdown-box">
-                    <span>Sonraki ödül: </span>
+                    <span data-i18n="next_reward_in">Sonraki ödül: </span>
                     <strong id="daily-timer-val">00 : 00 : 00</strong>
                 </div>
 
-                <button class="primary-btn daily-claim-btn" id="btn-claim-daily">ÖDÜLÜ AL</button>
+                <button class="primary-btn daily-claim-btn" id="btn-claim-daily" data-i18n="claim_reward">ÖDÜLÜ AL</button>
             </div>
         </div>
 
@@ -322,14 +324,14 @@
                 <!-- Header: Back Arrow + Centered Title -->
                 <div class="theme-modal-header">
                     <button class="theme-back-btn" id="btn-close-themes">←</button>
-                    <h2 class="theme-modal-title">Tema</h2>
+                    <h2 class="theme-modal-title" data-i18n="themes_title">Tema</h2>
                     <div style="width: 28px;"></div>
                 </div>
 
                 <!-- Segmented Capsule Tab Toggle -->
                 <div class="theme-tab-capsule">
-                    <button class="theme-tab-btn active" id="tab-btn-bg" data-tab="bg">Arka Planlar</button>
-                    <button class="theme-tab-btn" id="tab-btn-color" data-tab="color">Renkler</button>
+                    <button class="theme-tab-btn active" id="tab-btn-bg" data-tab="bg" data-i18n="tab_backgrounds">Arka Planlar</button>
+                    <button class="theme-tab-btn" id="tab-btn-color" data-tab="color" data-i18n="tab_colors">Renkler</button>
                 </div>
 
                 <!-- TAB 1: ARKA PLANLAR (BACKGROUNDS GRID VIEW) -->
@@ -764,9 +766,9 @@
 
         <div class="modal-overlay hidden" id="modal-missions">
             <div class="modal-card missions-card">
-                <div class="modal-header"><h2>GUNLUK GOREVLER</h2><button class="close-btn" id="btn-close-missions">✕</button></div>
+                <div class="modal-header"><h2 data-i18n="missions_title">GUNLUK GOREVLER</h2><button class="close-btn" id="btn-close-missions">✕</button></div>
                 <div class="missions-panel" aria-label="Gorevler">
-                    <div class="missions-heading"><span>Gorevlerini tamamla</span><span id="difficulty-label">SEVIYE 1</span></div>
+                    <div class="missions-heading"><span data-i18n="missions_subtitle">Gorevlerini tamamla</span><span id="difficulty-label">SEVIYE 1</span></div>
                     <div class="mission-row"><span>10 birlesme yap</span><span id="mission-merges">0/10</span><button data-mission="merges">+5</button></div>
                     <div class="mission-row"><span>128 tasi yap</span><span id="mission-tile">0/128</span><button data-mission="tile">+8</button></div>
                     <div class="mission-row"><span>500 skor yap</span><span id="mission-score">0/500</span><button data-mission="score">+8</button></div>
@@ -779,8 +781,8 @@
                 <span class="mission-toast-icon" id="mission-toast-icon">🎯</span>
             </div>
             <div class="mission-toast-text-group">
-                <strong id="mission-toast-title">GÖREV TAMAMLANDI!</strong>
-                <span id="mission-toast-text">Ödülünü Görevler menüsünden al.</span>
+                <strong id="mission-toast-title" data-i18n="mission_completed">GÖREV TAMAMLANDI!</strong>
+                <span id="mission-toast-text" data-i18n="mission_toast_desc">Ödülünü Görevler menüsünden al.</span>
             </div>
         </div>
 
@@ -791,7 +793,7 @@
                 <header class="shop-header">
                     <div class="shop-title-wrapper">
                         <span class="shop-title-icon">🛒</span>
-                        <h1 class="shop-title">MAĞAZA</h1>
+                        <h1 class="shop-title" data-i18n="shop_title">MAĞAZA</h1>
                     </div>
                     <div class="shop-gems-pill">
                         <span class="gem-icon">💎</span>
@@ -1013,34 +1015,34 @@
         <!-- Game Over Modal -->
         <div class="modal-overlay hidden" id="modal-gameover">
             <div class="modal-card">
-                <h2 class="modal-title">OYUN BİTTİ</h2>
+                <h2 class="modal-title" data-i18n="game_over">OYUN BİTTİ</h2>
                 <div class="modal-score-box">
                     <div class="score-row">
-                        <span>Skor:</span>
+                        <span data-i18n="score">Skor</span>:
                         <strong id="final-score">0</strong>
                     </div>
                     <div class="score-row">
-                        <span>En Yüksek:</span>
+                        <span data-i18n="high_score">En Yüksek</span>:
                         <strong id="final-best">0</strong>
                     </div>
                     <div class="score-row">
-                        <span>Kazanılan Elmas:</span>
+                        <span data-i18n="earned_gems">Kazanılan Elmas:</span>
                         <strong id="final-gems">+0 💎</strong>
                     </div>
                 </div>
 
                 <!-- 🛡️ Rewarded Revive Action -->
-                <button class="primary-btn" id="btn-rewarded-revive" style="background: linear-gradient(135deg, #10B981, #059669); margin-bottom: 10px; width: 100%; padding: 13px; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); border-radius: 14px; border: none; color: #fff; cursor: pointer;">
+                <button class="primary-btn" id="btn-rewarded-revive" data-i18n="btn_revive" style="background: linear-gradient(135deg, #10B981, #059669); margin-bottom: 10px; width: 100%; padding: 13px; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); border-radius: 14px; border: none; color: #fff; cursor: pointer;">
                     🛡️ REKLAM İZLE & CANLAN
                 </button>
 
                 <!-- 🎁 2X Elmas Action -->
-                <button class="secondary-btn" id="btn-rewarded-double-gems" style="background: linear-gradient(135deg, #F59E0B, #D97706); margin-bottom: 10px; width: 100%; padding: 12px; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); border-radius: 14px; border: none; color: #fff; cursor: pointer;">
+                <button class="secondary-btn" id="btn-rewarded-double-gems" data-i18n="btn_double_gems" style="background: linear-gradient(135deg, #F59E0B, #D97706); margin-bottom: 10px; width: 100%; padding: 12px; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); border-radius: 14px; border: none; color: #fff; cursor: pointer;">
                     🎁 2X ELMAS KAZAN (+💎)
                 </button>
 
-                <button class="primary-btn" id="btn-restart" style="margin-bottom: 8px; width: 100%;">YENİDEN BAŞLA</button>
-                <button class="secondary-btn" id="btn-gameover-home" style="width: 100%; padding: 11px; font-weight: 700; border-radius: 14px; background: rgba(255, 255, 255, 0.12); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;">ANA MENÜ</button>
+                <button class="primary-btn" id="btn-restart" data-i18n="restart" style="margin-bottom: 8px; width: 100%;">YENİDEN BAŞLA</button>
+                <button class="secondary-btn" id="btn-gameover-home" data-i18n="main_menu" style="width: 100%; padding: 11px; font-weight: 700; border-radius: 14px; background: rgba(255, 255, 255, 0.12); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;">ANA MENÜ</button>
             </div>
         </div>
 
@@ -1651,43 +1653,43 @@
         <!-- 🧭 ALT MENÜ ÇUBUĞU (BOTTOM NAVIGATION BAR - 5 TABS) -->
         <nav id="bottom-nav-bar" class="bottom-nav-bar">
             <!-- 1. TAB: MAĞAZA (EN SOLDA) -->
-            <button class="nav-tab-item" id="nav-tab-shop" data-tab="shop" title="Mağaza">
+            <button class="nav-tab-item" id="nav-tab-shop" data-tab="shop" title="Mağaza" data-i18n-title="nav_shop">
                 <div class="tab-icon-wrapper">
                     <span class="tab-icon">🛒</span>
                 </div>
-                <span class="tab-label">MAĞAZA</span>
+                <span class="tab-label" data-i18n="nav_shop">MAĞAZA</span>
             </button>
 
             <!-- 2. TAB: LİDERLİK TABLOSU (MAĞAZANIN SAĞINDA) -->
-            <button class="nav-tab-item" id="nav-tab-leaderboard" data-tab="leaderboard" title="Liderlik Tablosu">
+            <button class="nav-tab-item" id="nav-tab-leaderboard" data-tab="leaderboard" title="Liderlik Tablosu" data-i18n-title="nav_leaderboard">
                 <div class="tab-icon-wrapper">
                     <span class="tab-icon">📊</span>
                 </div>
-                <span class="tab-label">LİDERLİK</span>
+                <span class="tab-label" data-i18n="nav_leaderboard">LİDERLİK</span>
             </button>
 
             <!-- 3. TAB: ANA SAYFA (TAM ORTADA - AKTİF) -->
-            <button class="nav-tab-item active" id="nav-tab-home" data-tab="home" title="Ana Sayfa">
+            <button class="nav-tab-item active" id="nav-tab-home" data-tab="home" title="Ana Sayfa" data-i18n-title="nav_home">
                 <div class="tab-icon-wrapper home-highlight">
                     <span class="tab-icon">🏠</span>
                 </div>
-                <span class="tab-label">ANA SAYFA</span>
+                <span class="tab-label" data-i18n="nav_home">ANA SAYFA</span>
             </button>
 
             <!-- 4. TAB: PROFİL (ORTADAN SONRA / SAĞ KÖŞEDE) -->
-            <button class="nav-tab-item" id="nav-tab-profile" data-tab="profile" title="Profil">
+            <button class="nav-tab-item" id="nav-tab-profile" data-tab="profile" title="Profil" data-i18n-title="nav_profile">
                 <div class="tab-icon-wrapper">
                     <span class="tab-icon">👤</span>
                 </div>
-                <span class="tab-label">PROFİL</span>
+                <span class="tab-label" data-i18n="nav_profile">PROFİL</span>
             </button>
 
             <!-- 5. TAB: AYARLAR (EN SAĞDA) -->
-            <button class="nav-tab-item" id="nav-tab-settings" data-tab="settings" title="Ayarlar">
+            <button class="nav-tab-item" id="nav-tab-settings" data-tab="settings" title="Ayarlar" data-i18n-title="nav_settings">
                 <div class="tab-icon-wrapper">
                     <span class="tab-icon">⚙️</span>
                 </div>
-                <span class="tab-label">AYARLAR</span>
+                <span class="tab-label" data-i18n="nav_settings">AYARLAR</span>
             </button>
         </nav>
 

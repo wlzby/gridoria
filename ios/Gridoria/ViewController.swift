@@ -106,6 +106,15 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         let contentController = WKUserContentController()
         contentController.add(self, name: "iosBridge")
 
+        // Inject Native Device Language early before scripts execute
+        let langCode = Locale.preferredLanguages.first ?? "en"
+        let langScript = WKUserScript(
+            source: "window.nativeSystemLanguage = '\(langCode)';",
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
+        contentController.addUserScript(langScript)
+
         let config = WKWebViewConfiguration()
         config.userContentController = contentController
         config.allowsInlineMediaPlayback = true
@@ -232,8 +241,13 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("✅ WebView loaded successfully")
         injectSafeAreaValues()
-        // Make HTML & body transparent so native bgImageView shows through
+        // Inject Native Device Language & make HTML & body transparent so native bgImageView shows through
+        let langCode = Locale.preferredLanguages.first ?? "en"
         let transparentJS = """
+            window.nativeSystemLanguage = '\(langCode)';
+            if (window.i18n && typeof window.i18n.setLanguage === 'function') {
+                window.i18n.setLanguage('\(langCode)');
+            }
             if (document.documentElement) document.documentElement.style.setProperty('background', 'transparent', 'important');
             if (document.body) document.body.style.setProperty('background', 'transparent', 'important');
         """

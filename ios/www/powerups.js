@@ -142,17 +142,17 @@ class PowerUpManager {
         if (this.activeMode === 'hammer') {
             const hammerBtn = document.getElementById('powerup-hammer');
             if (hammerBtn) hammerBtn.classList.add('active-mode');
-            if (bannerText) bannerText.innerText = 'ÇEKİÇ AKTİF: Kırmak istediğiniz bloğa dokunun!';
+            if (bannerText) bannerText.innerText = window.i18n ? window.i18n.t('powerup_select_tile') : 'ÇEKİÇ AKTİF: Kırmak istediğiniz bloğa dokunun!';
             if (banner) banner.classList.remove('hidden');
         } else if (this.activeMode === 'bomb') {
             const bombBtn = document.getElementById('powerup-bomb');
             if (bombBtn) bombBtn.classList.add('active-mode');
-            if (bannerText) bannerText.innerText = 'BOMBA AKTİF: Patlatmak istediğiniz taşa dokunun!';
+            if (bannerText) bannerText.innerText = window.i18n ? window.i18n.t('powerup_select_tile') : 'BOMBA AKTİF: Patlatmak istediğiniz taşa dokunun!';
             if (banner) banner.classList.remove('hidden');
         } else if (this.activeMode === 'shrink') {
             const shrinkBtn = document.getElementById('powerup-shrink');
             if (shrinkBtn) shrinkBtn.classList.add('active-mode');
-            if (bannerText) bannerText.innerText = 'KÜÇÜLT AKTİF: Değerini azaltmak istediğiniz taşa dokunun!';
+            if (bannerText) bannerText.innerText = window.i18n ? window.i18n.t('powerup_select_tile') : 'KÜÇÜLT AKTİF: Değerini azaltmak istediğiniz taşa dokunun!';
             if (banner) banner.classList.remove('hidden');
         } else {
             if (banner) banner.classList.add('hidden');
