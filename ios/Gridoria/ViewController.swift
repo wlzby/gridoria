@@ -31,7 +31,10 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         // 4. Setup Daily Local Notifications
         setupLocalNotifications()
 
-        // 5. Load game
+        // 5. Setup AdMob Ads safely
+        AdManagerIOS.shared.initialize()
+
+        // 6. Load game
         loadLocalGame()
     }
 
@@ -260,14 +263,28 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         case "haptic":
             triggerHaptic(type: body["type"] as? String ?? "medium")
 
-        case "setBannerVisible", "showInterstitialAd":
+        case "setBannerVisible":
             break
+
+        case "showInterstitialAd":
+            AdManagerIOS.shared.showInterstitialAd(from: self)
 
         case "showRewardedAd":
             let rewardType = body["rewardType"] as? String ?? "reward"
-            webView.evaluateJavaScript(
-                "if(typeof window.onRewardedAdFailed==='function') window.onRewardedAdFailed('\(rewardType)','Ads disabled');",
-                completionHandler: nil)
+            let escapedReward = rewardType.replacingOccurrences(of: "'", with: "\\'")
+            AdManagerIOS.shared.showRewardedAd(
+                from: self,
+                rewardType: rewardType,
+                onReward: { [weak self] in
+                    let js = "if(typeof window.onRewardedAdSuccess==='function') window.onRewardedAdSuccess('\(escapedReward)');"
+                    self?.webView.evaluateJavaScript(js, completionHandler: nil)
+                },
+                onFail: { [weak self] errorMsg in
+                    let escapedErr = errorMsg.replacingOccurrences(of: "'", with: "\\'").replacingOccurrences(of: "\n", with: " ")
+                    let js = "if(typeof window.onRewardedAdFailed==='function') window.onRewardedAdFailed('\(escapedReward)','\(escapedErr)');"
+                    self?.webView.evaluateJavaScript(js, completionHandler: nil)
+                }
+            )
 
         case "buyProduct":
             if let productId = body["productId"] as? String {

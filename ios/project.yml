@@ -3,6 +3,10 @@ options:
   bundleIdPrefix: com.mawelly
   deploymentTarget:
     iOS: "15.0"
+packages:
+  GoogleMobileAds:
+    url: https://github.com/googleads/swift-package-manager-google-mobile-ads.git
+    from: 11.0.0
 targets:
   Gridoria:
     type: application
@@ -13,6 +17,8 @@ targets:
       - path: www
         buildPhase: resources
         type: folder
+    dependencies:
+      - package: GoogleMobileAds
     info:
       path: Gridoria/Info.plist
       properties:

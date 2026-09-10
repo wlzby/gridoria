@@ -21,6 +21,7 @@ workflows:
           cp -r ../app/src/main/assets/www/* ./www/
           brew install xcodegen || true
           xcodegen generate
+          xcodebuild -resolvePackageDependencies -project Gridoria.xcodeproj || true
 
       - name: Verify Project (Standalone WebView Build)
         script: |
