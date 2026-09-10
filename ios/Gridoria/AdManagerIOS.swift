@@ -27,11 +27,18 @@ class AdManagerIOS: NSObject, GADFullScreenContentDelegate {
     // MARK: - Safe Initialization (Main Thread)
     func initialize() {
         guard !isInitialized else { return }
+
+        // Defensive guard: Ensure GADApplicationIdentifier exists in bundle before initializing SDK
+        guard let appId = Bundle.main.object(forInfoDictionaryKey: "GADApplicationIdentifier") as? String, !appId.isEmpty else {
+            print("⚠️ AdMob Warning: GADApplicationIdentifier is missing from Info.plist. Skipping start to guarantee zero-crash launch.")
+            return
+        }
+
         isInitialized = true
 
         DispatchQueue.main.async {
             GADMobileAds.sharedInstance().start { status in
-                print("✅ AdMob: Google Mobile Ads SDK initialized successfully.")
+                print("✅ AdMob: Google Mobile Ads SDK initialized successfully with App ID: \(appId).")
                 self.loadRewardedAd()
                 self.loadInterstitialAd()
             }
