@@ -9,7 +9,7 @@ protocol StoreKitManagerDelegate: AnyObject {
 }
 
 @available(iOS 15.0, *)
-class StoreKitManager {
+class StoreKitManager: @unchecked Sendable {
     static let shared = StoreKitManager()
 
     weak var delegate: StoreKitManagerDelegate?

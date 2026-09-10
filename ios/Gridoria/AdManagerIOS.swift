@@ -98,7 +98,7 @@ class AdManagerIOS: NSObject, GADFullScreenContentDelegate {
             self.pendingRewardCallback = onReward
             self.pendingFailCallback = onFail
 
-            ad.present(from: viewController) {
+            ad.present(fromRootViewController: viewController) {
                 print("🎉 AdMob: User earned reward for \(rewardType)")
                 self.pendingRewardCallback?()
                 self.pendingRewardCallback = nil
@@ -131,7 +131,7 @@ class AdManagerIOS: NSObject, GADFullScreenContentDelegate {
     func showInterstitialAd(from viewController: UIViewController) {
         DispatchQueue.main.async {
             if let ad = self.interstitialAd {
-                ad.present(from: viewController)
+                ad.present(fromRootViewController: viewController)
             } else {
                 print("ℹ️ AdMob: Interstitial ad not ready, requesting load.")
                 self.loadInterstitialAd()
