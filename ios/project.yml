@@ -26,6 +26,16 @@ targets:
         CFBundleIdentifier: com.mawelly.gridoria.JGF9X5ACM5
         CFBundleShortVersionString: "1.0.0"
         CFBundleVersion: "1"
+        CFBundleIcons:
+          CFBundlePrimaryIcon:
+            CFBundleIconFiles:
+              - AppIcon
+            CFBundleIconName: AppIcon
+        CFBundleIcons~ipad:
+          CFBundlePrimaryIcon:
+            CFBundleIconFiles:
+              - AppIcon
+            CFBundleIconName: AppIcon
         UIRequiresFullScreen: true
         UILaunchStoryboardName: LaunchScreen
         UIViewControllerBasedStatusBarAppearance: true
