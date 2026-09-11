@@ -56,6 +56,7 @@ class GridoriaGame {
         this.updateUI();
         this.showMainMenu();
         this.setupLifecycleListeners();
+        setTimeout(() => this.submitScoreToFirebase(), 2500);
         if (window.NativeBridge && typeof window.NativeBridge.scheduleDailyNotification === 'function') {
             try {
                 window.NativeBridge.scheduleDailyNotification();
@@ -2150,6 +2151,7 @@ class GridoriaGame {
         this.updateProfileModalStats();
         this.updateMainMenuStats();
         this.updateLeaderboardDisplay();
+        this.submitScoreToFirebase();
     }
 
     generateMockLeaderboardData(mode = 'all') {
@@ -2211,9 +2213,102 @@ class GridoriaGame {
         return list;
     }
 
-    updateLeaderboardDisplay(mode = 'all') {
+    // ── 🌐 Firebase Realtime Database Live Leaderboard ───────────────────
+    getOrCreatePlayerId() {
+        let id = this.safeGet('gridoria_firebase_player_id');
+        if (!id) {
+            id = 'p_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+            this.safeSet('gridoria_firebase_player_id', id);
+        }
+        return id;
+    }
+
+    async submitScoreToFirebase() {
         try {
-            const data = this.generateMockLeaderboardData(mode);
+            const score = this.highScore || this.score || 0;
+            if (score <= 0) return;
+
+            const playerId = this.getOrCreatePlayerId();
+            const url = `https://gridoria-47e5a-default-rtdb.europe-west1.firebasedatabase.app/leaderboard/${playerId}.json`;
+            const payload = {
+                playerId: playerId,
+                name: this.username || 'Oyuncu',
+                avatar: this.userAvatar || '🧙‍♂️',
+                score: score,
+                tile: this.bestTile || 2048,
+                updatedAt: Date.now()
+            };
+
+            await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            console.log('✅ Firebase: High score synced to live leaderboard:', score);
+        } catch (err) {
+            console.warn('ℹ️ Firebase: Offline or score sync delayed:', err);
+        }
+    }
+
+    async fetchLiveLeaderboardData(mode = 'all') {
+        const mockList = this.generateMockLeaderboardData(mode);
+        try {
+            const url = `https://gridoria-47e5a-default-rtdb.europe-west1.firebasedatabase.app/leaderboard.json?orderBy="score"&limitToLast=50`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) throw new Error('Firebase HTTP ' + response.status);
+            const rawData = await response.json();
+
+            if (!rawData || typeof rawData !== 'object') {
+                return mockList;
+            }
+
+            const currentPid = this.getOrCreatePlayerId();
+            const realPlayers = Object.values(rawData).map(item => ({
+                name: item.name || 'Oyuncu',
+                avatar: item.avatar || '🧙‍♂️',
+                score: parseInt(item.score, 10) || 0,
+                tile: parseInt(item.tile, 10) || 2048,
+                isUser: item.playerId === currentPid
+            }));
+
+            realPlayers.sort((a, b) => b.score - a.score);
+
+            const hasUser = realPlayers.some(p => p.isUser);
+            if (!hasUser) {
+                realPlayers.push({
+                    name: this.username || 'Misafir_4982',
+                    avatar: this.userAvatar || '🧙‍♂️',
+                    score: this.highScore || 0,
+                    tile: this.bestTile || 2048,
+                    isUser: true
+                });
+                realPlayers.sort((a, b) => b.score - a.score);
+            }
+
+            if (realPlayers.length < 50) {
+                const needed = 50 - realPlayers.length;
+                const bots = mockList.filter(m => !m.isUser).slice(0, needed);
+                const combined = [...realPlayers, ...bots];
+                combined.sort((a, b) => b.score - a.score);
+                combined.forEach((item, idx) => { item.rank = idx + 1; });
+                return combined.slice(0, 50);
+            }
+
+            realPlayers.forEach((item, idx) => { item.rank = idx + 1; });
+            return realPlayers.slice(0, 50);
+        } catch (err) {
+            console.warn('ℹ️ Firebase: Using local leaderboard fallback:', err);
+            return mockList;
+        }
+    }
+
+    renderLeaderboardUI(data) {
+        try {
             const lbHeaderScore = document.getElementById('lb-header-high-score');
             const listEl = document.getElementById('leaderboard-list');
             const podiumContainer = document.querySelector('.podium-container');
@@ -2291,7 +2386,6 @@ class GridoriaGame {
                     this.renderAvatarElement(avatarNode, val);
                 });
 
-                // Attach click handlers to user edit pencils in list
                 document.querySelectorAll('.btn-lb-row-edit').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
@@ -2315,19 +2409,32 @@ class GridoriaGame {
 
                 if (stickyBar) {
                     if (userEntry.rank <= 5) {
-                        // User is in top 5 ranks, hide sticky bottom bar
                         stickyBar.classList.add('hidden-sticky');
                         if (listEl) listEl.classList.remove('has-sticky-bar');
                     } else {
-                        // User is rank > 5, show sticky bottom bar fixed above bottom nav bar
                         stickyBar.classList.remove('hidden-sticky');
                         if (listEl) listEl.classList.add('has-sticky-bar');
                     }
                 }
             }
         } catch (e) {
-            console.error('Leaderboard error:', e);
+            console.error('Leaderboard render error:', e);
         }
+    }
+
+    updateLeaderboardDisplay(mode = 'all') {
+        // 1. Instant zero-lag UI render with cached/local data
+        const initialData = this.generateMockLeaderboardData(mode);
+        this.renderLeaderboardUI(initialData);
+
+        // 2. Fetch live global scores from Firebase in background and refresh seamlessly
+        this.fetchLiveLeaderboardData(mode).then(liveData => {
+            if (liveData && Array.isArray(liveData) && liveData.length > 0) {
+                this.renderLeaderboardUI(liveData);
+            }
+        }).catch(err => {
+            console.warn('Live leaderboard refresh skipped:', err);
+        });
     }
 
     updateScoreDisplay() {
@@ -3634,6 +3741,7 @@ class GridoriaGame {
                 this.safeSet('gridoria_highscore', String(this.highScore));
                 if (typeof effects !== 'undefined') effects.showHighScorePop();
             }
+            this.submitScoreToFirebase();
 
             // Aktif oyun durumunu sıfırla (Böylece bir sonraki açılışta temiz tahtadan başlar)
             this.clearActiveGameState();
