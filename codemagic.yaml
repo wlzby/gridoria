@@ -1,5 +1,66 @@
 workflows:
   # ═══════════════════════════════════════════════════════════════════════════
+  # 🍏 iOS App Store & TestFlight Workflow
+  # ═══════════════════════════════════════════════════════════════════════════
+  ios-app-store:
+    name: Gridoria iOS App Store & TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: app_store_connect
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.mawelly.gridoria.JGF9X5ACM5
+      vars:
+        BUNDLE_ID: "com.mawelly.gridoria.JGF9X5ACM5"
+        XCODE_SCHEME: "Gridoria"
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Prepare Assets & Generate Xcode Project
+        script: |
+          cd ios
+          mkdir -p www
+          cp -r ../app/src/main/assets/www/* ./www/
+          brew install xcodegen || true
+          xcodegen generate
+          xcodebuild -resolvePackageDependencies -project Gridoria.xcodeproj || true
+
+      - name: Set Build Number & Configure Signing
+        script: |
+          cd ios
+          # Update CFBundleVersion to Codemagic BUILD_NUMBER so Apple accepts every upload
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" Gridoria/Info.plist || true
+          # Bind Apple Distribution profiles downloaded by Codemagic
+          xcode-project use-profiles --project Gridoria.xcodeproj
+
+      - name: Build IPA for App Store
+        script: |
+          cd ios
+          xcode-project build-ipa \
+            --project "Gridoria.xcodeproj" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - ios/build/ios/ipa/*.ipa
+      - /Users/builder/Library/Developer/Xcode/DerivedData/**/Build/Products/*-iphoneos/*.ipa
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/Products/*-iphoneos/*.ipa
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        expire_build_submitted_for_review: true
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: true
+
+  # ═══════════════════════════════════════════════════════════════════════════
   # 🍎 iOS Workflow (Builds Gridoria iOS App & IPA)
   # ═══════════════════════════════════════════════════════════════════════════
   ios-workflow:
