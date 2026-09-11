@@ -9,9 +9,6 @@ workflows:
     integrations:
       app_store_connect: app_store_connect
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.mawelly.gridoria.JGF9X5ACM5
       vars:
         BUNDLE_ID: "com.mawelly.gridoria.JGF9X5ACM5"
         XCODE_SCHEME: "Gridoria"
@@ -27,11 +24,19 @@ workflows:
           xcodegen generate
           xcodebuild -resolvePackageDependencies -project Gridoria.xcodeproj || true
 
+      - name: Set up Keychain & Fetch Signing Files
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
       - name: Set Build Number & Configure Signing
         script: |
           cd ios
           # Update CFBundleVersion to Codemagic BUILD_NUMBER so Apple accepts every upload
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" Gridoria/Info.plist || true
+          agvtool new-version -all $BUILD_NUMBER || true
           # Bind Apple Distribution profiles downloaded by Codemagic
           xcode-project use-profiles --project Gridoria.xcodeproj
 
