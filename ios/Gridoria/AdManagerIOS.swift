@@ -5,8 +5,8 @@ class AdManagerIOS: NSObject, GADFullScreenContentDelegate {
     static let shared = AdManagerIOS()
 
     // MARK: - Ad Unit IDs
-    let rewardedAdUnitID = "ca-app-pub-7719335438184188/5117225143"
-    let peekRewardedAdUnitID = "ca-app-pub-7719335438184188/1177980130"
+    let rewardedAdUnitID = "ca-app-pub-7719335438184188/9167104613"
+    let peekRewardedAdUnitID = "ca-app-pub-7719335438184188/9167104613"
     let interstitialAdUnitID = "ca-app-pub-3940256099942544/1033173712"
     let bannerAdUnitID = "ca-app-pub-3940256099942544/2934735716"
 

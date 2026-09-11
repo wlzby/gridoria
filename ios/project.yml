@@ -41,7 +41,7 @@ targets:
         UILaunchStoryboardName: LaunchScreen
         UIViewControllerBasedStatusBarAppearance: true
         UIStatusBarHidden: true
-        GADApplicationIdentifier: ca-app-pub-7719335438184188~3285326194
+        GADApplicationIdentifier: ca-app-pub-7719335438184188~4224547937
         NSUserTrackingUsageDescription: "Size daha alakalı reklamlar sunabilmek ve oyun deneyiminizi iyileştirmek için izninize ihtiyaç duyuyoruz."
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
