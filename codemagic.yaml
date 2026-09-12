@@ -9,6 +9,9 @@ workflows:
     integrations:
       app_store_connect: app_store_connect
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.mawelly.gridoria.JGF9X5ACM5
       vars:
         BUNDLE_ID: "com.mawelly.gridoria.JGF9X5ACM5"
         XCODE_SCHEME: "Gridoria"
