@@ -123,13 +123,16 @@ workflows:
       - name: Set Build Number & Configure Signing
         script: |
           cd ios
-          # Ensure build number is at least 9 (Apple rejected build 8)
+          # Ensure version is 1.0.1 and build number is at least 9 (Apple rejected build 8)
           BUILD_NUM=${BUILD_NUMBER:-9}
           if [ "$BUILD_NUM" -lt 9 ]; then
             BUILD_NUM=$((BUILD_NUM + 8))
           fi
+          echo "Using CFBundleShortVersionString: 1.0.1"
           echo "Using CFBundleVersion: $BUILD_NUM"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.1" Gridoria/Info.plist || true
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" Gridoria/Info.plist || true
+          agvtool new-marketing-version "1.0.1" || true
           agvtool new-version -all $BUILD_NUM || true
           # Bind profiles and certificates stored in Codemagic Code signing identities
           xcode-project use-profiles --project Gridoria.xcodeproj

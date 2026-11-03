@@ -26,8 +26,8 @@ targets:
       properties:
         CFBundleDisplayName: Gridoria
         CFBundleIdentifier: com.mawelly.gridoria.JGF9X5ACM5
-        CFBundleShortVersionString: "1.0.0"
-        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0.1"
+        CFBundleVersion: "9"
         ITSAppUsesNonExemptEncryption: false
         CFBundleIcons:
           CFBundlePrimaryIcon:
