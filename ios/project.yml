@@ -19,6 +19,8 @@ targets:
         type: folder
     dependencies:
       - package: GoogleMobileAds
+      - sdk: GameKit.framework
+      - sdk: StoreKit.framework
     info:
       path: Gridoria/Info.plist
       properties:

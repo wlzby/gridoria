@@ -107,6 +107,35 @@ class MainActivity : Activity() {
             setContentView(webView)
             webView.loadUrl("file:///android_asset/www/index.html")
 
+            // 💎 Initialize Google Play In-App Billing
+            try {
+                BillingManager.initialize(this, webView)
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
+
+            // 🎮 Initialize Google Play Games Services v2
+            try {
+                PlayGamesManager.initialize(this)
+                PlayGamesManager.checkAuthentication(this)
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
+
+            // ⭐ Initialize Google Play In-App Review
+            try {
+                ReviewManagerHelper.initialize(this)
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
+
+            // 🔄 Initialize Google Play In-App Updates
+            try {
+                UpdateManagerHelper.initialize(this)
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
+
             // 🔔 Schedule Daily Notification (24h Smart Cycle at 19:30)
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -140,9 +169,6 @@ class MainActivity : Activity() {
     }
 
     inner class WebAppInterface {
-        @Suppress("DEPRECATION")
-        private val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-
         @JavascriptInterface
         fun setBannerVisible(visible: Boolean) {
             isBannerEnabled = false
@@ -180,19 +206,58 @@ class MainActivity : Activity() {
         @JavascriptInterface
         fun triggerHaptic(type: String) {
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val effect = when (type) {
-                        "light" -> VibrationEffect.createOneShot(15, 80)
-                        "medium" -> VibrationEffect.createOneShot(30, 150)
-                        "heavy" -> VibrationEffect.createOneShot(55, 230)
-                        else -> VibrationEffect.createOneShot(25, 120)
-                    }
-                    vibrator?.vibrate(effect)
+                // 1. Immediate hardware UI haptic feedback via WebView view
+                runOnUiThread {
+                    try {
+                        val constant = when (type) {
+                            "heavy" -> android.view.HapticFeedbackConstants.LONG_PRESS
+                            "light" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                                android.view.HapticFeedbackConstants.KEYBOARD_RELEASE
+                            } else {
+                                android.view.HapticFeedbackConstants.KEYBOARD_TAP
+                            }
+                            else -> android.view.HapticFeedbackConstants.KEYBOARD_TAP
+                        }
+                        webView.performHapticFeedback(constant, android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+                    } catch (_: Throwable) {}
+                }
+
+                // 2. Full System Vibrator (Android 12+ VibratorManager / fallback)
+                val vib = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val manager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? android.os.VibratorManager
+                    manager?.defaultVibrator ?: (getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator)
                 } else {
                     @Suppress("DEPRECATION")
-                    vibrator?.vibrate(30)
+                    getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
                 }
-            } catch (_: Exception) {}
+
+                if (vib != null && vib.hasVibrator()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        try {
+                            val effect = when (type) {
+                                "light" -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+                                "heavy" -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
+                                else -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                            }
+                            vib.vibrate(effect)
+                            return
+                        } catch (_: Throwable) {}
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val ms = when (type) {
+                            "light" -> 25L
+                            "heavy" -> 65L
+                            else -> 40L
+                        }
+                        vib.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        vib.vibrate(35L)
+                    }
+                }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
         }
 
         @JavascriptInterface
@@ -201,6 +266,67 @@ class MainActivity : Activity() {
                 NotificationReceiver.scheduleNextNotification(this@MainActivity)
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+
+        // ── 💎 In-App Purchases (Google Play Billing) ──
+        @JavascriptInterface
+        fun buyProduct(productId: String) {
+            runOnUiThread {
+                BillingManager.buyProduct(this@MainActivity, productId)
+            }
+        }
+
+        // ── 🔄 Restore Purchases (Google Play Billing) ──
+        @JavascriptInterface
+        fun restorePurchases() {
+            runOnUiThread {
+                BillingManager.restorePurchases()
+            }
+        }
+
+        // ── ⭐ Google Play In-App Review (ASO & 5-Star Rating Booster) ──
+        @JavascriptInterface
+        fun requestInAppReview() {
+            runOnUiThread {
+                ReviewManagerHelper.requestInAppReview(this@MainActivity)
+            }
+        }
+
+        // ── 🎮 Google Play Games Services (Leaderboards & Achievements) ──
+        @JavascriptInterface
+        fun submitHighScore(score: Long) {
+            runOnUiThread {
+                PlayGamesManager.submitHighScore(this@MainActivity, score)
+            }
+        }
+
+        @JavascriptInterface
+        fun showLeaderboard() {
+            runOnUiThread {
+                PlayGamesManager.showLeaderboards(this@MainActivity)
+            }
+        }
+
+        @JavascriptInterface
+        fun showAchievements() {
+            runOnUiThread {
+                PlayGamesManager.showAchievements(this@MainActivity)
+            }
+        }
+
+        @JavascriptInterface
+        fun unlockAchievement(achievementId: String) {
+            runOnUiThread {
+                PlayGamesManager.unlockAchievement(this@MainActivity, achievementId)
+            }
+        }
+
+        // ── 🔄 Google Play In-App Updates ──
+        @JavascriptInterface
+        fun checkForUpdates() {
+            runOnUiThread {
+                UpdateManagerHelper.checkForUpdates(this@MainActivity)
             }
         }
     }
@@ -231,6 +357,9 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        try {
+            UpdateManagerHelper.onDestroy()
+        } catch (_: Throwable) {}
         try {
             if (::webView.isInitialized) {
                 (webView.parent as? ViewGroup)?.removeView(webView)

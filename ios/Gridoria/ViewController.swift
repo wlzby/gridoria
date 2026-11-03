@@ -2,8 +2,10 @@ import UIKit
 import WebKit
 import AudioToolbox
 import UserNotifications
+import GameKit
+import StoreKit
 
-class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, StoreKitManagerDelegate {
+class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, StoreKitManagerDelegate, GKGameCenterControllerDelegate {
 
     private var webView: WKWebView!
     private var bgImageView: UIImageView!
@@ -31,7 +33,10 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         // 4. Setup Daily Local Notifications
         setupLocalNotifications()
 
-        // 5. Load game
+        // 5. Setup Apple Game Center (GameKit)
+        authenticateLocalPlayer()
+
+        // 6. Load game
         loadLocalGame()
     }
 
@@ -57,6 +62,13 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         // Safely initialize AdMob only after window is key & visible and app is active
         AdManagerIOS.shared.initialize()
+
+        // Enable Apple Game Center Access Point (floating pill badge)
+        if #available(iOS 14.0, *) {
+            GKAccessPoint.shared.location = .topLeading
+            GKAccessPoint.shared.showHighlights = true
+            GKAccessPoint.shared.isActive = true
+        }
     }
 
     // MARK: - Native Background Layer
@@ -320,6 +332,30 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
                 storeKitDidFailPurchase(productId: "restore", error: "iOS 15.0 veya üzeri gereklidir.")
             }
 
+        case "scheduleNotification":
+            setupLocalNotifications()
+
+        case "submitScore":
+            if let score = body["score"] as? Int {
+                submitScoreToGameCenter(score: score)
+            } else if let scoreStr = body["score"] as? String, let score = Int(scoreStr) {
+                submitScoreToGameCenter(score: score)
+            }
+
+        case "showLeaderboard":
+            showGameCenterLeaderboards()
+
+        case "showAchievements":
+            showGameCenterAchievements()
+
+        case "unlockAchievement":
+            if let achId = body["achievementId"] as? String {
+                unlockGameCenterAchievement(identifier: achId)
+            }
+
+        case "requestReview":
+            requestAppStoreReview()
+
         default:
             print("Bridge: unknown action '\(action)'")
         }
@@ -363,7 +399,7 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             center.removeAllPendingNotificationRequests()
 
             let content = UNMutableNotificationContent()
-            content.title = "Gridoria 2048 🌲"
+            content.title = "Gridoria 🌲"
             content.body = "🎁 Günlük 100 Elmas hediyen hazır! Hemen gir ve ödülünü topla!"
             content.sound = .default
 
@@ -374,6 +410,118 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
             let request = UNNotificationRequest(identifier: "gridoria_daily_reminder", content: content, trigger: trigger)
             center.add(request, withCompletionHandler: nil)
+        }
+    }
+
+    // MARK: - Apple GameKit (Game Center) Integration
+    private func authenticateLocalPlayer() {
+        let localPlayer = GKLocalPlayer.local
+        localPlayer.authenticateHandler = { [weak self] (vc, error) in
+            guard let self = self else { return }
+            if let vc = vc {
+                self.present(vc, animated: true, completion: nil)
+            } else if localPlayer.isAuthenticated {
+                print("✅ Game Center: Authenticated successfully as \(localPlayer.displayName)")
+                if #available(iOS 14.0, *) {
+                    GKAccessPoint.shared.location = .topLeading
+                    GKAccessPoint.shared.showHighlights = true
+                    GKAccessPoint.shared.isActive = true
+                }
+            } else {
+                if let error = error {
+                    print("⚠️ Game Center authentication failed: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private func submitScoreToGameCenter(score: Int) {
+        guard GKLocalPlayer.local.isAuthenticated else {
+            print("⚠️ Game Center: User not authenticated, cannot submit score")
+            return
+        }
+        let leaderboardIDs = ["gridoria_high_score", "gridoria_leaderboard", "gridoria_global_leaderboard"]
+        if #available(iOS 14.0, *) {
+            GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: leaderboardIDs) { error in
+                if let error = error {
+                    print("⚠️ Game Center submitScore error: \(error.localizedDescription)")
+                } else {
+                    print("✅ Game Center: Score \(score) submitted successfully")
+                }
+            }
+        } else {
+            let gkScore = GKScore(leaderboardIdentifier: "gridoria_high_score")
+            gkScore.value = Int64(score)
+            GKScore.report([gkScore]) { error in
+                if let error = error {
+                    print("⚠️ Game Center legacy submitScore error: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private func showGameCenterLeaderboards() {
+        guard GKLocalPlayer.local.isAuthenticated else {
+            authenticateLocalPlayer()
+            return
+        }
+        let gcVC: GKGameCenterViewController
+        if #available(iOS 14.0, *) {
+            gcVC = GKGameCenterViewController(state: .leaderboards)
+        } else {
+            gcVC = GKGameCenterViewController()
+            gcVC.viewState = .leaderboards
+        }
+        gcVC.gameCenterDelegate = self
+        present(gcVC, animated: true, completion: nil)
+    }
+
+    private func showGameCenterAchievements() {
+        guard GKLocalPlayer.local.isAuthenticated else {
+            authenticateLocalPlayer()
+            return
+        }
+        let gcVC: GKGameCenterViewController
+        if #available(iOS 14.0, *) {
+            gcVC = GKGameCenterViewController(state: .achievements)
+        } else {
+            gcVC = GKGameCenterViewController()
+            gcVC.viewState = .achievements
+        }
+        gcVC.gameCenterDelegate = self
+        present(gcVC, animated: true, completion: nil)
+    }
+
+    private func unlockGameCenterAchievement(identifier: String, percentComplete: Double = 100.0) {
+        guard GKLocalPlayer.local.isAuthenticated else { return }
+        let achievement = GKAchievement(identifier: identifier)
+        achievement.percentComplete = percentComplete
+        achievement.showsCompletionBanner = true
+        GKAchievement.report([achievement]) { error in
+            if let error = error {
+                print("⚠️ Game Center achievement report error: \(error.localizedDescription)")
+            } else {
+                print("✅ Game Center: Achievement \(identifier) reported (\(percentComplete)%)")
+            }
+        }
+    }
+
+    // MARK: - GKGameCenterControllerDelegate
+    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
+        gameCenterViewController.dismiss(animated: true, completion: nil)
+    }
+
+    // MARK: - Native In-App Review (SKStoreReviewController)
+    private func requestAppStoreReview() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if #available(iOS 14.0, *) {
+                if let scene = self.view.window?.windowScene {
+                    SKStoreReviewController.requestReview(in: scene)
+                }
+            } else {
+                SKStoreReviewController.requestReview()
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ class GridoriaGame {
         this.score = 0;
         this.highScore = 0;
         this.gems = 0;
-        this.bestTile = 2048;
+        this.bestTile = 1024;
         this.comboMeter = 0;
         this.comboMultiplier = 1;
         this.mergedThisTurn = false;
@@ -19,7 +19,8 @@ class GridoriaGame {
         this._feverSecsLeft = 0;
 
         this.missionProgress = { merges: 0, maxTile: 0, score: 0, claimed: [], notified: [] };
-        this.unlockedThemes = ['forest', 'obsidian', 'aurora', 'nebula', 'walnut', 'oak', 'cherry', 'ebony', 'earth', 'clouds', 'ocean', 'puppy', 'cat'];
+        this.unlockedThemes = ['forest', 'walnut', 'wood'];
+        this.unlockedBgs = ['forest', 'walnut', 'wood'];
         this.currentTheme = 'forest';
         this.currentBgTheme = 'forest';
         this.currentColorPalette = 'default';
@@ -51,8 +52,7 @@ class GridoriaGame {
         this.loadSavedData();
         this.initInitialBoard();
         this.bindEvents();
-        this.updateUI();
-        this.showMainMenu();
+        this.updateSettingsQuickTogglesUI();
         this.updateUI();
         this.showMainMenu();
         this.setupLifecycleListeners();
@@ -100,8 +100,6 @@ class GridoriaGame {
         this.scoreEl = document.getElementById('current-score');
         this.highScoreEl = document.getElementById('high-score');
         this.gemsEl = document.getElementById('diamond-count');
-        this.comboBarEl = document.getElementById('combo-bar-fill');
-        this.comboMultEl = document.getElementById('combo-multiplier');
         this.statusEl = document.getElementById('play-status-text');
         this.nextTileEl = document.getElementById('next-tile');
 
@@ -134,23 +132,23 @@ class GridoriaGame {
 
         const hasReceivedWelcome = this.safeGet('gridoria_has_received_welcome_bonus');
         if (!hasReceivedWelcome) {
-            this.gems = 100;
-            this.safeSet('gridoria_gems', '100');
+            this.gems = 30;
+            this.safeSet('gridoria_gems', '30');
             if (typeof powerups !== 'undefined') {
-                powerups.addFreeCount('hammer', 2);
-                powerups.addFreeCount('bomb', 2);
-                powerups.addFreeCount('swap', 2);
-                powerups.addFreeCount('undo', 2);
+                powerups.addFreeCount('hammer', 1);
+                powerups.addFreeCount('bomb', 1);
+                powerups.addFreeCount('swap', 1);
+                powerups.addFreeCount('undo', 1);
             }
             this.safeSet('gridoria_has_received_welcome_bonus', 'true');
         } else {
             const savedGems = this.safeGet('gridoria_gems');
-            this.gems = savedGems !== null ? Math.max(0, parseInt(savedGems, 10)) : 100;
+            this.gems = savedGems !== null ? Math.max(0, parseInt(savedGems, 10)) : 30;
             this.safeSet('gridoria_gems', String(this.gems));
         }
 
         const savedBest = this.safeGet('gridoria_best_tile');
-        this.bestTile = savedBest ? (parseInt(savedBest, 10) || 2048) : 2048;
+        this.bestTile = savedBest ? (parseInt(savedBest, 10) || 1024) : 1024;
 
         const today = new Date().toISOString().slice(0, 10);
         const savedMissions = this.safeGet('gridoria_missions');
@@ -210,16 +208,28 @@ class GridoriaGame {
         this.initMenuDemoAnimation();
         this.initPeekTimerLoop();
 
-        const savedUnlocked = this.safeGet('gridoria_unlocked_bgs');
-        if (savedUnlocked) {
-            try {
-                this.unlockedBgs = JSON.parse(savedUnlocked);
-            } catch (e) {
-                this.unlockedBgs = ['obsidian', 'walnut', 'wood', 'forest'];
-            }
+        // 🎨 Sadece Orman (forest) ve Ahşap (walnut/wood) varsayılan olarak açıktır. Diğerleri 250 elmastır.
+        const hasEnforcedOnlyWoodAndForest = this.safeGet('gridoria_theme_lock_v5_enforced');
+        if (!hasEnforcedOnlyWoodAndForest) {
+            this.unlockedBgs = ['forest', 'walnut', 'wood'];
+            this.safeSet('gridoria_unlocked_bgs', JSON.stringify(this.unlockedBgs));
+            this.safeSet('gridoria_theme_lock_v5_enforced', 'true');
         } else {
-            this.unlockedBgs = ['obsidian', 'walnut', 'wood', 'forest'];
+            const savedUnlocked = this.safeGet('gridoria_unlocked_bgs');
+            if (savedUnlocked) {
+                try {
+                    const parsed = JSON.parse(savedUnlocked);
+                    this.unlockedBgs = Array.isArray(parsed) 
+                        ? Array.from(new Set(['forest', 'walnut', 'wood', ...parsed]))
+                        : ['forest', 'walnut', 'wood'];
+                } catch (e) {
+                    this.unlockedBgs = ['forest', 'walnut', 'wood'];
+                }
+            } else {
+                this.unlockedBgs = ['forest', 'walnut', 'wood'];
+            }
         }
+        this.unlockedThemes = this.unlockedBgs;
 
         if (this.currentBgTheme === 'custom') {
             this.applyCustomBgPhoto();
@@ -227,9 +237,27 @@ class GridoriaGame {
         this.updateCustomBgCardPreview();
         this.updateThemeCardsUI();
 
-        document.querySelectorAll('.palette-card, .color-card').forEach(card => {
-            card.classList.toggle('active', card.dataset.color === this.currentColorPalette);
+        // 🎨 Renk Paletleri: İlk 3 tanesi ücretsizdir (default, fluffy, ebonygold). Diğerleri 250 elmastır.
+        const defaultPalettes = ['default', 'fluffy', 'ebonygold'];
+        const savedUnlockedPalettes = this.safeGet('gridoria_unlocked_palettes_v3');
+        if (!savedUnlockedPalettes) {
+            this.unlockedPalettes = [...defaultPalettes];
+            this.safeSet('gridoria_unlocked_palettes_v3', JSON.stringify(this.unlockedPalettes));
+        } else {
+            try {
+                const parsed = JSON.parse(savedUnlockedPalettes);
+                this.unlockedPalettes = Array.isArray(parsed) 
+                    ? Array.from(new Set([...defaultPalettes, ...parsed]))
+                    : [...defaultPalettes];
+            } catch (e) {
+                this.unlockedPalettes = [...defaultPalettes];
+            }
+        }
+        defaultPalettes.forEach(p => {
+            if (!this.unlockedPalettes.includes(p)) this.unlockedPalettes.push(p);
         });
+
+        this.updatePaletteCardsUI();
 
         // 🧹 Eski takılı kalmış aktif oyunu ve skoru kesin olarak sıfırla (0 puandan ve boş tahtadan başla)
         const hasClearedStuckGame = this.safeGet('gridoria_has_cleared_stuck_v2');
@@ -382,7 +410,8 @@ class GridoriaGame {
                     const val = Math.abs(rawVal);
                     const isMaxCrownTile = val === maxBoardTile && val >= 16;
                     const hp = isFrozen ? (this.iceGrid[r][c] || 3) : 0;
-                    const baseClassName = `tile val-${val}${isFrozen ? ` is-frozen ice-hp-${hp}` : ''}${isMaxCrownTile ? ' is-king-crown' : ''}`;
+                    const kClass = val >= 1000 ? ` val-${this.formatTileVal(val).toLowerCase()}` : '';
+                    const baseClassName = `tile val-${val}${kClass}${isFrozen ? ` is-frozen ice-hp-${hp}` : ''}${isMaxCrownTile ? ' is-king-crown' : ''}`;
                     const displayVal = this.formatTileVal(val);
 
                     let targetInner = '';
@@ -403,6 +432,8 @@ class GridoriaGame {
                         if (!tile.classList.contains('sliding-merge')) {
                             tile.style.transform = '';
                             tile.style.opacity = '';
+                            tile.style.visibility = '';
+                            tile.style.display = '';
                             tile.style.borderRadius = '';
                         }
                         const isJelly = tile.classList.contains('tile-water-drop');
@@ -671,10 +702,14 @@ class GridoriaGame {
         // Global gesture protection: Prevent WKWebView rubber-band scrolling while allowing all modal lists to scroll smoothly
         document.addEventListener('touchmove', (e) => {
             const scrollable = e.target.closest(
-                '.shop-content-scroll, .profile-content-scroll, .settings-content-scroll, ' +
+                '.settings-main-scroll-list, #settings-scroll-list, .color-palettes-list, .palette-card, ' +
+                '.settings-panel-view, #panel-settings-colors, #panel-settings-themes, ' +
+                '.full-screen-settings, .settings-full-container, .settings-content-scroll, ' +
+                '.shop-full-container, .shop-content-scroll, .profile-full-container, .profile-content-scroll, ' +
+                '.leaderboard-full-container, .lb-list-scroll, #leaderboard-list, ' +
                 '.theme-tab-content, .bg-themes-grid, .palette-themes-grid, ' +
                 '.modal-card, .modal-body, .missions-panel, .daily-grid-container, ' +
-                '.lb-list-scroll, #leaderboard-list, .scrollable-area, .crop-modal-card'
+                '.scrollable-area, .crop-modal-card, [data-scrollable="true"]'
             );
             if (scrollable) {
                 return; // Allow native touch scrolling in modals!
@@ -700,6 +735,7 @@ class GridoriaGame {
                 const isEnabled = sounds.toggleSound();
                 const btn = document.getElementById('btn-audio');
                 if (btn) btn.style.opacity = isEnabled ? '1' : '0.4';
+                this.updateSettingsQuickTogglesUI();
             }
         });
 
@@ -725,16 +761,17 @@ class GridoriaGame {
         listen('btn-open-shop-top', 'click', openShopModal);
         listen('btn-close-shop', 'click', closeShopModal);
 
-        // Gem Card Purchase Handlers (Using StoreKit on iOS, fallback in Web)
+        // Gem Card Purchase Handlers (Using StoreKit on iOS, Google Play Billing on Android)
         document.querySelectorAll('.gem-card').forEach(card => {
             const gemsAmount = parseInt(card.dataset.gems, 10) || 0;
             const productId = card.dataset.productId || `com.mawelly.gridoria.gems${gemsAmount}`;
             const buyBtn = card.querySelector('.gem-buy-btn');
             if (buyBtn && gemsAmount > 0) {
                 buyBtn.addEventListener('click', () => {
-                    if (typeof NativeBridge !== 'undefined' && NativeBridge.isIOS()) {
+                    if (typeof NativeBridge !== 'undefined' && (NativeBridge.isIOS() || NativeBridge.isAndroid())) {
                         NativeBridge.triggerHaptic('medium');
-                        this.showToast('Apple ile satın alma başlatılıyor...', '⏳', 'BEKLEYİN');
+                        const storeName = NativeBridge.isIOS() ? 'Apple' : 'Google Play';
+                        this.showToast(`${storeName} ile satın alma başlatılıyor...`, '⏳', 'BEKLEYİN');
                         NativeBridge.buyProduct(productId);
                         return;
                     }
@@ -766,11 +803,11 @@ class GridoriaGame {
                                 powerups.addFreeCount('hammer', 3);
                                 powerups.addFreeCount('bomb', 3);
                                 powerups.addFreeCount('swap', 3);
-                                this.showToast('Süper Joker Paketi Eklendi! (3x Çekiç, 3x Bomba, 3x Değiştirici)', '⚡', 'PAKET KAZANILDI');
+                                this.showToast('Süper Joker Paketi Eklendi! (3x UFO, 3x Dron, 3x Değiştirici)', '⚡', 'PAKET KAZANILDI');
                             } else {
                                 powerups.addFreeCount(boosterType, count);
-                                const nameMap = { hammer: 'Çekiç', bomb: 'Bomba', swap: 'Değiştirici', shrink: 'Küçült' };
-                                const iconMap = { hammer: '🔨', bomb: '💣', swap: '🔄', shrink: '🧪' };
+                                const nameMap = { hammer: 'UFO', bomb: 'Dron', swap: 'Değiştirici', shrink: 'Küçült' };
+                                const iconMap = { hammer: '🛸', bomb: '🎯', swap: '🔄', shrink: '🧪' };
                                 this.showToast(`${count}x ${nameMap[boosterType] || boosterType} Envanterinize Eklendi!`, iconMap[boosterType] || '🎁', 'JOKER EKLENDİ');
                             }
                         }
@@ -782,9 +819,10 @@ class GridoriaGame {
         // Starter Pack Handler
         listen('btn-buy-starter-pack', 'click', () => {
             const productId = 'com.mawelly.gridoria.starterpack';
-            if (typeof NativeBridge !== 'undefined' && NativeBridge.isIOS()) {
+            if (typeof NativeBridge !== 'undefined' && (NativeBridge.isIOS() || NativeBridge.isAndroid())) {
                 NativeBridge.triggerHaptic('medium');
-                this.showToast('Apple ile satın alma başlatılıyor...', '⏳', 'BEKLEYİN');
+                const storeName = NativeBridge.isIOS() ? 'Apple' : 'Google Play';
+                this.showToast(`${storeName} ile satın alma başlatılıyor...`, '⏳', 'BEKLEYİN');
                 NativeBridge.buyProduct(productId);
                 return;
             }
@@ -795,9 +833,10 @@ class GridoriaGame {
         // VIP Pack Handler
         listen('btn-buy-vip', 'click', () => {
             const productId = 'com.mawelly.gridoria.vip';
-            if (typeof NativeBridge !== 'undefined' && NativeBridge.isIOS()) {
+            if (typeof NativeBridge !== 'undefined' && (NativeBridge.isIOS() || NativeBridge.isAndroid())) {
                 NativeBridge.triggerHaptic('medium');
-                this.showToast('Apple ile satın alma başlatılıyor...', '⏳', 'BEKLEYİN');
+                const storeName = NativeBridge.isIOS() ? 'Apple' : 'Google Play';
+                this.showToast(`${storeName} ile satın alma başlatılıyor...`, '⏳', 'BEKLEYİN');
                 NativeBridge.buyProduct(productId);
                 return;
             }
@@ -805,15 +844,50 @@ class GridoriaGame {
             this.onPurchaseSuccess(productId);
         });
 
-        // Restore Purchases Handler (Required by Apple App Store Review)
+        // Restore Purchases Handler (Apple App Store & Google Play)
         listen('btn-restore-purchases', 'click', () => {
-            if (typeof NativeBridge !== 'undefined' && NativeBridge.isIOS()) {
+            if (typeof NativeBridge !== 'undefined' && (NativeBridge.isIOS() || NativeBridge.isAndroid())) {
                 NativeBridge.triggerHaptic('medium');
-                this.showToast('Satın alımlarınız Apple sunucularından kontrol ediliyor...', '⏳', 'GERİ YÜKLEME');
+                const storeName = NativeBridge.isIOS() ? 'Apple' : 'Google Play';
+                this.showToast(`Satın alımlarınız ${storeName} üzerinden kontrol ediliyor...`, '⏳', 'GERİ YÜKLEME');
                 NativeBridge.restorePurchases();
                 return;
             }
             this.showToast('Satın alımlarınız kontrol edildi ve güncellendi! 👑', '✅', 'GERİ YÜKLENDİ');
+        });
+
+        // 🎮 Google Play Games & Store Review Handlers
+        listen('btn-play-games-leaderboard', 'click', () => {
+            if (typeof NativeBridge !== 'undefined' && typeof NativeBridge.showLeaderboard === 'function') {
+                NativeBridge.triggerHaptic('medium');
+                NativeBridge.showLeaderboard();
+            }
+        });
+
+        listen('btn-rate-game', 'click', () => {
+            if (typeof NativeBridge !== 'undefined' && typeof NativeBridge.requestInAppReview === 'function') {
+                NativeBridge.triggerHaptic('medium');
+                NativeBridge.requestInAppReview();
+            } else {
+                this.showToast('Teşekkürler! Oyunumuzu puanladığınız için mutluyuz ⭐', '⭐');
+            }
+        });
+
+        listen('btn-open-play-achievements', 'click', () => {
+            if (typeof NativeBridge !== 'undefined' && typeof NativeBridge.showAchievements === 'function') {
+                NativeBridge.triggerHaptic('medium');
+                NativeBridge.showAchievements();
+            }
+        });
+
+        listen('btn-check-updates', 'click', () => {
+            if (typeof NativeBridge !== 'undefined' && typeof NativeBridge.checkForUpdates === 'function') {
+                NativeBridge.triggerHaptic('light');
+                this.showToast('Google Play güncellemeleri kontrol ediliyor...', '🔄', 'KONTROL');
+                NativeBridge.checkForUpdates();
+            } else {
+                this.showToast('En güncel Gridoria sürümünü kullanıyorsunuz! ✅', '✅');
+            }
         });
 
         // Restart Game
@@ -845,6 +919,8 @@ class GridoriaGame {
         listen('btn-themes', 'click', () => {
             const modal = document.getElementById('modal-themes');
             if (modal) modal.classList.remove('hidden');
+            this.updateThemeCardsUI();
+            this.updatePaletteCardsUI();
         });
         listen('btn-close-themes', 'click', () => {
             const modal = document.getElementById('modal-themes');
@@ -862,6 +938,7 @@ class GridoriaGame {
             if (btnColor) btnColor.classList.remove('active');
             if (contentBg) contentBg.classList.remove('hidden');
             if (contentColor) contentColor.classList.add('hidden');
+            this.updateThemeCardsUI();
         });
 
         listen('tab-btn-color', 'click', () => {
@@ -874,10 +951,11 @@ class GridoriaGame {
             if (btnBg) btnBg.classList.remove('active');
             if (contentColor) contentColor.classList.remove('hidden');
             if (contentBg) contentBg.classList.add('hidden');
+            this.updatePaletteCardsUI();
         });
 
-        // Background card selection
-        document.querySelectorAll('.bg-card').forEach(card => {
+        // Background card selection in Themes Modal
+        document.querySelectorAll('#modal-themes .bg-card').forEach(card => {
             card.addEventListener('click', () => {
                 const bgKey = card.dataset.bg;
                 const cost = Number(card.dataset.cost || 0);
@@ -885,11 +963,14 @@ class GridoriaGame {
             });
         });
 
-        // Color Palette card selection
-        document.querySelectorAll('.palette-card').forEach(card => {
-            card.addEventListener('click', () => {
+        // Color Palette card selection across all modals (Themes modal and Settings)
+        document.querySelectorAll('.palette-card, .color-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 const colorKey = card.dataset.color;
-                this.selectColorPalette(colorKey);
+                if (colorKey) {
+                    this.selectColorPalette(colorKey);
+                }
             });
         });
 
@@ -1006,6 +1087,9 @@ class GridoriaGame {
             setActiveNavTab('settings');
             const modal = document.getElementById('modal-settings');
             if (modal) modal.classList.remove('hidden');
+            this.updateThemeCardsUI();
+            this.updatePaletteCardsUI();
+            this.updateSettingsQuickTogglesUI();
         });
 
         // Top Bar Header Event Listeners
@@ -1204,33 +1288,15 @@ class GridoriaGame {
         // 🔊 Top 2 Quick Toggle Icon Cards (Audio & Haptics)
         listen('btn-toggle-sound-card', 'click', () => {
             if (typeof sounds !== 'undefined' && typeof sounds.toggleSound === 'function') {
-                const isMuted = sounds.toggleSound();
-                const card = document.getElementById('btn-toggle-sound-card');
-                const icon = document.getElementById('icon-sound-state');
-                const title = document.getElementById('text-sound-title');
-
-                if (card) {
-                    card.classList.toggle('active', !isMuted);
-                    card.classList.toggle('off', isMuted);
-                }
-                if (icon) icon.innerText = isMuted ? '🔇' : '🔊';
-                if (title) title.innerText = isMuted ? 'SES KAPALI' : 'SES AÇIK';
+                sounds.toggleSound();
+                this.updateSettingsQuickTogglesUI();
             }
         });
 
         listen('btn-toggle-vibe-card', 'click', () => {
             if (typeof effects !== 'undefined' && typeof effects.toggleVibration === 'function') {
-                const isEnabled = effects.toggleVibration();
-                const card = document.getElementById('btn-toggle-vibe-card');
-                const icon = document.getElementById('icon-vibe-state');
-                const title = document.getElementById('text-vibe-title');
-
-                if (card) {
-                    card.classList.toggle('active', isEnabled);
-                    card.classList.toggle('off', !isEnabled);
-                }
-                if (icon) icon.innerText = isEnabled ? '📳' : '🔕';
-                if (title) title.innerText = isEnabled ? 'TİTREŞİM AÇIK' : 'TİTREŞİM KAPALI';
+                effects.toggleVibration();
+                this.updateSettingsQuickTogglesUI();
             }
         });
 
@@ -1248,6 +1314,9 @@ class GridoriaGame {
                 panelThemes.classList.remove('hidden');
                 panelColors.classList.remove('active');
                 panelColors.classList.add('hidden');
+                const scrollList = document.getElementById('settings-scroll-list');
+                if (scrollList) scrollList.scrollTop = 0;
+                this.updateThemeCardsUI();
             });
 
             tabColorsBtn.addEventListener('click', () => {
@@ -1257,11 +1326,20 @@ class GridoriaGame {
                 panelColors.classList.remove('hidden');
                 panelThemes.classList.remove('active');
                 panelThemes.classList.add('hidden');
+                const scrollList = document.getElementById('settings-scroll-list');
+                if (scrollList) scrollList.scrollTop = 0;
+                this.updatePaletteCardsUI();
             });
         }
 
+        listen('btn-close-settings', 'click', () => {
+            const modal = document.getElementById('modal-settings');
+            if (modal) modal.classList.add('hidden');
+            setActiveNavTab('home');
+        });
+
         // 🪵 Wood & Background Theme Selection inside Settings
-        document.querySelectorAll('#panel-settings-themes .bg-card, .bg-card').forEach(card => {
+        document.querySelectorAll('#panel-settings-themes .bg-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (e) e.stopPropagation();
                 const bgKey = card.dataset.bg;
@@ -1273,20 +1351,6 @@ class GridoriaGame {
                 }
                 if (bgKey) {
                     this.selectBgTheme(bgKey, cost);
-                }
-            });
-        });
-
-        // 🎨 Color Palette Selection inside Settings (Tile Colors)
-        document.querySelectorAll('.color-card, .palette-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (e) e.stopPropagation();
-                const colorKey = card.dataset.color;
-                if (colorKey) {
-                    this.selectColorPalette(colorKey);
-                    document.querySelectorAll('.color-card, .palette-card').forEach(c => {
-                        c.classList.toggle('active', c.dataset.color === colorKey);
-                    });
                 }
             });
         });
@@ -1443,7 +1507,7 @@ class GridoriaGame {
                     this.safeRemove('gridoria_best_tile');
                     this.clearActiveGameState();
                     this.highScore = 0;
-                    this.bestTile = 2048;
+                    this.bestTile = 1024;
                     this.resetGame();
                     this.updateUI();
                     this.updateMainMenuStats();
@@ -1460,26 +1524,27 @@ class GridoriaGame {
         listen('btn-home-menu', 'click', () => this.showMainMenu());
         listen('btn-missions', 'click', () => this.showMainMenu());
 
-        listen('btn-main-themes', 'click', () => {
+        const openThemes = () => {
             const modal = document.getElementById('modal-themes');
             if (modal) modal.classList.remove('hidden');
-        });
-        listen('btn-main-missions', 'click', () => {
+        };
+        listen('btn-main-themes', 'click', openThemes);
+        listen('btn-menu-themes', 'click', openThemes);
+        listen('btn-themes', 'click', openThemes);
+
+        const openMissions = () => {
             const modal = document.getElementById('modal-missions');
             if (modal) modal.classList.remove('hidden');
-        });
-        listen('btn-menu-missions', 'click', () => {
-            const modal = document.getElementById('modal-missions');
-            if (modal) modal.classList.remove('hidden');
-        });
-        listen('btn-main-shop', 'click', () => {
+        };
+        listen('btn-main-missions', 'click', openMissions);
+        listen('btn-menu-missions', 'click', openMissions);
+
+        const openShop = () => {
             const shopBtn = document.getElementById('btn-open-shop');
             if (shopBtn) shopBtn.click();
-        });
-        listen('menu-btn-shop', 'click', () => {
-            const shopBtn = document.getElementById('btn-open-shop');
-            if (shopBtn) shopBtn.click();
-        });
+        };
+        listen('btn-main-shop', 'click', openShop);
+        listen('btn-menu-shop', 'click', openShop);
 
         listen('btn-close-missions', 'click', () => {
             const modal = document.getElementById('modal-missions');
@@ -1534,7 +1599,7 @@ class GridoriaGame {
     }
 
     formatTileVal(val) {
-        if (!val) return '2048';
+        if (!val) return '0';
         const absVal = Math.abs(val);
         if (absVal >= 1000000) return Math.floor(absVal / 1000000) + 'M';
         if (absVal >= 1000) return Math.floor(absVal / 1000) + 'K';
@@ -1609,7 +1674,6 @@ class GridoriaGame {
         if (gameView) gameView.classList.remove('hidden');
         if (navBar) navBar.classList.add('hidden');
         this.updateBannerVisibility();
-        if (typeof sounds !== 'undefined') sounds.playShoot();
     }
 
     updateMainMenuStats() {
@@ -1664,7 +1728,7 @@ class GridoriaGame {
                 const resumedLabel = window.i18n ? window.i18n.t('resumed_tile') : 'KALDIĞINIZ TAŞ';
                 const scoreLabel = window.i18n ? window.i18n.t('score') : 'SKOR';
                 const locale = window.i18n ? window.i18n.getLocale() : 'tr-TR';
-                if (heroLabel) heroLabel.innerText = `${resumedLabel}: ${activeMax} (${scoreLabel}: ${activeScore.toLocaleString(locale)})`;
+                if (heroLabel) heroLabel.innerText = `${resumedLabel}: ${this.formatTileVal(activeMax)} (${scoreLabel}: ${activeScore.toLocaleString(locale)})`;
                 if (playBtnText) playBtnText.innerText = window.i18n ? window.i18n.t('continue') : 'DEVAM ET';
             } else {
                 if (menuBestTile) menuBestTile.innerText = this.formatTileVal(this.bestTile);
@@ -1792,14 +1856,14 @@ class GridoriaGame {
                 }, 520);
 
             } else if (currentTargetVal >= 2048) {
-                // 2048'e ulaşıldı! Kutlama ve döngüyü sıfırlama
+                // 2K hedefine ulaşıldı! Kutlama ve döngüyü sıfırlama
                 targetTile.classList.add('merge-pop');
                 setTimeout(() => {
                     resetDemo();
                 }, 1000);
 
             } else {
-                // SÜREKLİ KATLANMA (2->4->8->16->32->64->128->256->512->1024->2048)
+                // SÜREKLİ KATLANMA (2->4->8->16->32->64->128->256->512->1024->2K)
                 const shootVal = currentTargetVal;
                 if (flyingVal) flyingVal.innerText = shootVal.toString();
                 updateTileStyle(flyingTile, shootVal);
@@ -2066,22 +2130,6 @@ class GridoriaGame {
         }
     }
 
-    selectBgTheme(bgKey, cost = 0) {
-        if (bgKey === 'custom') {
-            this.openCustomBgConfirmModal();
-            return;
-        }
-        this.currentBgTheme = bgKey;
-        this.safeSet('gridoria_bg_theme', bgKey);
-        document.body.dataset.bgTheme = bgKey;
-        document.body.dataset.theme = bgKey;
-        document.body.style.backgroundImage = 'none';
-        document.querySelectorAll('.bg-card').forEach(c => {
-            c.classList.toggle('active', c.dataset.bg === bgKey);
-        });
-        if (typeof sounds !== 'undefined') sounds.playPop();
-    }
-
     applyCustomBgPhoto() {
         const customBgData = this.safeGet('gridoria_custom_bg');
         if (customBgData && this.currentBgTheme === 'custom') {
@@ -2136,13 +2184,13 @@ class GridoriaGame {
         if (modal) modal.classList.add('hidden');
 
         if (isFirstTimeReward) {
-            this.addGems(50);
+            this.addGems(25);
             if (typeof sounds !== 'undefined') sounds.playLevelUp();
             if (typeof effects !== 'undefined') {
                 effects.triggerHaptic('heavy');
                 effects.showConfetti();
             }
-            this.setStatus('🎁 +50 💎 Profil Hediye Elması Hesabınıza Eklendi!', 'merge');
+            this.setStatus('🎁 +25 💎 Profil Hediye Elması Hesabınıza Eklendi!', 'merge');
         } else {
             if (typeof sounds !== 'undefined') sounds.playPop();
             this.setStatus('✏️ Profil Bilgileriniz Başarıyla Güncellendi!', 'normal');
@@ -2158,7 +2206,7 @@ class GridoriaGame {
         const names = [
             'EfsaneEjder', 'Bozkurt', 'AslanKral', 'Şimşek', 'KaraKartal', 
             'Kaplan99', 'ZirveTekniği', 'BulmacaUstadı', 'Gökbörü', 'NeonKnight', 
-            'Rüzgar', 'Master2048', 'Fırtına', 'BıçakGibi', 'Karakalem', 
+            'Rüzgar', 'TacticMaster', 'Fırtına', 'BıçakGibi', 'Karakalem', 
             'SiberKral', 'AltınPati', 'AlevKapanı', 'BombaÇocuğu', 'Matrix42', 
             'Akıncı', 'Göktürk', 'KuleAvcısı', 'Pusula', 'GizemliMimar', 
             'SonNinja', 'BüyükKaptan', 'KırmızıŞahin', 'GeceAvcısı', 'MistikKral', 
@@ -2194,7 +2242,7 @@ class GridoriaGame {
 
         // Add User Player
         const userScore = this.highScore || 0;
-        const userTile = this.bestTile || 2048;
+        const userTile = this.bestTile || 1024;
         list.push({
             name: this.username || 'Misafir_4982',
             avatar: this.userAvatar || '🧙‍♂️',
@@ -2235,7 +2283,7 @@ class GridoriaGame {
                 name: this.username || 'Oyuncu',
                 avatar: this.userAvatar || '🧙‍♂️',
                 score: score,
-                tile: this.bestTile || 2048,
+                tile: this.bestTile || 1024,
                 updatedAt: Date.now()
             };
 
@@ -2272,7 +2320,7 @@ class GridoriaGame {
                 name: item.name || 'Oyuncu',
                 avatar: item.avatar || '🧙‍♂️',
                 score: parseInt(item.score, 10) || 0,
-                tile: parseInt(item.tile, 10) || 2048,
+                tile: parseInt(item.tile, 10) || 1024,
                 isUser: item.playerId === currentPid
             }));
 
@@ -2284,7 +2332,7 @@ class GridoriaGame {
                     name: this.username || 'Misafir_4982',
                     avatar: this.userAvatar || '🧙‍♂️',
                     score: this.highScore || 0,
-                    tile: this.bestTile || 2048,
+                    tile: this.bestTile || 1024,
                     isUser: true
                 });
                 realPlayers.sort((a, b) => b.score - a.score);
@@ -2329,7 +2377,7 @@ class GridoriaGame {
                         <div class="podium-avatar" id="podium-avatar-2"></div>
                         <div class="podium-name">${top2.name} ${top2.isUser ? '(Sen)' : ''}</div>
                         <div class="podium-score">${top2.score.toLocaleString('tr-TR')}</div>
-                        <div class="podium-tile">${top2.tile}</div>
+                        <div class="podium-tile">${this.formatTileVal(top2.tile)}</div>
                         <div class="podium-base base-2">2</div>
                     </div>
                     <div class="podium-card rank-1-card">
@@ -2337,7 +2385,7 @@ class GridoriaGame {
                         <div class="podium-avatar" id="podium-avatar-1"></div>
                         <div class="podium-name">${top1.name} ${top1.isUser ? '(Sen)' : ''}</div>
                         <div class="podium-score">${top1.score.toLocaleString('tr-TR')}</div>
-                        <div class="podium-tile">${top1.tile}</div>
+                        <div class="podium-tile">${this.formatTileVal(top1.tile)}</div>
                         <div class="podium-base base-1">1</div>
                     </div>
                     <div class="podium-card rank-3-card">
@@ -2345,7 +2393,7 @@ class GridoriaGame {
                         <div class="podium-avatar" id="podium-avatar-3"></div>
                         <div class="podium-name">${top3.name} ${top3.isUser ? '(Sen)' : ''}</div>
                         <div class="podium-score">${top3.score.toLocaleString('tr-TR')}</div>
-                        <div class="podium-tile">${top3.tile}</div>
+                        <div class="podium-tile">${this.formatTileVal(top3.tile)}</div>
                         <div class="podium-base base-3">3</div>
                     </div>
                 `;
@@ -2370,7 +2418,7 @@ class GridoriaGame {
                             <span class="lb-avatar" data-user-avatar="${item.avatar}"></span>
                             <div class="lb-user-info">
                                 <span class="lb-name">${item.name} ${item.isUser ? '<span class="user-tag">(Sen)</span> <span class="lb-edit-icon-badge btn-lb-row-edit" title="İsmi Değiştir">✏️</span>' : ''}</span>
-                                <span class="lb-tile-tag">${item.tile} Blok</span>
+                                <span class="lb-tile-tag">${this.formatTileVal(item.tile)} Blok</span>
                             </div>
                             <div class="lb-score-box">
                                 <span class="lb-score-val">${item.score.toLocaleString('tr-TR')}</span>
@@ -2497,7 +2545,6 @@ class GridoriaGame {
         this.mergesThisTurn = 0;
         this.setStatus(`Sütun ${col + 1} hedeflendi`, 'aiming');
 
-        if (typeof sounds !== 'undefined') sounds.playShoot();
         if (typeof effects !== 'undefined') effects.triggerHaptic('light');
 
         const valToPlace = this.currentShooterVal;
@@ -2592,7 +2639,7 @@ class GridoriaGame {
             // 1K (1024)'e Ulaşıldığında: 2 ve 4 ARTIK GELMEZ! EN DÜŞÜK TAŞ EN AZ 8!
             options = [{ val: 8, w: 35 }, { val: 16, w: 30 }, { val: 32, w: 20 }, { val: 64, w: 10 }, { val: 128, w: 5 }];
         } else if (currentMax < 4096) {
-            // 2K (2048)'ye Ulaşıldığında: EN DÜŞÜK TAŞ EN AZ 16! (2, 4, 8 elenir)
+            // 2K'ye Ulaşıldığında: EN DÜŞÜK TAŞ EN AZ 16! (2, 4, 8 elenir)
             options = [{ val: 16, w: 35 }, { val: 32, w: 30 }, { val: 64, w: 20 }, { val: 128, w: 10 }, { val: 256, w: 5 }];
         } else {
             // 4K (4096+) ve Üzeri: EN DÜŞÜK TAŞ EN AZ 32! (2, 4, 8, 16 elenir)
@@ -2702,7 +2749,8 @@ class GridoriaGame {
         const curAbs = Math.abs(this.currentShooterVal);
         const curFrozen = this.currentShooterVal < 0;
         const curDisplay = this.formatTileVal(curAbs);
-        this.currentShooterEl.className = `tile shooter-tile val-${curAbs}${curFrozen ? ' is-frozen ice-hp-3' : ''}`;
+        const curKClass = curAbs >= 1000 ? ` val-${this.formatTileVal(curAbs).toLowerCase()}` : '';
+        this.currentShooterEl.className = `tile shooter-tile val-${curAbs}${curKClass}${curFrozen ? ' is-frozen ice-hp-3' : ''}`;
         if (curFrozen) {
             this.currentShooterEl.innerHTML = `
                 <span class="tile-number">${curDisplay}</span>
@@ -2722,8 +2770,9 @@ class GridoriaGame {
                 const nextDisplay = this.formatTileVal(nextAbs);
                 const remSecs = this.getPeekTimeRemainingSecs();
                 const timerStr = this.formatPeekTimer(remSecs);
+                const nextKClass = nextAbs >= 1000 ? ` val-${this.formatTileVal(nextAbs).toLowerCase()}` : '';
 
-                this.nextTileEl.className = `next-tile val-${nextAbs}${nextFrozen ? ' is-frozen ice-hp-3' : ''}`;
+                this.nextTileEl.className = `next-tile val-${nextAbs}${nextKClass}${nextFrozen ? ' is-frozen ice-hp-3' : ''}`;
                 if (nextFrozen) {
                     this.nextTileEl.innerHTML = `
                         <span class="tile-number">${nextDisplay}</span>
@@ -2768,7 +2817,7 @@ class GridoriaGame {
         this.currentTargetGoal = target;
         this.safeSet('gridoria_target_goal', this.currentTargetGoal.toString());
         const targetValEl = document.getElementById('target-goal-val');
-        if (targetValEl) targetValEl.innerText = this.currentTargetGoal.toLocaleString('tr-TR');
+        if (targetValEl) targetValEl.innerText = this.formatTileVal(this.currentTargetGoal);
     }
 
     applyCeilingGravityAndMerge(callback, activeCell = null) {
@@ -2961,20 +3010,29 @@ class GridoriaGame {
                 this.highScore = this.score;
             }
 
-            const gemReward = newVal >= 4096 ? 100 : newVal >= 2048 ? 50 : newVal >= 1024 ? 25 : newVal >= 512 ? 10 : newVal >= 256 ? 5 : newVal >= 128 ? 2 : newVal >= 64 ? 1 : 0;
+            const gemReward = newVal >= 8192 ? 10 : newVal >= 4096 ? 5 : newVal >= 2048 ? 2 : newVal >= 1024 ? 1 : 0;
             if (gemReward > 0) {
                 this.gems += gemReward;
-                this.setStatus(`+${gemReward} 💎 Harika Birleşme! (${newVal})`, 'ready');
+                this.setStatus(`+${gemReward} 💎 Harika Birleşme! (${this.formatTileVal(newVal)})`, 'ready');
             }
 
-            // 🎯 Dynamic Milestone Goal Progression (256 ➔ 512 ➔ 1024 ➔ 2048...)
+            // 🎯 Dynamic Milestone Goal Progression (256 ➔ 512 ➔ 1024 ➔ 2K...)
             if (newVal >= this.currentTargetGoal) {
                 const reachedGoal = this.currentTargetGoal;
-                const step = Math.max(0, Math.round(Math.log2(reachedGoal / 256)));
-                const extraGems = 5 + (step * 2);
+                const extraGems = reachedGoal >= 4096 ? 5 : reachedGoal >= 2048 ? 3 : reachedGoal >= 1024 ? 2 : 1;
 
                 this.gems += extraGems;
                 this.recalculateTargetGoal();
+
+                // ⭐ Google Play In-App Review & Achievement when reaching major milestone
+                if (reachedGoal >= 2048 && typeof NativeBridge !== 'undefined') {
+                    if (typeof NativeBridge.requestInAppReview === 'function') {
+                        setTimeout(() => NativeBridge.requestInAppReview(), 2500);
+                    }
+                    if (typeof NativeBridge.unlockAchievement === 'function') {
+                        NativeBridge.unlockAchievement('achievement_reach_2048');
+                    }
+                }
 
                 if (typeof sounds !== 'undefined') sounds.playLevelUp();
                 if (typeof effects !== 'undefined') {
@@ -2989,7 +3047,7 @@ class GridoriaGame {
                 }
 
                 this.showToast(
-                    `🎉 SÜPER GİDİYORSUN!\n${reachedGoal} Hedefine Ulaşıldı! (+${extraGems} 💎 Ekstra Ödül Kazandın)\nYeni Hedef: ${this.currentTargetGoal}!`, 
+                    `🎉 SÜPER GİDİYORSUN!\n${this.formatTileVal(reachedGoal)} Hedefine Ulaşıldı! (+${extraGems} 💎 Ekstra Ödül Kazandın)\nYeni Hedef: ${this.formatTileVal(this.currentTargetGoal)}!`, 
                     '🎯', 
                     'HEDEF ULAŞILDI!'
                 );
@@ -3040,12 +3098,26 @@ class GridoriaGame {
             16: '#d61444',
             24: '#7614d9',
             32: '#e67300',
+            48: '#e11d48',
             64: '#8c14d9',
+            96: '#0284c7',
             128: '#4cb800',
             256: '#c20829',
             512: '#bf190c',
             1024: '#ff9900',
-            2048: '#ffe000'
+            2048: '#ffe000',
+            4096: '#06b6d4',
+            8192: '#ec4899',
+            16384: '#8b5cf6',
+            32768: '#10b981',
+            65536: '#f97316',
+            131072: '#3b82f6',
+            262144: '#e11d48',
+            524288: '#d946ef',
+            1048576: '#ffd700',
+            2097152: '#00f2fe',
+            4194304: '#ff007f',
+            8388608: '#ffffff'
         };
         return colors[val] || '#00eed8';
     }
@@ -3136,9 +3208,9 @@ class GridoriaGame {
 
     claimMission(name) {
         const goals = {
-            merges: [this.missionProgress.merges, 10, 5, '10 Birleşme Yap'],
-            tile: [this.missionProgress.maxTile, 128, 8, '128 Taşını Yap'],
-            score: [this.missionProgress.score, 500, 8, '500 Skor Yap']
+            merges: [this.missionProgress.merges, 10, 3, '10 Birleşme Yap'],
+            tile: [this.missionProgress.maxTile, 128, 5, '128 Taşını Yap'],
+            score: [this.missionProgress.score, 500, 5, '500 Skor Yap']
         };
         const [value, target, reward, label] = goals[name] || [0, 1, 0, name];
         if (value < target || this.missionProgress.claimed.includes(name)) return;
@@ -3151,9 +3223,9 @@ class GridoriaGame {
 
     checkMissionCompletion() {
         const goals = {
-            merges: [this.missionProgress.merges, 10, 5, '10 Birleşme Görevi'],
-            tile: [this.missionProgress.maxTile, 128, 8, '128 Taşı Görevi'],
-            score: [this.missionProgress.score, 500, 8, '500 Skor Görevi']
+            merges: [this.missionProgress.merges, 10, 3, '10 Birleşme Görevi'],
+            tile: [this.missionProgress.maxTile, 128, 5, '128 Taşı Görevi'],
+            score: [this.missionProgress.score, 500, 5, '500 Skor Görevi']
         };
         Object.entries(goals).forEach(([name, [value, target, reward, label]]) => {
             const claimed = this.missionProgress.claimed.includes(name);
@@ -3171,13 +3243,13 @@ class GridoriaGame {
 
     getDailyRewardsConfig() {
         return [
-            { day: 1, gems: 50, hammer: 0, bomb: 0, title: 'Gün 1', label: '50 💎', icon: '💎' },
-            { day: 2, gems: 100, hammer: 1, bomb: 0, title: 'Gün 2', label: '100 💎 + 🔨', icon: '🔨' },
-            { day: 3, gems: 150, hammer: 0, bomb: 0, title: 'Gün 3', label: '150 💎', icon: '💎' },
-            { day: 4, gems: 200, hammer: 0, bomb: 1, title: 'Gün 4', label: '200 💎 + 💣', icon: '💣' },
-            { day: 5, gems: 250, hammer: 1, bomb: 0, title: 'Gün 5', label: '250 💎 + 🔨', icon: '🔨' },
-            { day: 6, gems: 280, hammer: 0, bomb: 1, title: 'Gün 6', label: '280 💎 + 💣', icon: '💣' },
-            { day: 7, gems: 300, hammer: 1, bomb: 1, title: 'Gün 7+ SÜPER PAKET', label: '300 💎 + 🔨 + 💣', isMega: true }
+            { day: 1, gems: 5, hammer: 0, bomb: 0, title: 'Gün 1', label: '5 💎', icon: '💎' },
+            { day: 2, gems: 10, hammer: 1, bomb: 0, title: 'Gün 2', label: '10 💎 + 🛸', icon: '🛸' },
+            { day: 3, gems: 15, hammer: 0, bomb: 0, title: 'Gün 3', label: '15 💎', icon: '💎' },
+            { day: 4, gems: 15, hammer: 0, bomb: 1, title: 'Gün 4', label: '15 💎 + 🎯 Dron', icon: '🎯' },
+            { day: 5, gems: 20, hammer: 1, bomb: 0, title: 'Gün 5', label: '20 💎 + 🛸', icon: '🛸' },
+            { day: 6, gems: 25, hammer: 0, bomb: 1, title: 'Gün 6', label: '25 💎 + 🎯 Dron', icon: '🎯' },
+            { day: 7, gems: 40, hammer: 1, bomb: 1, title: 'Gün 7+ SÜPER PAKET', label: '40 💎 + 🛸 + 🎯', isMega: true }
         ];
     }
 
@@ -3235,23 +3307,28 @@ class GridoriaGame {
 
             card.className = `daily-card ${r.isMega ? 'mega-card' : ''} ${isClaimed ? 'claimed-day' : ''} ${isActive ? 'active-day' : ''} ${isLocked ? 'locked-day' : ''}`;
 
+            const droneSvgHtml = `<svg viewBox="0 0 92 78" class="military-drone-svg daily-drone-svg" fill="none"><path d="M46 4 L88 52 L72 68 L58 58 L46 62 L34 58 L20 68 L4 52 Z" fill="#0f172a" stroke="#00f2fe" stroke-width="2.5"/><circle cx="46" cy="44" r="7" fill="#00f2fe"/><circle cx="46" cy="18" r="3" fill="#ef4444"/><polygon points="37,60 43,60 40,75" fill="#00f2fe"/><polygon points="49,60 55,60 52,75" fill="#00f2fe"/></svg>`;
+
             if (r.isMega) {
                 card.innerHTML = `
                     <div class="daily-card-header">${r.title}</div>
                     <div class="daily-card-body">
                         <div class="mega-rewards-row">
                             <div class="mega-reward-item"><span>💎</span> ${r.gems}</div>
-                            <div class="mega-reward-item"><span>🔨</span> 1x</div>
-                            <div class="mega-reward-item"><span>💣</span> 1x</div>
+                            <div class="mega-reward-item"><span>🛸</span> 1x</div>
+                            <div class="mega-reward-item"><span class="daily-drone-icon">${droneSvgHtml}</span> 1x</div>
                         </div>
                     </div>
                     ${isClaimed ? '<div class="daily-card-checkmark">✓</div>' : ''}
                 `;
             } else {
+                const iconHtml = (r.bomb > 0)
+                    ? `<span class="daily-card-icon daily-drone-icon">${droneSvgHtml}</span>`
+                    : `<span class="daily-card-icon">${r.icon}</span>`;
                 card.innerHTML = `
                     <div class="daily-card-header">${r.title}</div>
                     <div class="daily-card-body">
-                        <span class="daily-card-icon">${r.icon}</span>
+                        ${iconHtml}
                         <span class="daily-card-val">${r.label}</span>
                     </div>
                     ${isClaimed ? '<div class="daily-card-checkmark">✓</div>' : ''}
@@ -3345,11 +3422,11 @@ class GridoriaGame {
         // Toast feedback message
         let rewardMsg = `Günlük Ödül Alındı! +${currentReward.gems} 💎`;
         if (currentReward.hammer > 0 && currentReward.bomb > 0) {
-            rewardMsg = `EFSANEVİ ÖDÜL! +${currentReward.gems}💎 +1x🔨 +1x💣`;
+            rewardMsg = `EFSANEVİ ÖDÜL! +${currentReward.gems}💎 +1x🛸 +1x🎯 Dron`;
         } else if (currentReward.hammer > 0) {
-            rewardMsg = `Günlük Ödül! +${currentReward.gems}💎 ve 1x 🔨 Çekiç!`;
+            rewardMsg = `Günlük Ödül! +${currentReward.gems}💎 ve 1x 🛸 UFO!`;
         } else if (currentReward.bomb > 0) {
-            rewardMsg = `Günlük Ödül! +${currentReward.gems}💎 ve 1x 💣 Bomba!`;
+            rewardMsg = `Günlük Ödül! +${currentReward.gems}💎 ve 1x 🎯 Dron!`;
         }
 
         this.showToast(rewardMsg, '🎁');
@@ -3533,12 +3610,12 @@ class GridoriaGame {
                 this.selectedAvatarTemp = croppedDataUrl;
                 this.safeSet('gridoria_user_avatar', croppedDataUrl);
                 
-                const profileImg = document.getElementById('user-avatar-img');
-                const menuImg = document.getElementById('menu-avatar-img');
-                const editPreviewImg = document.getElementById('edit-avatar-preview-img');
-                if (profileImg) profileImg.src = croppedDataUrl;
-                if (menuImg) menuImg.src = croppedDataUrl;
-                if (editPreviewImg) editPreviewImg.src = croppedDataUrl;
+                this.safeSet('gridoria_custom_avatar', croppedDataUrl);
+                const profileCircle = document.getElementById('btn-profile-avatar-circle');
+                if (profileCircle) this.renderAvatarElement(profileCircle, croppedDataUrl);
+                const editPreviewCircle = document.querySelector('.edit-avatar-preview-circle');
+                if (editPreviewCircle) this.renderAvatarElement(editPreviewCircle, croppedDataUrl);
+                this.updateProfileModalStats();
 
                 const cropModal = document.getElementById('modal-crop-photo');
                 if (cropModal) cropModal.classList.add('hidden');
@@ -3576,62 +3653,107 @@ class GridoriaGame {
 
     selectBgTheme(bgKey, cost = 250) {
         if (!Array.isArray(this.unlockedBgs)) {
-            const savedUnlocked = this.safeGet('gridoria_unlocked_bgs');
-            if (savedUnlocked) {
-                try {
-                    this.unlockedBgs = JSON.parse(savedUnlocked);
-                } catch (e) {
-                    this.unlockedBgs = ['obsidian', 'walnut', 'wood', 'forest'];
-                }
-            } else {
-                this.unlockedBgs = ['obsidian', 'walnut', 'wood', 'forest'];
-            }
+            this.unlockedBgs = ['forest', 'walnut', 'wood'];
         }
 
+        const themeNames = {
+            forest: 'Yeşil Orman', walnut: 'Ceviz Ahşap', wood: 'Ceviz Ahşap',
+            aurora: 'Kutup Işıkları', nebula: 'Kozmik Nebula', oak: 'Meşe Ahşap',
+            cherry: 'Kiraz Ahşap', ebony: 'Abanoz Ahşap', clouds: 'Altın Gökyüzü',
+            earth: 'Dünya & Uzay', ocean: 'Turkuaz Deniz', puppy: 'Sevimli Köpekler',
+            cat: 'Kara Kedi', lake: 'Gece Gölü', cyber: 'Siber Yarış',
+            obsidian: 'Gece Siyahı', custom: 'Kendi Fotoğrafın'
+        };
+        const themeName = themeNames[bgKey] || bgKey;
+
+        // Custom photo theme flow
         if (bgKey === 'custom') {
-            const savedCustomBg = this.safeGet('gridoria_custom_bg');
-            this.currentBgTheme = 'custom';
-            this.currentTheme = 'custom';
-            document.body.dataset.bgTheme = 'custom';
-            document.body.dataset.theme = 'custom';
+            const isCustomUnlocked = this.unlockedBgs.includes('custom');
+            if (!isCustomUnlocked) {
+                const themeCost = 250;
+                this.showConfirmDialog({
+                    icon: '🎨',
+                    title: 'Özel Tema Kilidini Aç',
+                    desc: `Kendi fotoğrafınızı arka plan yapma temasını 250 💎 karşılığında açmak istiyor musunuz?\n(Mevcut Elmasınız: ${this.gems.toLocaleString('tr-TR')} 💎)`,
+                    okText: '💎 250 SATIN AL',
+                    cancelText: 'VAZGEÇ',
+                    okBtnBg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    onConfirm: () => {
+                        if (this.gems < themeCost) {
+                            this.showToast(`Yetersiz Elmas! Bu özellik için ${themeCost} 💎 gerekiyor.`, '⚠️', 'YETERSİZ ELMAS');
+                            if (typeof sounds !== 'undefined') sounds.playFeverEnd();
+                            return;
+                        }
+                        if (this.deductGems(themeCost)) {
+                            this.unlockedBgs.push('custom');
+                            this.safeSet('gridoria_unlocked_bgs', JSON.stringify(this.unlockedBgs));
+                            const shopGemsVal = document.getElementById('shop-gems-val');
+                            if (shopGemsVal) shopGemsVal.innerText = this.gems.toLocaleString('tr-TR');
+                            this.showToast('Özel Fotoğraf Teması 250 💎 Karşılığında Açıldı!', '🎨', 'TEMA AÇILDI');
+                            if (typeof effects !== 'undefined') effects.triggerConfetti();
+                            if (typeof sounds !== 'undefined') sounds.playLevelUp();
+                            this.updateThemeCardsUI();
+                            this.openCustomBgConfirmModal();
+                        }
+                    }
+                });
+                return;
+            } else {
+                const savedCustomBg = this.safeGet('gridoria_custom_bg');
+                this.currentBgTheme = 'custom';
+                this.currentTheme = 'custom';
+                document.body.dataset.bgTheme = 'custom';
+                document.body.dataset.theme = 'custom';
 
-            if (savedCustomBg) {
-                this.applyCustomBgPhoto();
+                if (savedCustomBg) {
+                    this.applyCustomBgPhoto();
+                }
+                this.openCustomBgConfirmModal();
+                return;
             }
-            this.openCustomBgConfirmModal();
-            return;
         }
 
-        // Check if theme is locked and requires gem purchase
-        const isFree = cost === 0 || ['obsidian', 'walnut', 'wood', 'forest'].includes(bgKey);
+        // Only forest, walnut, and wood are free by default
+        const isFree = ['forest', 'walnut', 'wood'].includes(bgKey);
         const isUnlocked = isFree || this.unlockedBgs.includes(bgKey);
 
         if (!isUnlocked) {
-            const themeCost = cost > 0 ? cost : 250;
-            if (this.gems < themeCost) {
-                this.showToast(`Yetersiz Elmas! Bu tema için ${themeCost} 💎 gerekiyor.`, '⚠️', 'YETERSIZ ELMAS');
-                if (typeof sounds !== 'undefined') sounds.playFeverEnd();
-                return;
-            }
-            if (this.deductGems(themeCost)) {
-                this.unlockedBgs.push(bgKey);
-                this.safeSet('gridoria_unlocked_bgs', JSON.stringify(this.unlockedBgs));
-                const shopGemsVal = document.getElementById('shop-gems-val');
-                if (shopGemsVal) shopGemsVal.innerText = this.gems.toLocaleString('tr-TR');
-                
-                const themeNames = {
-                    aurora: 'Kutup Işıkları', nebula: 'Kozmik Nebula', oak: 'Meşe Ahşap',
-                    cherry: 'Kiraz Ahşap', ebony: 'Abanoz Ahşap', clouds: 'Altın Gökyüzü',
-                    earth: 'Dünya & Uzay', ocean: 'Turkuaz Deniz', puppy: 'Sevimli Köpekler',
-                    cat: 'Kara Kedi', lake: 'Gece Gölü', cyber: 'Siber Yarış'
-                };
-                this.showToast(`${themeNames[bgKey] || bgKey} Teması ${themeCost} 💎 Karşılığında Satın Alındı!`, '🎨', 'TEMA AÇILDI');
-                if (typeof effects !== 'undefined') effects.triggerConfetti();
-            } else {
-                return;
-            }
+            const themeCost = 250;
+            this.showConfirmDialog({
+                icon: '🎨',
+                title: 'Temayı Satın Al',
+                desc: `"${themeName}" temasını 250 💎 karşılığında satın almak ve hemen uygulamak istiyor musunuz?\n(Mevcut Elmasınız: ${this.gems.toLocaleString('tr-TR')} 💎)`,
+                okText: '💎 250 SATIN AL',
+                cancelText: 'VAZGEÇ',
+                okBtnBg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                onConfirm: () => {
+                    if (this.gems < themeCost) {
+                        this.showToast(`Yetersiz Elmas! Bu tema için ${themeCost} 💎 gerekiyor.`, '⚠️', 'YETERSİZ ELMAS');
+                        if (typeof sounds !== 'undefined') sounds.playFeverEnd();
+                        return;
+                    }
+                    if (this.deductGems(themeCost)) {
+                        this.unlockedBgs.push(bgKey);
+                        this.safeSet('gridoria_unlocked_bgs', JSON.stringify(this.unlockedBgs));
+                        const shopGemsVal = document.getElementById('shop-gems-val');
+                        if (shopGemsVal) shopGemsVal.innerText = this.gems.toLocaleString('tr-TR');
+
+                        this.showToast(`Tebrikler! ${themeName} Teması Açıldı!`, '🎨', 'TEMA AÇILDI');
+                        if (typeof effects !== 'undefined') effects.triggerConfetti();
+                        if (typeof sounds !== 'undefined') sounds.playLevelUp();
+
+                        this._applyTheme(bgKey);
+                    }
+                }
+            });
+            return;
         }
 
+        // Directly apply unlocked / free theme
+        this._applyTheme(bgKey);
+    }
+
+    _applyTheme(bgKey) {
         document.body.style.backgroundImage = '';
         this.currentBgTheme = bgKey;
         this.currentTheme = bgKey;
@@ -3643,27 +3765,18 @@ class GridoriaGame {
         this.safeSet('gridoria_unlocked_bgs', JSON.stringify(this.unlockedBgs));
         this.updateThemeCardsUI();
         this.updateCustomBgCardPreview();
-        if (typeof sounds !== 'undefined') sounds.playReward();
+        if (typeof sounds !== 'undefined') sounds.playPop();
     }
 
     updateThemeCardsUI() {
         if (!Array.isArray(this.unlockedBgs)) {
-            const savedUnlocked = this.safeGet('gridoria_unlocked_bgs');
-            if (savedUnlocked) {
-                try {
-                    this.unlockedBgs = JSON.parse(savedUnlocked);
-                } catch (e) {
-                    this.unlockedBgs = ['obsidian', 'walnut', 'wood', 'forest'];
-                }
-            } else {
-                this.unlockedBgs = ['obsidian', 'walnut', 'wood', 'forest'];
-            }
+            this.unlockedBgs = ['forest', 'walnut', 'wood'];
         }
 
         document.querySelectorAll('.bg-card').forEach(card => {
             const bgKey = card.dataset.bg;
             if (!bgKey) return;
-            const isFree = card.dataset.cost === '0' || ['obsidian', 'walnut', 'wood', 'forest'].includes(bgKey);
+            const isFree = ['forest', 'walnut', 'wood'].includes(bgKey);
             const isUnlocked = isFree || this.unlockedBgs.includes(bgKey);
             const isActive = bgKey === this.currentBgTheme;
 
@@ -3684,21 +3797,144 @@ class GridoriaGame {
                 badge.className = 'bg-price-badge unlocked-badge';
                 badge.innerText = 'AÇILDI ✓';
             } else {
-                const price = card.dataset.cost || '250';
                 badge.className = 'bg-price-badge';
-                badge.innerText = `🔒 ${price} 💎`;
+                badge.innerText = '🔒 250 💎';
             }
         });
     }
 
     selectColorPalette(colorKey) {
+        if (!Array.isArray(this.unlockedPalettes)) {
+            this.unlockedPalettes = ['default', 'fluffy', 'ebonygold'];
+        }
+
+        const paletteNames = {
+            default: 'Varsayılan',
+            fluffy: 'Fluffy (9 Tüylü Renk)',
+            ebonygold: 'Siyah & Altın',
+            inverted: 'Ters Renkler',
+            vivid: 'Canlı Neon',
+            crystal: 'Kristal Buz',
+            lava: 'Volkanik Ateş',
+            galaxy: 'Kozmik Galaksi',
+            red: 'Kırmızı Aşk',
+            emerald: 'Zümrüt Orman',
+            sapphire: 'Safir & Okyanus',
+            vaporwave: 'Siberpunk Neon',
+            relaxing: 'Rahatlatıcı'
+        };
+        const paletteName = paletteNames[colorKey] || colorKey;
+
+        // İlk 3 tanesi ücretsizdir (default, fluffy, ebonygold)
+        const isFree = ['default', 'fluffy', 'ebonygold'].includes(colorKey);
+        const isUnlocked = isFree || this.isVip || this.unlockedPalettes.includes(colorKey);
+
+        if (!isUnlocked) {
+            const paletteCost = 250;
+            this.showConfirmDialog({
+                icon: '🎨',
+                title: 'Renk Paletini Satın Al',
+                desc: `"${paletteName}" renk paletini 250 💎 karşılığında satın almak ve hemen uygulamak istiyor musunuz?\n(Mevcut Elmasınız: ${this.gems.toLocaleString('tr-TR')} 💎)`,
+                okText: '💎 250 SATIN AL',
+                cancelText: 'VAZGEÇ',
+                okBtnBg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                onConfirm: () => {
+                    if (this.gems < paletteCost) {
+                        this.showToast(`Yetersiz Elmas! Bu renk paleti için ${paletteCost} 💎 gerekiyor.`, '⚠️', 'YETERSİZ ELMAS');
+                        if (typeof sounds !== 'undefined') sounds.playFeverEnd();
+                        return;
+                    }
+                    if (this.deductGems(paletteCost)) {
+                        this.unlockedPalettes.push(colorKey);
+                        this.safeSet('gridoria_unlocked_palettes_v3', JSON.stringify(this.unlockedPalettes));
+                        const shopGemsVal = document.getElementById('shop-gems-val');
+                        if (shopGemsVal) shopGemsVal.innerText = this.gems.toLocaleString('tr-TR');
+
+                        this.showToast(`Tebrikler! ${paletteName} Renk Paleti Açıldı!`, '🎨', 'PALET AÇILDI');
+                        if (typeof effects !== 'undefined') effects.triggerConfetti();
+                        if (typeof sounds !== 'undefined') sounds.playLevelUp();
+
+                        this._applyColorPalette(colorKey);
+                    }
+                }
+            });
+            return;
+        }
+
+        this._applyColorPalette(colorKey);
+    }
+
+    _applyColorPalette(colorKey) {
         this.currentColorPalette = colorKey;
         document.body.dataset.colorPalette = colorKey;
-        document.querySelectorAll('.palette-card').forEach(card => {
-            card.classList.toggle('active', card.dataset.color === colorKey);
-        });
         this.safeSet('gridoria_color_palette', colorKey);
+        this.updatePaletteCardsUI();
         if (typeof sounds !== 'undefined') sounds.playReward();
+    }
+
+    updatePaletteCardsUI() {
+        if (!Array.isArray(this.unlockedPalettes)) {
+            this.unlockedPalettes = ['default', 'fluffy', 'ebonygold'];
+        }
+
+        document.querySelectorAll('.palette-card, .color-card').forEach(card => {
+            const colorKey = card.dataset.color;
+            if (!colorKey) return;
+            const isFree = ['default', 'fluffy', 'ebonygold'].includes(colorKey);
+            const isUnlocked = isFree || this.isVip || this.unlockedPalettes.includes(colorKey);
+            const isActive = colorKey === this.currentColorPalette;
+
+            card.classList.toggle('active', isActive);
+            card.classList.toggle('is-locked', !isUnlocked);
+
+            const badge = card.querySelector('.palette-pro-badge');
+            if (badge) {
+                if (isFree) {
+                    badge.style.display = 'none';
+                } else if (isUnlocked) {
+                    badge.style.display = 'inline-block';
+                    badge.innerText = '✓ AÇIK';
+                    badge.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    badge.style.borderColor = '#34d399';
+                    badge.style.boxShadow = '0 4px 10px rgba(16, 185, 129, 0.4)';
+                } else {
+                    badge.style.display = 'inline-block';
+                    badge.innerText = '💎 PRO';
+                    badge.style.background = 'linear-gradient(135deg, #d97706 0%, #92400e 100%)';
+                    badge.style.borderColor = '#fde047';
+                    badge.style.boxShadow = '0 4px 10px rgba(217, 119, 6, 0.5)';
+                }
+            }
+        });
+    }
+
+    updateSettingsQuickTogglesUI() {
+        const soundEnabled = typeof sounds !== 'undefined' ? !!sounds.enabled : true;
+        const soundCard = document.getElementById('btn-toggle-sound-card');
+        const soundIcon = document.getElementById('icon-sound-state');
+        const soundTitle = document.getElementById('text-sound-title');
+
+        if (soundCard) {
+            soundCard.classList.toggle('active', soundEnabled);
+            soundCard.classList.toggle('off', !soundEnabled);
+        }
+        if (soundIcon) soundIcon.innerText = soundEnabled ? '🔊' : '🔇';
+        if (soundTitle) soundTitle.innerText = soundEnabled ? 'SES AÇIK' : 'SES KAPALI';
+
+        const vibeEnabled = typeof effects !== 'undefined' ? !!effects.vibrationEnabled : true;
+        const vibeCard = document.getElementById('btn-toggle-vibe-card');
+        const vibeIcon = document.getElementById('icon-vibe-state');
+        const vibeTitle = document.getElementById('text-vibe-title');
+
+        if (vibeCard) {
+            vibeCard.classList.toggle('active', vibeEnabled);
+            vibeCard.classList.toggle('off', !vibeEnabled);
+        }
+        if (vibeIcon) vibeIcon.innerText = vibeEnabled ? '📳' : '🔕';
+        if (vibeTitle) vibeTitle.innerText = vibeEnabled ? 'TİTREŞİM AÇIK' : 'TİTREŞİM KAPALI';
+
+        const headerAudioBtn = document.getElementById('btn-audio');
+        if (headerAudioBtn) headerAudioBtn.style.opacity = soundEnabled ? '1' : '0.4';
     }
 
     setStatus(text, state = 'ready') {
@@ -3740,7 +3976,18 @@ class GridoriaGame {
                 this.highScore = this.score;
                 this.safeSet('gridoria_highscore', String(this.highScore));
                 if (typeof effects !== 'undefined') effects.showHighScorePop();
+
+                // ⭐ Google Play In-App Review (High Score Achievement moment!)
+                if (this.score >= 1000 && typeof NativeBridge !== 'undefined' && typeof NativeBridge.requestInAppReview === 'function') {
+                    setTimeout(() => NativeBridge.requestInAppReview(), 2000);
+                }
             }
+
+            // 🎮 Submit Score to Google Play Games Leaderboards
+            if (typeof NativeBridge !== 'undefined' && typeof NativeBridge.submitHighScore === 'function') {
+                NativeBridge.submitHighScore(this.score);
+            }
+
             this.submitScoreToFirebase();
 
             // Aktif oyun durumunu sıfırla (Böylece bir sonraki açılışta temiz tahtadan başlar)
@@ -3783,8 +4030,8 @@ class GridoriaGame {
     }
 
     calculateEndGameGems() {
-        const milestoneBonus = this.getMaxTileOnBoard() >= 128 ? 2 : 0;
-        return Math.min(12, Math.floor(this.score / 250) + milestoneBonus);
+        const milestoneBonus = this.getMaxTileOnBoard() >= 1024 ? 1 : 0;
+        return Math.min(3, Math.floor(this.score / 2500) + milestoneBonus);
     }
 
     resetGame() {
@@ -3855,7 +4102,7 @@ class GridoriaGame {
                 powerups.addFreeCount('hammer', 3);
                 powerups.addFreeCount('bomb', 3);
             }
-            this.showToast('Başlangıç Paketi Tanımlandı! (+500 💎, 3x Çekiç, 3x Bomba)', '📦', 'PAKET ALINDI');
+            this.showToast('Başlangıç Paketi Tanımlandı! (+500 💎, 3x UFO, 3x Dron)', '📦', 'PAKET ALINDI');
         } else if (productId === 'com.mawelly.gridoria.vip') {
             this.isVip = true;
             this.safeSet('gridoria_is_vip', 'true');
@@ -3934,7 +4181,7 @@ class GridoriaGame {
     }
 
     doubleGemsFromRewardedAd() {
-        const amount = this.lastEarnedEndGems > 0 ? this.lastEarnedEndGems : 10;
+        const amount = this.lastEarnedEndGems > 0 ? this.lastEarnedEndGems : 3;
         this.addGems(amount);
         const btnDouble = document.getElementById('btn-rewarded-double-gems');
         if (btnDouble) {
@@ -3951,7 +4198,7 @@ class GridoriaGame {
     }
 
     claimFreeGemsFromRewardedAd() {
-        const amount = 50;
+        const amount = 10;
         this.addGems(amount);
         if (typeof sounds !== 'undefined') sounds.playLevelUp();
         if (typeof effects !== 'undefined') {

@@ -12,8 +12,8 @@ android {
         applicationId = "com.mawelly.gridoria"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,6 +52,21 @@ dependencies {
 
     // 🔥 Google AdMob (Rewarded & Interstitial Ads)
     implementation("com.google.android.gms:play-services-ads:23.6.0")
+
+    // 💎 Google Play In-App Billing (StoreKit / Play Billing Client 7)
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
+
+    // 🎮 Google Play Games Services v2 (Leaderboards, Achievements, Play Profile)
+    implementation("com.google.android.gms:play-services-games-v2:20.1.2")
+
+    // ⭐ Google Play In-App Review API (In-app rating & ASO booster)
+    implementation("com.google.android.play:review-ktx:2.0.2")
+
+    // 🔄 Google Play In-App Update API (Seamless version updates)
+    implementation("com.google.android.play:app-update-ktx:2.1.0")
+
+    // 🛡️ Google User Messaging Platform (UMP / GDPR & AdMob CMP)
+    implementation("com.google.android.ump:user-messaging-platform:3.1.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

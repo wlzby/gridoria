@@ -214,9 +214,60 @@
 
             <!-- Footer: Power-up Boosters Bar -->
             <footer class="powerups-footer">
-                <button class="powerup-btn" id="powerup-bomb" title="Bomba Patlat" data-i18n-title="booster_bomb">
-                    <div class="booster-icon-box bomb-bg">
-                        <span class="powerup-icon">💣</span>
+                <button class="powerup-btn" id="powerup-bomb" title="Cerrahi Dron Saldırısı" data-i18n-title="booster_bomb">
+                    <div class="booster-icon-box drone-bg bomb-bg">
+                        <span class="powerup-icon drone-icon">
+                            <svg viewBox="0 0 92 78" class="military-drone-svg drone-svg-icon" fill="none">
+                                <defs>
+                                    <linearGradient id="md-body-dock" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#1e293b"/>
+                                        <stop offset="45%" stop-color="#0f172a"/>
+                                        <stop offset="100%" stop-color="#020617"/>
+                                    </linearGradient>
+                                    <linearGradient id="md-wing-dock" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#38bdf8"/>
+                                        <stop offset="100%" stop-color="#00f2fe"/>
+                                    </linearGradient>
+                                    <radialGradient id="md-core-dock" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#38bdf8" stop-opacity="1"/>
+                                        <stop offset="65%" stop-color="#00f2fe" stop-opacity="0.45"/>
+                                        <stop offset="100%" stop-color="transparent"/>
+                                    </radialGradient>
+                                    <filter id="md-glow-dock" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="2" result="b"/>
+                                        <feComposite in="SourceGraphic" in2="b" operator="over"/>
+                                    </filter>
+                                </defs>
+                                <!-- Heavy Delta Wing Chassis -->
+                                <path d="M46 4 L88 52 L72 68 L58 58 L46 62 L34 58 L20 68 L4 52 Z" fill="url(#md-body-dock)" stroke="#334155" stroke-width="1.8"/>
+                                <!-- Faceted Stealth Armor Plates -->
+                                <path d="M46 6 L84 50 L70 54 L46 16 L22 54 L8 50 Z" fill="#1e293b" stroke="#475569" stroke-width="1.2"/>
+                                <!-- Cyber Neon Wing Trim -->
+                                <line x1="46" y1="6" x2="86" y2="51" stroke="url(#md-wing-dock)" stroke-width="2.2" filter="url(#md-glow-dock)"/>
+                                <line x1="46" y1="6" x2="6" y2="51" stroke="url(#md-wing-dock)" stroke-width="2.2" filter="url(#md-glow-dock)"/>
+                                <!-- Wingtip Angular Rudders -->
+                                <polygon points="88,52 82,65 76,62" fill="#0f172a" stroke="#00f2fe" stroke-width="1.2"/>
+                                <polygon points="4,52 10,65 16,62" fill="#0f172a" stroke="#00f2fe" stroke-width="1.2"/>
+                                <!-- Center Tactical Spine & Weapon Bays -->
+                                <polygon points="46,10 56,38 52,60 40,60 36,38" fill="#0b1120" stroke="#0284c7" stroke-width="1.4"/>
+                                <!-- Plasma Reactor Core -->
+                                <circle cx="46" cy="44" r="7.5" fill="#0369a1" stroke="#00f2fe" stroke-width="1.8"/>
+                                <circle cx="46" cy="44" r="4.5" fill="url(#md-core-dock)" filter="url(#md-glow-dock)"/>
+                                <!-- Forward FLIR Sensor / Targeting Turret -->
+                                <ellipse cx="46" cy="18" rx="4" ry="5.5" fill="#020617" stroke="#ef4444" stroke-width="1.4"/>
+                                <circle cx="46" cy="17" r="2.2" fill="#ef4444" class="m-drone-sensor-pulse"/>
+                                <!-- Dual Jet Exhaust Thrusters -->
+                                <rect x="37" y="60" width="6" height="5" rx="1.5" fill="#334155" stroke="#64748b"/>
+                                <rect x="49" y="60" width="6" height="5" rx="1.5" fill="#334155" stroke="#64748b"/>
+                                <!-- Twin Jet Thruster Flames -->
+                                <g class="m-drone-thruster-jets">
+                                    <polygon points="37,65 43,65 40,77" fill="#00f2fe" filter="url(#md-glow-dock)"/>
+                                    <polygon points="49,65 55,65 52,77" fill="#00f2fe" filter="url(#md-glow-dock)"/>
+                                    <polygon points="38.5,65 41.5,65 40,72" fill="#ffffff"/>
+                                    <polygon points="50.5,65 53.5,65 52,72" fill="#ffffff"/>
+                                </g>
+                            </svg>
+                        </span>
                     </div>
                     <div class="powerup-cost">
                         <span class="cost-diamond">💎</span>
@@ -224,9 +275,9 @@
                     </div>
                 </button>
 
-                <button class="powerup-btn" id="powerup-hammer" title="Çekiç (Bloğu Kır)" data-i18n-title="booster_hammer">
-                    <div class="booster-icon-box hammer-bg">
-                        <span class="powerup-icon">🔨</span>
+                <button class="powerup-btn" id="powerup-hammer" title="UFO Çekim Işını" data-i18n-title="booster_hammer">
+                    <div class="booster-icon-box ufo-bg hammer-bg">
+                        <span class="powerup-icon ufo-icon">🛸</span>
                     </div>
                     <div class="powerup-cost">
                         <span class="cost-diamond">💎</span>
@@ -256,9 +307,9 @@
             </footer>
         </div>
 
-        <!-- Target Tile Selection Banner Overlay for Hammer/Bomb -->
+        <!-- Target Tile Selection Banner Overlay for UFO/Drone -->
         <div class="powerup-banner hidden" id="powerup-banner">
-            <span id="powerup-banner-text" data-i18n="powerup_select_tile">Yok etmek istediğin taşı seç</span>
+            <span id="powerup-banner-text" data-i18n="powerup_select_tile">UFO ile çekmek istediğin bloğu seç</span>
             <button class="cancel-btn" id="btn-cancel-powerup" data-i18n="cancel">İptal</button>
         </div>
 
@@ -791,6 +842,7 @@
             <div class="shop-full-container">
                 <!-- Shop Top Header Bar -->
                 <header class="shop-header">
+                    <button class="shop-back-btn" id="btn-close-shop" title="Geri">←</button>
                     <div class="shop-title-wrapper">
                         <span class="shop-title-icon">🛒</span>
                         <h1 class="shop-title" data-i18n="shop_title">MAĞAZA</h1>
@@ -817,7 +869,7 @@
                                 <span class="special-icon">🎁</span>
                                 <div class="special-text">
                                     <div class="special-title">ÜCRETSİZ ELMAS HEDİYESİ</div>
-                                    <div class="special-desc">Kısa bir reklam izle ve anında <strong>+50 💎 Elmas</strong> kazan!</div>
+                                    <div class="special-desc">Kısa bir reklam izle ve anında <strong>+10 💎 Elmas</strong> kazan!</div>
                                 </div>
                             </div>
                             <button class="shop-buy-btn gold-pulse-btn">
@@ -833,7 +885,7 @@
                                 <div class="starter-details">
                                     <div class="starter-title">BAŞLANGIÇ HOŞ GELDİN PAKETİ</div>
                                     <div class="starter-items">
-                                        <span>💎 500 Elmas</span> • <span>🔨 3x Çekiç</span> • <span>💣 3x Bomba</span>
+                                        <span>💎 500 Elmas</span> • <span>🛸 3x UFO</span> • <span class="inline-drone-badge"><svg viewBox="0 0 92 78" class="military-drone-svg inline-drone-svg" fill="none"><path d="M46 4 L88 52 L72 68 L58 58 L46 62 L34 58 L20 68 L4 52 Z" fill="#0f172a" stroke="#00f2fe" stroke-width="2.5"/><circle cx="46" cy="44" r="7" fill="#00f2fe"/><circle cx="46" cy="18" r="3" fill="#ef4444"/><polygon points="37,60 43,60 40,75" fill="#00f2fe"/><polygon points="49,60 55,60 52,75" fill="#00f2fe"/></svg> 3x Dron</span>
                                     </div>
                                 </div>
                             </div>
@@ -914,13 +966,13 @@
                         </h2>
                         <div class="booster-items-list">
                             
-                            <!-- Booster 1: Hammer -->
+                            <!-- Booster 1: UFO -->
                             <div class="shop-card booster-card" data-booster="hammer" data-count="5" data-cost="150">
                                 <div class="booster-left">
-                                    <span class="booster-icon">🔨</span>
+                                    <span class="booster-icon">🛸</span>
                                     <div class="booster-info">
-                                        <div class="booster-name">5x Blok Kırma Çekici</div>
-                                        <div class="booster-desc">İstediğiniz herhangi bir blok veya taşı kırıp temizler.</div>
+                                        <div class="booster-name" data-i18n="shop_booster_ufo_name">5x UFO Çekim Işını</div>
+                                        <div class="booster-desc" data-i18n="shop_booster_ufo_desc">İstediğiniz herhangi bir bloğu uzay gemisiyle çekip tahtadan temizler.</div>
                                     </div>
                                 </div>
                                 <button class="shop-buy-btn booster-buy-btn">
@@ -928,13 +980,64 @@
                                 </button>
                             </div>
 
-                            <!-- Booster 2: Bomb -->
+                            <!-- Booster 2: Drone -->
                             <div class="shop-card booster-card" data-booster="bomb" data-count="5" data-cost="200">
                                 <div class="booster-left">
-                                    <span class="booster-icon">💣</span>
+                                    <span class="booster-icon shop-drone-box">
+                                        <svg viewBox="0 0 92 78" class="military-drone-svg shop-drone-svg" fill="none">
+                                            <defs>
+                                                <linearGradient id="md-body-shop" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                    <stop offset="0%" stop-color="#1e293b"/>
+                                                    <stop offset="45%" stop-color="#0f172a"/>
+                                                    <stop offset="100%" stop-color="#020617"/>
+                                                </linearGradient>
+                                                <linearGradient id="md-wing-shop" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" stop-color="#38bdf8"/>
+                                                    <stop offset="100%" stop-color="#00f2fe"/>
+                                                </linearGradient>
+                                                <radialGradient id="md-core-shop" cx="50%" cy="50%" r="50%">
+                                                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="1"/>
+                                                    <stop offset="65%" stop-color="#00f2fe" stop-opacity="0.45"/>
+                                                    <stop offset="100%" stop-color="transparent"/>
+                                                </radialGradient>
+                                                <filter id="md-glow-shop" x="-20%" y="-20%" width="140%" height="140%">
+                                                    <feGaussianBlur stdDeviation="2" result="b"/>
+                                                    <feComposite in="SourceGraphic" in2="b" operator="over"/>
+                                                </filter>
+                                            </defs>
+                                            <!-- Heavy Delta Wing Chassis -->
+                                            <path d="M46 4 L88 52 L72 68 L58 58 L46 62 L34 58 L20 68 L4 52 Z" fill="url(#md-body-shop)" stroke="#334155" stroke-width="1.8"/>
+                                            <!-- Faceted Stealth Armor Plates -->
+                                            <path d="M46 6 L84 50 L70 54 L46 16 L22 54 L8 50 Z" fill="#1e293b" stroke="#475569" stroke-width="1.2"/>
+                                            <!-- Cyber Neon Wing Trim -->
+                                            <line x1="46" y1="6" x2="86" y2="51" stroke="url(#md-wing-shop)" stroke-width="2.2" filter="url(#md-glow-shop)"/>
+                                            <line x1="46" y1="6" x2="6" y2="51" stroke="url(#md-wing-shop)" stroke-width="2.2" filter="url(#md-glow-shop)"/>
+                                            <!-- Wingtip Angular Rudders -->
+                                            <polygon points="88,52 82,65 76,62" fill="#0f172a" stroke="#00f2fe" stroke-width="1.2"/>
+                                            <polygon points="4,52 10,65 16,62" fill="#0f172a" stroke="#00f2fe" stroke-width="1.2"/>
+                                            <!-- Center Tactical Spine & Weapon Bays -->
+                                            <polygon points="46,10 56,38 52,60 40,60 36,38" fill="#0b1120" stroke="#0284c7" stroke-width="1.4"/>
+                                            <!-- Plasma Reactor Core -->
+                                            <circle cx="46" cy="44" r="7.5" fill="#0369a1" stroke="#00f2fe" stroke-width="1.8"/>
+                                            <circle cx="46" cy="44" r="4.5" fill="url(#md-core-shop)" filter="url(#md-glow-shop)"/>
+                                            <!-- Forward FLIR Sensor / Targeting Turret -->
+                                            <ellipse cx="46" cy="18" rx="4" ry="5.5" fill="#020617" stroke="#ef4444" stroke-width="1.4"/>
+                                            <circle cx="46" cy="17" r="2.2" fill="#ef4444" class="m-drone-sensor-pulse"/>
+                                            <!-- Dual Jet Exhaust Thrusters -->
+                                            <rect x="37" y="60" width="6" height="5" rx="1.5" fill="#334155" stroke="#64748b"/>
+                                            <rect x="49" y="60" width="6" height="5" rx="1.5" fill="#334155" stroke="#64748b"/>
+                                            <!-- Twin Jet Thruster Flames -->
+                                            <g class="m-drone-thruster-jets">
+                                                <polygon points="37,65 43,65 40,77" fill="#00f2fe" filter="url(#md-glow-shop)"/>
+                                                <polygon points="49,65 55,65 52,77" fill="#00f2fe" filter="url(#md-glow-shop)"/>
+                                                <polygon points="38.5,65 41.5,65 40,72" fill="#ffffff"/>
+                                                <polygon points="50.5,65 53.5,65 52,72" fill="#ffffff"/>
+                                            </g>
+                                        </svg>
+                                    </span>
                                     <div class="booster-info">
-                                        <div class="booster-name">5x Alan Bombası</div>
-                                        <div class="booster-desc">Seçtiğiniz alanın etrafındaki tüm taşları patlatır.</div>
+                                        <div class="booster-name" data-i18n="shop_booster_drone_name">5x Cerrahi Dron Saldırısı</div>
+                                        <div class="booster-desc" data-i18n="shop_booster_drone_desc">Seçtiğiniz 5 bloğu cerrahi hava saldırısıyla anında yok eder.</div>
                                     </div>
                                 </div>
                                 <button class="shop-buy-btn booster-buy-btn">
@@ -962,8 +1065,8 @@
                                 <div class="booster-left">
                                     <span class="booster-icon">⚡📦</span>
                                     <div class="booster-info">
-                                        <div class="booster-name">SÜPER JOKER PAKETİ</div>
-                                        <div class="booster-desc">3x Çekiç + 3x Bomba + 3x Değiştirici İndirimli Paket</div>
+                                        <div class="booster-name" data-i18n="shop_mega_bundle_name">SÜPER JOKER PAKETİ</div>
+                                        <div class="booster-desc" data-i18n="shop_mega_bundle_desc">3x UFO + 3x Dron + 3x Değiştirici İndirimli Paket</div>
                                     </div>
                                 </div>
                                 <button class="shop-buy-btn booster-buy-btn mega-buy-btn">
@@ -1052,6 +1155,7 @@
             <div class="profile-full-container">
                 <!-- Profile Top Header Bar -->
                 <header class="profile-header">
+                    <button class="profile-back-btn" id="btn-close-profile" title="Geri">←</button>
                     <div class="profile-title-wrapper">
                         <span class="profile-title-icon">👤</span>
                         <h1 class="profile-title">OYUNCU PROFİLİ</h1>
@@ -1151,10 +1255,14 @@
             <div class="lb-full-container">
                 <!-- Leaderboard Top Header Bar -->
                 <header class="lb-header">
+                    <button class="lb-back-btn" id="btn-close-leaderboard" title="Geri">←</button>
                     <div class="lb-title-wrapper">
                         <span class="lb-title-icon">📊</span>
                         <h1 class="lb-title">LİDERLİK TABLOSU</h1>
                     </div>
+                    <button class="lb-play-games-btn" id="btn-play-games-leaderboard" title="Google Play Games Sıralaması">
+                        <span>🎮</span>
+                    </button>
                     <div class="lb-user-badge">
                         <span class="lb-badge-icon">👑</span>
                         <span id="lb-header-high-score" class="lb-header-score-val">0</span>
@@ -1168,7 +1276,7 @@
                         <!-- 2nd Rank (Silver) -->
                         <div class="podium-card rank-2-card">
                             <div class="podium-crown">🥈</div>
-                            <div class="podium-avatar">🧙‍♂️</div>
+                            <div class="podium-avatar" id="podium-avatar-2">🧙‍♂️</div>
                             <div class="podium-name">wlzby (Sen)</div>
                             <div class="podium-score" id="podium-user-score">98,400</div>
                             <div class="podium-tile">2048</div>
@@ -1178,7 +1286,7 @@
                         <!-- 1st Rank (Gold Winner) -->
                         <div class="podium-card rank-1-card">
                             <div class="podium-crown">👑</div>
-                            <div class="podium-avatar">🐉</div>
+                            <div class="podium-avatar" id="podium-avatar-1">🐉</div>
                             <div class="podium-name">EfsaneEjder</div>
                             <div class="podium-score">142,500</div>
                             <div class="podium-tile">4096</div>
@@ -1188,7 +1296,7 @@
                         <!-- 3rd Rank (Bronze) -->
                         <div class="podium-card rank-3-card">
                             <div class="podium-crown">🥉</div>
-                            <div class="podium-avatar">🐺</div>
+                            <div class="podium-avatar" id="podium-avatar-3">🐺</div>
                             <div class="podium-name">Bozkurt</div>
                             <div class="podium-score">85,200</div>
                             <div class="podium-tile">2048</div>
@@ -1296,12 +1404,13 @@
             <div class="settings-full-container">
                 <!-- Settings Top Header Bar -->
                 <header class="settings-header">
+                    <button class="settings-back-btn" id="btn-close-settings" title="Geri">←</button>
                     <div class="settings-title-wrapper">
                         <span class="settings-title-icon">⚙️</span>
                         <h1 class="settings-title">OYUN AYARLARI</h1>
                     </div>
                     <div class="settings-version-badge">
-                        <span>v1.1.8</span>
+                        <span>v1.2.0</span>
                     </div>
                 </header>
 
@@ -1465,109 +1574,312 @@
                         </div>
                     </div>
 
-                    <!-- Tab 2: Color Palettes Panel (Visual Cards Grid View - Tile Colors) -->
+                    <!-- Tab 2: Color Palettes Panel (Visual Horizontal Cards List View) -->
                     <div class="settings-panel-view hidden" id="panel-settings-colors">
-                        <div class="color-palettes-grid">
+                        <div class="color-palettes-list">
 
-                            <!-- 1. VARSAYILAN -->
-                            <div class="color-card active" data-color="default">
-                                <div class="color-card-preview-box">
-                                    <div class="palette-grid-3x3">
-                                        <span style="background: #a855f7;">2</span>
-                                        <span style="background: #eab308;">4</span>
-                                        <span style="background: #84cc16;">8</span>
-                                        <span style="background: #0ea5e9;">16</span>
-                                        <span style="background: #ef4444;">32</span>
-                                        <span style="background: #2563eb;">64</span>
-                                        <span style="background: #f59e0b;">128</span>
-                                        <span style="background: #8b5cf6;">256</span>
-                                        <span style="background: #f43f5e;">512</span>
-                                    </div>
+                            <!-- 1. VARSAYILAN (ÜCRETSİZ) -->
+                            <div class="palette-card active" data-color="default">
+                                <div class="palette-grid-preview">
+                                    <span style="background: #a855f7;"></span>
+                                    <span style="background: #eab308;"></span>
+                                    <span style="background: #84cc16;"></span>
+                                    <span style="background: #0ea5e9;"></span>
+                                    <span style="background: #ef4444;"></span>
+                                    <span style="background: #2563eb;"></span>
+                                    <span style="background: #f59e0b;"></span>
+                                    <span style="background: #8b5cf6;"></span>
+                                    <span style="background: #f43f5e;"></span>
                                 </div>
-                                <span class="color-card-name">Varsayılan Taşlar 💎</span>
-                                <div class="color-check-badge">✓</div>
+                                <span class="palette-title">VARSAYILAN</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
                             </div>
 
-                            <!-- 2. FLUFFY POFUDUK -->
-                            <div class="color-card" data-color="fluffy">
-                                <div class="color-card-preview-box">
-                                    <div class="palette-grid-3x3">
-                                        <span style="background: url('fluffy_blue_fur.jpg') center/cover no-repeat;">2</span>
-                                        <span style="background: url('fluffy_green_fur.jpg') center/cover no-repeat;">4</span>
-                                        <span style="background: url('fluffy_pink_fur.jpg') center/cover no-repeat;">8</span>
-                                        <span style="background: url('fluffy_red_fur.jpg') center/cover no-repeat;">16</span>
-                                        <span style="background: url('fluffy_purple_fur.jpg') center/cover no-repeat;">32</span>
-                                        <span style="background: url('fluffy_yellow_fur.jpg') center/cover no-repeat;">64</span>
-                                        <span style="background: url('fluffy_orange_fur.jpg') center/cover no-repeat;">128</span>
-                                        <span style="background: url('fluffy_cyan_fur.jpg') center/cover no-repeat;">256</span>
-                                        <span style="background: url('fluffy_fur_texture.jpg') center/cover no-repeat;">512</span>
-                                    </div>
+                            <!-- 2. FLUFFY (9 TÜYLÜ RENK) (ÜCRETSİZ) -->
+                            <div class="palette-card" data-color="fluffy">
+                                <div class="palette-grid-preview">
+                                    <span style="background: url('fluffy_blue_fur.jpg') center/cover no-repeat;"></span>
+                                    <span style="background: url('fluffy_green_fur.jpg') center/cover no-repeat;"></span>
+                                    <span style="background: url('fluffy_pink_fur.jpg') center/cover no-repeat;"></span>
+                                    <span style="background: url('fluffy_red_fur.jpg') center/cover no-repeat;"></span>
+                                    <span style="background: url('fluffy_purple_fur.jpg') center/cover no-repeat;"></span>
+                                    <span style="background: url('fluffy_yellow_fur.jpg') center/cover no-repeat;"></span>
+                                    <span style="background: url('fluffy_orange_fur.jpg') center/cover no-repeat;"></span>
+                                    <span style="background: url('fluffy_cyan_fur.jpg') center/cover no-repeat;"></span>
+                                    <span style="background: url('fluffy_fur_texture.jpg') center/cover no-repeat;"></span>
                                 </div>
-                                <span class="color-card-name">Fluffy Pofuduk Taşlar 🧸</span>
-                                <div class="color-check-badge">✓</div>
+                                <span class="palette-title">FLUFFY (9 TÜYLÜ RENK) 🧸</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
                             </div>
 
-                            <!-- 3. SİYAH & ALTIN (PRO) -->
-                            <div class="color-card" data-color="ebonygold">
-                                <div class="color-card-preview-box">
-                                    <div class="palette-grid-3x3">
-                                        <span style="background: #ffd700; color: #000; text-shadow: none;">2</span>
-                                        <span style="background: #374151;">4</span>
-                                        <span style="background: #d4af37; color: #000; text-shadow: none;">8</span>
-                                        <span style="background: #1f2937;">16</span>
-                                        <span style="background: #f59e0b;">32</span>
-                                        <span style="background: #111827;">64</span>
-                                        <span style="background: #eab308; color: #000; text-shadow: none;">128</span>
-                                        <span style="background: #4b5563;">256</span>
-                                        <span style="background: #fbbf24; color: #000; text-shadow: none;">512</span>
-                                    </div>
+                            <!-- 3. SİYAH & ALTIN (ÜCRETSİZ - 3. Ücretsiz Renk) -->
+                            <div class="palette-card" data-color="ebonygold">
+                                <div class="palette-grid-preview">
+                                    <span style="background: #ffd700;"></span>
+                                    <span style="background: #374151;"></span>
+                                    <span style="background: #d4af37;"></span>
+                                    <span style="background: #1f2937;"></span>
+                                    <span style="background: #b8860b;"></span>
+                                    <span style="background: #111827;"></span>
+                                    <span style="background: #f59e0b;"></span>
+                                    <span style="background: #4b5563;"></span>
+                                    <span style="background: #eab308;"></span>
                                 </div>
-                                <span class="color-card-name">Siyah & Altın Taşlar 👑</span>
-                                <div class="color-check-badge">✓</div>
+                                <span class="palette-title">SİYAH & ALTIN 👑</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
                             </div>
 
-                            <!-- 4. SOFT PASTEL -->
-                            <div class="color-card" data-color="pastel">
-                                <div class="color-card-preview-box">
-                                    <div class="palette-grid-3x3">
-                                        <span style="background: #f472b6;">2</span>
-                                        <span style="background: #38bdf8;">4</span>
-                                        <span style="background: #4ade80;">8</span>
-                                        <span style="background: #fbbf24;">16</span>
-                                        <span style="background: #c084fc;">32</span>
-                                        <span style="background: #fb7185;">64</span>
-                                        <span style="background: #a7f3d0; color: #1e293b; text-shadow: none;">128</span>
-                                        <span style="background: #fed7aa; color: #1e293b; text-shadow: none;">256</span>
-                                        <span style="background: #e9d5ff; color: #1e293b; text-shadow: none;">512</span>
-                                    </div>
+                            <!-- 4. TERS RENKLER (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="inverted" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #00f2fe; border: 2px solid #000;"></span>
+                                    <span style="background: #ff007f; border: 2px solid #000;"></span>
+                                    <span style="background: #39ff14; border: 2px solid #000;"></span>
+                                    <span style="background: #ffd700; border: 2px solid #000;"></span>
+                                    <span style="background: #ff4500; border: 2px solid #000;"></span>
+                                    <span style="background: #7928ca; border: 2px solid #000;"></span>
+                                    <span style="background: #00e5ff; border: 2px solid #000;"></span>
+                                    <span style="background: #ff1493; border: 2px solid #000;"></span>
+                                    <span style="background: #ccff00; border: 2px solid #000;"></span>
                                 </div>
-                                <span class="color-card-name">Soft Pastel Taşlar 🌸</span>
-                                <div class="color-check-badge">✓</div>
+                                <span class="palette-title">TERS RENKLER 🔄</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
                             </div>
 
-                            <!-- 5. SİBER NEON -->
-                            <div class="color-card" data-color="neon">
-                                <div class="color-card-preview-box">
-                                    <div class="palette-grid-3x3">
-                                        <span style="background: #00f2fe; color: #000; text-shadow: none;">2</span>
-                                        <span style="background: #ff0844;">4</span>
-                                        <span style="background: #76b852;">8</span>
-                                        <span style="background: #b224ef;">16</span>
-                                        <span style="background: #ffb703; color: #000; text-shadow: none;">32</span>
-                                        <span style="background: #f107a3;">64</span>
-                                        <span style="background: #00c6ff; color: #000; text-shadow: none;">128</span>
-                                        <span style="background: #f857a6;">256</span>
-                                        <span style="background: #ff5858;">512</span>
-                                    </div>
+                            <!-- 5. CANLI NEON (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="vivid" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #ff007f;"></span>
+                                    <span style="background: #ff4500;"></span>
+                                    <span style="background: #ffb703;"></span>
+                                    <span style="background: #00f2fe;"></span>
+                                    <span style="background: #70e000;"></span>
+                                    <span style="background: #3a0ca3;"></span>
+                                    <span style="background: #f72585;"></span>
+                                    <span style="background: #4cc9f0;"></span>
+                                    <span style="background: #7209b7;"></span>
                                 </div>
-                                <span class="color-card-name">Siber Neon Taşlar ⚡</span>
-                                <div class="color-check-badge">✓</div>
+                                <span class="palette-title">CANLI NEON ⚡</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
+                            </div>
+
+                            <!-- 6. KRİSTAL BUZ (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="crystal" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #a5f3fc;"></span>
+                                    <span style="background: #38bdf8;"></span>
+                                    <span style="background: #e0f2fe;"></span>
+                                    <span style="background: #0284c7;"></span>
+                                    <span style="background: #bae6fd;"></span>
+                                    <span style="background: #0369a1;"></span>
+                                    <span style="background: #cbd5e1;"></span>
+                                    <span style="background: #00c6ff;"></span>
+                                    <span style="background: #f1f5f9;"></span>
+                                </div>
+                                <span class="palette-title">KRİSTAL BUZ 🧊</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
+                            </div>
+
+                            <!-- 7. VOLKANİK ATEŞ (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="lava" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #ff4500;"></span>
+                                    <span style="background: #dc2626;"></span>
+                                    <span style="background: #ffb703;"></span>
+                                    <span style="background: #991b1b;"></span>
+                                    <span style="background: #f97316;"></span>
+                                    <span style="background: #7f1d1d;"></span>
+                                    <span style="background: #ff7518;"></span>
+                                    <span style="background: #450a0a;"></span>
+                                    <span style="background: #ea580c;"></span>
+                                </div>
+                                <span class="palette-title">VOLKANİK ATEŞ 🔥</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
+                            </div>
+
+                            <!-- 8. KOZMİK GALAKSİ (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="galaxy" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #7928ca;"></span>
+                                    <span style="background: #ff0080;"></span>
+                                    <span style="background: #4c1d95;"></span>
+                                    <span style="background: #3b82f6;"></span>
+                                    <span style="background: #a855f7;"></span>
+                                    <span style="background: #1e1b4b;"></span>
+                                    <span style="background: #d8b4fe;"></span>
+                                    <span style="background: #2e1065;"></span>
+                                    <span style="background: #00f2fe;"></span>
+                                </div>
+                                <span class="palette-title">KOZMİK GALAKSİ 🌌</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
+                            </div>
+
+                            <!-- 9. KIRMIZI AŞK (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="red" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #ff4d6d;"></span>
+                                    <span style="background: #c9184a;"></span>
+                                    <span style="background: #ff758f;"></span>
+                                    <span style="background: #a4133c;"></span>
+                                    <span style="background: #ff8fa3;"></span>
+                                    <span style="background: #800f2f;"></span>
+                                    <span style="background: #ffb3c1;"></span>
+                                    <span style="background: #590d22;"></span>
+                                    <span style="background: #e63946;"></span>
+                                </div>
+                                <span class="palette-title">KIRMIZI AŞK ❤️</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
+                            </div>
+
+                            <!-- 10. ZÜMRÜT ORMAN (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="emerald" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #2ecc71;"></span>
+                                    <span style="background: #10b981;"></span>
+                                    <span style="background: #059669;"></span>
+                                    <span style="background: #047857;"></span>
+                                    <span style="background: #34d399;"></span>
+                                    <span style="background: #065f46;"></span>
+                                    <span style="background: #6ee7b7;"></span>
+                                    <span style="background: #064e3b;"></span>
+                                    <span style="background: #15803d;"></span>
+                                </div>
+                                <span class="palette-title">ZÜMRÜT ORMAN 🌲</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
+                            </div>
+
+                            <!-- 11. SAFİR & OKYANUS (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="sapphire" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #00c6ff;"></span>
+                                    <span style="background: #0072ff;"></span>
+                                    <span style="background: #0284c7;"></span>
+                                    <span style="background: #0369a1;"></span>
+                                    <span style="background: #38bdf8;"></span>
+                                    <span style="background: #1e40af;"></span>
+                                    <span style="background: #67e8f9;"></span>
+                                    <span style="background: #0f172a;"></span>
+                                    <span style="background: #00f2fe;"></span>
+                                </div>
+                                <span class="palette-title">SAFİR & OKYANUS 🌊</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
+                            </div>
+
+                            <!-- 12. SİBERPUNK NEON (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="vaporwave" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #ff007f;"></span>
+                                    <span style="background: #ff00cc;"></span>
+                                    <span style="background: #cc00ff;"></span>
+                                    <span style="background: #9900ff;"></span>
+                                    <span style="background: #ff3399;"></span>
+                                    <span style="background: #e60073;"></span>
+                                    <span style="background: #ff66cc;"></span>
+                                    <span style="background: #c71585;"></span>
+                                    <span style="background: #ff1493;"></span>
+                                </div>
+                                <span class="palette-title">SİBERPUNK NEON 🎆</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
+                            </div>
+
+                            <!-- 13. RAHATLATICI (PRO - 250 💎) -->
+                            <div class="palette-card is-locked" data-color="relaxing" data-cost="250">
+                                <div class="palette-pro-badge">💎 PRO</div>
+                                <div class="palette-grid-preview">
+                                    <span style="background: #e09f9d;"></span>
+                                    <span style="background: #7bb4cb;"></span>
+                                    <span style="background: #b197cb;"></span>
+                                    <span style="background: #d4a5cb;"></span>
+                                    <span style="background: #81cca8;"></span>
+                                    <span style="background: #e2b7cb;"></span>
+                                    <span style="background: #a3ca9e;"></span>
+                                    <span style="background: #dec1d8;"></span>
+                                    <span style="background: #b2b887;"></span>
+                                </div>
+                                <span class="palette-title">RAHATLATICI 🍃</span>
+                                <div class="palette-select-icon">
+                                    <span class="circle-check">✓</span>
+                                    <span class="circle-empty"></span>
+                                </div>
                             </div>
 
                         </div>
                     </div>
 
-                    <!-- Reset Game Danger Button (Positioned comfortably lower down) -->
+                    <!-- 🌟 Google Play Services Actions -->
+                    <div class="settings-google-actions">
+                        <button class="settings-action-btn google-rate-btn" id="btn-rate-game">
+                            <span class="btn-action-icon">⭐</span>
+                            <div class="btn-action-text">
+                                <strong>Bizi Değerlendir</strong>
+                                <small>Google Play'de 5 yıldız ver & destek ol</small>
+                            </div>
+                            <span class="btn-action-arrow">›</span>
+                        </button>
+                        <button class="settings-action-btn google-games-btn" id="btn-open-play-achievements">
+                            <span class="btn-action-icon">🏆</span>
+                            <div class="btn-action-text">
+                                <strong>Play Games Başarımları</strong>
+                                <small>Google Play XP ve rozetlerini gör</small>
+                            </div>
+                            <span class="btn-action-arrow">›</span>
+                        </button>
+                        <button class="settings-action-btn google-update-btn" id="btn-check-updates">
+                            <span class="btn-action-icon">🔄</span>
+                            <div class="btn-action-text">
+                                <strong>Güncellemeleri Kontrol Et</strong>
+                                <small>En son sürüm ve yenilikleri al</small>
+                            </div>
+                            <span class="btn-action-arrow">›</span>
+                        </button>
+                    </div>
+
+<!-- Reset Game Danger Button (Positioned comfortably lower down) -->
                     <div class="settings-reset-wrapper">
                         <button class="btn-reset-game-danger" id="btn-reset-data">
                             <span class="btn-danger-icon">🔄</span>

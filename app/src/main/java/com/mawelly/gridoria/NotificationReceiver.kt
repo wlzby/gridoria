@@ -17,11 +17,11 @@ class NotificationReceiver : BroadcastReceiver() {
         const val CHANNEL_ID = "gridoria_daily_channel"
         const val CHANNEL_NAME = "Gridoria Günlük Bildirimler"
         const val ACTION_DAILY_NOTIFICATION = "com.mawelly.gridoria.ACTION_DAILY_NOTIFICATION"
-        const val REQUEST_CODE = 2048
+        const val REQUEST_CODE = 1001
 
         private val MESSAGES = listOf(
             "🎁 Günlük 100 Elmas hediyen hazır! Hemen gir ve ödülünü topla!",
-            "🔥 Yeni bir rekor kırabilir misin? Bugün 2048 taşını patlatma sırası sende!",
+            "🔥 Yeni bir rekor kırabilir misin? Bugün efsanevi blokları birleştirme sırası sende!",
             "🧠 Günde 20 dakika Gridoria oyna, zihnini ve hafızanı zinde tut!",
             "⚡ Ateş Modu (Fever Mode) hazır! Hemen oyuna gir ve komboları patlat!"
         )
@@ -107,7 +107,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Gridoria 2048 🌲")
+                .setContentTitle("Gridoria 🌲")
                 .setContentText(bodyText)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(bodyText))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)

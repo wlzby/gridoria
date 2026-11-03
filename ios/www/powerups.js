@@ -100,7 +100,6 @@ class PowerUpManager {
         bind('powerup-refresh', () => this.triggerRefresh());
         bind('powerup-undo', () => this.triggerUndo());
         bind('powerup-bomb', () => this.selectPowerup('bomb'));
-        bind('powerup-shrink', () => this.selectPowerup('shrink'));
         bind('powerup-swap', () => this.triggerSwap());
         bind('btn-cancel-powerup', () => this.clearActiveMode());
     }
@@ -142,17 +141,12 @@ class PowerUpManager {
         if (this.activeMode === 'hammer') {
             const hammerBtn = document.getElementById('powerup-hammer');
             if (hammerBtn) hammerBtn.classList.add('active-mode');
-            if (bannerText) bannerText.innerText = window.i18n ? window.i18n.t('powerup_select_tile') : 'ÇEKİÇ AKTİF: Kırmak istediğiniz bloğa dokunun!';
+            if (bannerText) bannerText.innerText = window.i18n ? (window.i18n.t('powerup_select_tile') || '🛸 UFO AKTİF: Çekmek istediğin bloğa dokun!') : '🛸 UFO AKTİF: Çekmek istediğin bloğa dokun!';
             if (banner) banner.classList.remove('hidden');
         } else if (this.activeMode === 'bomb') {
             const bombBtn = document.getElementById('powerup-bomb');
             if (bombBtn) bombBtn.classList.add('active-mode');
-            if (bannerText) bannerText.innerText = window.i18n ? window.i18n.t('powerup_select_tile') : 'BOMBA AKTİF: Patlatmak istediğiniz taşa dokunun!';
-            if (banner) banner.classList.remove('hidden');
-        } else if (this.activeMode === 'shrink') {
-            const shrinkBtn = document.getElementById('powerup-shrink');
-            if (shrinkBtn) shrinkBtn.classList.add('active-mode');
-            if (bannerText) bannerText.innerText = window.i18n ? window.i18n.t('powerup_select_tile') : 'KÜÇÜLT AKTİF: Değerini azaltmak istediğiniz taşa dokunun!';
+            if (bannerText) bannerText.innerText = window.i18n ? (window.i18n.t('powerup_select_drone') || '🎯 DRON SALDIRISI: Vurmak istediğin 5 bloğun merkezine dokun!') : '🎯 DRON SALDIRISI: Vurmak istediğin 5 bloğun merkezine dokun!';
             if (banner) banner.classList.remove('hidden');
         } else {
             if (banner) banner.classList.add('hidden');
@@ -204,11 +198,26 @@ class PowerUpManager {
         }
 
         if (usedFree || game.deductGems(cost)) {
-            if (typeof sounds !== 'undefined') sounds.playMerge(2);
-            game.restorePreviousState(true);
-            game.previousState = null;
-            game.saveData();
-            if (typeof effects !== 'undefined') effects.triggerHaptic('medium');
+            game.isAnimating = true;
+            if (typeof effects !== 'undefined' && typeof effects.playTimeRewindAnimation === 'function') {
+                effects.playTimeRewindAnimation({
+                    onRestore: () => {
+                        game.restorePreviousState(true);
+                        game.previousState = null;
+                        game.saveData();
+                    },
+                    onComplete: () => {
+                        game.isAnimating = false;
+                    }
+                });
+            } else {
+                if (typeof sounds !== 'undefined') sounds.playUndo();
+                game.restorePreviousState(true);
+                game.previousState = null;
+                game.saveData();
+                if (typeof effects !== 'undefined') effects.triggerHaptic('medium');
+                game.isAnimating = false;
+            }
         }
     }
 
@@ -226,12 +235,28 @@ class PowerUpManager {
         }
 
         if (usedFree || game.deductGems(cost)) {
-            const temp = game.currentShooterVal;
-            game.currentShooterVal = game.nextShooterVal;
-            game.nextShooterVal = temp;
-            game.updateShooterTiles();
-            if (typeof sounds !== 'undefined') sounds.playMerge(2);
-            if (typeof effects !== 'undefined') effects.triggerHaptic('light');
+            game.isAnimating = true;
+            if (typeof effects !== 'undefined' && typeof effects.playShooterSwapAnimation === 'function') {
+                effects.playShooterSwapAnimation({
+                    onSwap: () => {
+                        const temp = game.currentShooterVal;
+                        game.currentShooterVal = game.nextShooterVal;
+                        game.nextShooterVal = temp;
+                        game.updateShooterTiles();
+                    },
+                    onComplete: () => {
+                        game.isAnimating = false;
+                    }
+                });
+            } else {
+                const temp = game.currentShooterVal;
+                game.currentShooterVal = game.nextShooterVal;
+                game.nextShooterVal = temp;
+                game.updateShooterTiles();
+                if (typeof sounds !== 'undefined') sounds.playSwap();
+                if (typeof effects !== 'undefined') effects.triggerHaptic('light');
+                game.isAnimating = false;
+            }
         }
     }
 
@@ -255,13 +280,44 @@ class PowerUpManager {
             const usedFree = this.useFreeCount('hammer');
             if (usedFree || game.deductGems(this.costs.hammer)) {
                 const cell = game.getCellElement(row, col);
-                game.grid[row][col] = 0;
-                game.iceGrid[row][col] = 0;
-                game.renderGrid();
-                if (typeof sounds !== 'undefined') sounds.playHammer();
-                showPowerupEffect(cell, '#ff0844');
-                game.applyCeilingGravityAndMerge();
+                const tileEl = cell ? cell.querySelector('.tile') : null;
+                const isFrozen = (game.iceGrid && game.iceGrid[row][col] > 0) || (game.grid[row][col] < 0);
+                const tileVal = Math.abs(game.grid[row][col]);
+
                 this.clearActiveMode();
+                game.isAnimating = true;
+
+                if (typeof effects !== 'undefined' && typeof effects.playUfoAbduction === 'function') {
+                    effects.playUfoAbduction({
+                        cell: cell,
+                        tileEl: tileEl,
+                        row: row,
+                        col: col,
+                        val: tileVal,
+                        isFrozen: isFrozen,
+                        onAbduct: () => {
+                            // Sound is triggered with precise timing inside effects.playUfoAbduction
+                        },
+                        onComplete: () => {
+                            game.grid[row][col] = 0;
+                            if (game.iceGrid) game.iceGrid[row][col] = 0;
+                            game.renderGrid();
+                            game.applyCeilingGravityAndMerge(() => {
+                                game.isAnimating = false;
+                                game.checkGameOver();
+                            });
+                        }
+                    });
+                } else {
+                    game.grid[row][col] = 0;
+                    if (game.iceGrid) game.iceGrid[row][col] = 0;
+                    game.renderGrid();
+                    if (typeof sounds !== 'undefined') sounds.playUfoAbduct();
+                    game.applyCeilingGravityAndMerge(() => {
+                        game.isAnimating = false;
+                        game.checkGameOver();
+                    });
+                }
             }
             return true;
         }
@@ -279,7 +335,18 @@ class PowerUpManager {
             for (const pos of targetArea) {
                 if (pos.r >= 0 && pos.r < game.ROWS && pos.c >= 0 && pos.c < game.COLS) {
                     if (game.grid[pos.r][pos.c] !== 0) {
-                        validPositions.push(pos);
+                        const cell = game.getCellElement(pos.r, pos.c);
+                        const tileEl = cell ? cell.querySelector('.tile') : null;
+                        const isFrozen = (game.iceGrid && game.iceGrid[pos.r][pos.c] > 0) || (game.grid[pos.r][pos.c] < 0);
+                        const val = Math.abs(game.grid[pos.r][pos.c]);
+                        validPositions.push({
+                            r: pos.r,
+                            c: pos.c,
+                            cell: cell,
+                            tileEl: tileEl,
+                            isFrozen: isFrozen,
+                            val: val
+                        });
                     }
                 }
             }
@@ -288,46 +355,106 @@ class PowerUpManager {
 
             const usedFree = this.useFreeCount('bomb');
             if (usedFree || game.deductGems(this.costs.bomb)) {
+                this.clearActiveMode();
                 game.isAnimating = true;
 
-                // Play deep 3D explosion sound
-                if (typeof sounds !== 'undefined') sounds.playBomb();
+                const centerCell = game.getCellElement(row, col);
 
-                // Trigger screen shake
-                const appContainer = document.getElementById('app-container');
-                if (appContainer) {
-                    appContainer.classList.remove('screen-shake');
-                    void appContainer.offsetWidth;
-                    appContainer.classList.add('screen-shake');
-                    setTimeout(() => appContainer.classList.remove('screen-shake'), 240);
-                }
-
-                // Stage 1: Trigger explosion animation & particle bursts on each exploding tile
-                validPositions.forEach(pos => {
-                    const cell = game.getCellElement(pos.r, pos.c);
-                    if (cell) {
-                        const tileEl = cell.querySelector('.tile');
-                        if (tileEl) {
-                            tileEl.classList.add('tile-exploding-shatter');
+                if (typeof effects !== 'undefined' && typeof effects.playDroneStrike === 'function') {
+                    effects.playDroneStrike({
+                        centerCell: centerCell,
+                        targetPositions: validPositions,
+                        onStrike: () => {
+                            // Strike impact handled smoothly inside effects.playDroneStrike
+                        },
+                        onComplete: () => {
+                            validPositions.forEach(pos => {
+                                game.grid[pos.r][pos.c] = 0;
+                                if (game.iceGrid) game.iceGrid[pos.r][pos.c] = 0;
+                            });
+                            game.renderGrid();
+                            game.applyCeilingGravityAndMerge(() => {
+                                game.isAnimating = false;
+                                game.checkGameOver();
+                            });
                         }
-                        showPowerupEffect(cell, '#ff5500');
-                    }
-                });
-
-                // Stage 2: Wait 360ms for disintegration animation before clearing grid & shifting gravity
-                setTimeout(() => {
+                    });
+                } else if (typeof effects !== 'undefined' && typeof effects.playBlackHole === 'function') {
+                    effects.playBlackHole({
+                        centerCell: centerCell,
+                        targetPositions: validPositions,
+                        onCollapse: () => {
+                            if (typeof sounds !== 'undefined' && typeof sounds.playBlackHoleCollapse === 'function') {
+                                sounds.playBlackHoleCollapse();
+                            }
+                        },
+                        onComplete: () => {
+                            validPositions.forEach(pos => {
+                                game.grid[pos.r][pos.c] = 0;
+                                if (game.iceGrid) game.iceGrid[pos.r][pos.c] = 0;
+                            });
+                            game.renderGrid();
+                            game.applyCeilingGravityAndMerge(() => {
+                                game.isAnimating = false;
+                                game.checkGameOver();
+                            });
+                        }
+                    });
+                } else if (typeof effects !== 'undefined' && typeof effects.playSpaceOctopus === 'function') {
+                    effects.playSpaceOctopus({
+                        centerCell: centerCell,
+                        targetPositions: validPositions,
+                        onSnatch: () => {
+                            if (typeof sounds !== 'undefined' && typeof sounds.playBlackHoleCollapse === 'function') {
+                                sounds.playBlackHoleCollapse();
+                            }
+                        },
+                        onComplete: () => {
+                            validPositions.forEach(pos => {
+                                game.grid[pos.r][pos.c] = 0;
+                                if (game.iceGrid) game.iceGrid[pos.r][pos.c] = 0;
+                            });
+                            game.renderGrid();
+                            game.applyCeilingGravityAndMerge(() => {
+                                game.isAnimating = false;
+                                game.checkGameOver();
+                            });
+                        }
+                    });
+                } else if (typeof effects !== 'undefined' && typeof effects.playSpaceChomper === 'function') {
+                    effects.playSpaceChomper({
+                        centerCell: centerCell,
+                        targetPositions: validPositions,
+                        onChomp: () => {
+                            if (typeof sounds !== 'undefined' && typeof sounds.playOctoSnatch === 'function') {
+                                sounds.playOctoSnatch();
+                            }
+                        },
+                        onComplete: () => {
+                            validPositions.forEach(pos => {
+                                game.grid[pos.r][pos.c] = 0;
+                                if (game.iceGrid) game.iceGrid[pos.r][pos.c] = 0;
+                            });
+                            game.renderGrid();
+                            game.applyCeilingGravityAndMerge(() => {
+                                game.isAnimating = false;
+                                game.checkGameOver();
+                            });
+                        }
+                    });
+                } else {
+                    // Fallback
+                    if (typeof sounds !== 'undefined') sounds.playBomb();
                     validPositions.forEach(pos => {
                         game.grid[pos.r][pos.c] = 0;
-                        game.iceGrid[pos.r][pos.c] = 0;
+                        if (game.iceGrid) game.iceGrid[pos.r][pos.c] = 0;
                     });
-
                     game.renderGrid();
                     game.applyCeilingGravityAndMerge(() => {
                         game.isAnimating = false;
                         game.checkGameOver();
                     });
-                    this.clearActiveMode();
-                }, 360);
+                }
             }
             return true;
         }

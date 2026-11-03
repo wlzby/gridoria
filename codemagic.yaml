@@ -1,9 +1,102 @@
 workflows:
   # ═══════════════════════════════════════════════════════════════════════════
-  # 🍏 iOS App Store & TestFlight Workflow
+  # 📱 1. Appetize.io iOS Simulator Workflow (ÖNCE BURADAN TEST EDİN)
+  # ═══════════════════════════════════════════════════════════════════════════
+  ios-simulator-appetize:
+    name: 1. Gridoria iOS Simulator (Appetize.io Test)
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: "com.mawelly.gridoria.JGF9X5ACM5"
+        XCODE_SCHEME: "Gridoria"
+    scripts:
+      - name: Prepare Assets & Generate Xcode Project
+        script: |
+          cd ios
+          mkdir -p www
+          cp -r ../app/src/main/assets/www/* ./www/
+          which xcodegen || brew install xcodegen || true
+          xcodegen generate
+          xcodebuild -resolvePackageDependencies -project Gridoria.xcodeproj || true
+
+      - name: Build iOS Application for Simulator (Appetize.io)
+        script: |
+          cd ios
+          xcodebuild build \
+            -project Gridoria.xcodeproj \
+            -scheme Gridoria \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build-sim \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package Appetize.io Simulator ZIP
+        script: |
+          mkdir -p $CM_BUILD_DIR/output
+          cd ios
+
+          SIM_APP_PATH=$(find build-sim -name "Gridoria.app" | head -n 1)
+          if [ -z "$SIM_APP_PATH" ]; then
+            echo "❌ Gridoria.app not found in build-sim!"
+            exit 1
+          fi
+
+          echo "Found Simulator App at: $SIM_APP_PATH"
+          mkdir -p "$SIM_APP_PATH/www"
+          cp -r www/* "$SIM_APP_PATH/www/" 2>/dev/null || true
+          cp -r www/* "$SIM_APP_PATH/" 2>/dev/null || true
+
+          SIM_DIR=$(dirname "$SIM_APP_PATH")
+          SIM_NAME=$(basename "$SIM_APP_PATH")
+
+          echo "Compressing $SIM_NAME into Gridoria_Simulator.zip for Appetize.io..."
+          (cd "$SIM_DIR" && zip -y -r -9 "$CM_BUILD_DIR/output/Gridoria_Simulator.zip" "$SIM_NAME")
+
+          echo "✅ Gridoria_Simulator.zip successfully created!"
+          ls -lh "$CM_BUILD_DIR/output/Gridoria_Simulator.zip"
+
+      - name: Optional Direct Upload to Appetize.io
+        script: |
+          if [ -n "$APPETIZE_API_TOKEN" ]; then
+            echo "Uploading Gridoria_Simulator.zip to Appetize.io..."
+            RESPONSE=$(curl -s https://$APPETIZE_API_TOKEN@api.appetize.io/v2/apps \
+              -F "file=@$CM_BUILD_DIR/output/Gridoria_Simulator.zip" \
+              -F "platform=ios")
+            echo "Appetize response: $RESPONSE"
+            PUBLIC_KEY=$(echo "$RESPONSE" | grep -o '"publicKey":"[^"]*' | cut -d'"' -f4)
+            if [ -n "$PUBLIC_KEY" ]; then
+              echo "=========================================================="
+              echo "🚀 APPETIZE.IO CANLI TEST URL:"
+              echo "https://appetize.io/app/$PUBLIC_KEY"
+              echo "=========================================================="
+            fi
+          else
+            echo "ℹ️ APPETIZE_API_TOKEN tanımlanmadı. 'Gridoria_Simulator.zip' dosyasını Codemagic Artifacts bölümünden indirip https://appetize.io/upload adresine yükleyebilirsiniz."
+          fi
+
+    artifacts:
+      - output/*.zip
+      - output/*.app
+
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: true
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 🍏 2. iOS TestFlight & App Store Workflow (TEST DOĞRULANINCA GÖNDERİN)
   # ═══════════════════════════════════════════════════════════════════════════
   ios-app-store:
-    name: Gridoria iOS App Store & TestFlight
+    name: 2. Gridoria iOS TestFlight & App Store
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
@@ -23,20 +116,25 @@ workflows:
           cd ios
           mkdir -p www
           cp -r ../app/src/main/assets/www/* ./www/
-          brew install xcodegen || true
+          which xcodegen || brew install xcodegen || true
           xcodegen generate
           xcodebuild -resolvePackageDependencies -project Gridoria.xcodeproj || true
 
       - name: Set Build Number & Configure Signing
         script: |
           cd ios
-          # Update CFBundleVersion to Codemagic BUILD_NUMBER so Apple accepts every upload
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" Gridoria/Info.plist || true
-          agvtool new-version -all $BUILD_NUMBER || true
+          # Ensure build number is at least 9 (Apple rejected build 8)
+          BUILD_NUM=${BUILD_NUMBER:-9}
+          if [ "$BUILD_NUM" -lt 9 ]; then
+            BUILD_NUM=$((BUILD_NUM + 8))
+          fi
+          echo "Using CFBundleVersion: $BUILD_NUM"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" Gridoria/Info.plist || true
+          agvtool new-version -all $BUILD_NUM || true
           # Bind profiles and certificates stored in Codemagic Code signing identities
           xcode-project use-profiles --project Gridoria.xcodeproj
 
-      - name: Build IPA for App Store
+      - name: Build IPA for App Store & TestFlight
         script: |
           cd ios
           xcode-project build-ipa \
@@ -62,123 +160,10 @@ workflows:
           failure: true
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # 🍎 iOS Workflow (Builds Gridoria iOS App & IPA)
-  # ═══════════════════════════════════════════════════════════════════════════
-  ios-workflow:
-    name: Gridoria iOS Build
-    max_build_duration: 60
-    instance_type: mac_mini_m2
-    environment:
-      xcode: latest
-      cocoapods: default
-      vars:
-        BUNDLE_ID: "com.mawelly.gridoria.JGF9X5ACM5"
-        XCODE_WORKSPACE: "ios/Gridoria.xcworkspace"
-        XCODE_SCHEME: "Gridoria"
-    scripts:
-      - name: Prepare Assets & Generate Xcode Project
-        script: |
-          cd ios
-          mkdir -p www
-          cp -r ../app/src/main/assets/www/* ./www/
-          brew install xcodegen || true
-          xcodegen generate
-          xcodebuild -resolvePackageDependencies -project Gridoria.xcodeproj || true
-
-      - name: Verify Project (Standalone WebView Build)
-        script: |
-          cd ios
-          echo "Standalone native build with StoreKit 2 & WebKit - CocoaPods not required"
-
-      - name: Build iOS Application (Simulator for Appetize.io)
-        script: |
-          cd ios
-          # Try workspace first (CocoaPods), fall back to project
-          if [ -f "Gridoria.xcworkspace/contents.xcworkspacedata" ]; then
-            BUILD_FLAG="-workspace Gridoria.xcworkspace"
-          else
-            BUILD_FLAG="-project Gridoria.xcodeproj"
-          fi
-
-          xcodebuild build \
-            $BUILD_FLAG \
-            -scheme Gridoria \
-            -configuration Release \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build-sim \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
-
-      - name: Build iOS Application for Real Devices (Sideloadly IPA)
-        script: |
-          cd ios
-          if [ -f "Gridoria.xcworkspace/contents.xcworkspacedata" ]; then
-            BUILD_FLAG="-workspace Gridoria.xcworkspace"
-          else
-            BUILD_FLAG="-project Gridoria.xcodeproj"
-          fi
-
-          xcodebuild build \
-            $BUILD_FLAG \
-            -scheme Gridoria \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            -derivedDataPath build-device \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
-
-      - name: Package Sideloadly IPA & Simulator Artifacts
-        script: |
-          mkdir -p $CM_BUILD_DIR/output
-          cd ios
-
-          # 1. Package Real Device IPA (for Sideloadly / AltStore)
-          DEVICE_APP_PATH=$(find build-device -name "Gridoria.app" | head -n 1)
-          if [ -n "$DEVICE_APP_PATH" ]; then
-            echo "Packaging Real Device IPA from: $DEVICE_APP_PATH"
-            mkdir -p "$DEVICE_APP_PATH/www"
-            cp -r www/* "$DEVICE_APP_PATH/www/"
-            cp -r www/* "$DEVICE_APP_PATH/"
-            
-            mkdir -p ipa_temp/Payload
-            cp -r "$DEVICE_APP_PATH" ipa_temp/Payload/
-            (cd ipa_temp && zip -y -r -9 "$CM_BUILD_DIR/output/Gridoria.ipa" Payload)
-            rm -rf ipa_temp
-          fi
-
-          # 2. Package Simulator ZIP (for Appetize.io)
-          SIM_APP_PATH=$(find build-sim -name "Gridoria.app" | head -n 1)
-          if [ -n "$SIM_APP_PATH" ]; then
-            echo "Packaging Simulator ZIP from: $SIM_APP_PATH"
-            mkdir -p "$SIM_APP_PATH/www"
-            cp -r www/* "$SIM_APP_PATH/www/"
-            cp -r www/* "$SIM_APP_PATH/"
-            SIM_DIR=$(dirname "$SIM_APP_PATH")
-            SIM_NAME=$(basename "$SIM_APP_PATH")
-            (cd "$SIM_DIR" && zip -y -r "$CM_BUILD_DIR/output/Gridoria_Simulator.zip" "$SIM_NAME")
-            cp -r "$SIM_APP_PATH" "$CM_BUILD_DIR/output/"
-          fi
-    artifacts:
-      - output/*.ipa
-      - output/*.zip
-      - output/*.app
-    publishing:
-      email:
-        recipients:
-          - user@example.com # Replace with your email to receive build notifications
-        notify:
-          success: true
-          failure: true
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # 🤖 Android Workflow (Builds Gridoria Android APK & AAB)
+  # 🤖 3. Android Workflow (Builds Gridoria Android APK & AAB)
   # ═══════════════════════════════════════════════════════════════════════════
   android-workflow:
-    name: Gridoria Android Build
+    name: 3. Gridoria Android Build
     max_build_duration: 30
     instance_type: linux_x2
     environment:
