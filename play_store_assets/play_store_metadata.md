@@ -87,37 +87,44 @@ Hemen ücretsiz indir, blokları fırlat, sayıları birleştir ve Gridoria taht
 
 ---
 
-## 🇬🇧 ENGLISH STORE LISTING (EN)
+## 🇬🇧 ENGLISH STORE LISTING (EN - United States)
 
-### 1. App Title (Max 30 Characters)
+### 1. App Title / Uygulama Adı (Max 30 Characters)
 ```text
 Gridoria: 2048 Block Puzzle
 ```
 *(Character count: 27 / 30)*
+*Alternatif (Eğer "Shooter" vurgusunu korumak isterseniz):* `Gridoria: 2048 Block Shooter` *(28 / 30)*
 
 ---
 
-### 2. Short Description (Max 80 Characters - 2 Options)
+### 2. Short Description / Kısa Açıklama (Max 80 Characters)
 
-**Option 1 (Tactical & Boosters):**
+**Option 1 (Tavsiye Edilen - Türkçe ile %100 Birebir Eşleşen Dron & UFO Vurgusu):**
+```text
+Aim, shoot tiles & reach 2048! Tactical brain puzzle with drone & UFO boosters.
+```
+*(Character count: 79 / 80)*
+
+**Option 2 (Aksiyon & Kombo Odaklı):**
+```text
+Aim, shoot blocks & merge to 2048! Tactical puzzle with combat drones & UFOs.
+```
+*(Character count: 77 / 80)*
+
+**Option 3 (Usta & Şebeke Odaklı):**
 ```text
 Aim, shoot tiles & merge to 2048! Master the grid with drones & tactical UFOs.
 ```
 *(Character count: 78 / 80)*
 
-**Option 2 (Action & Combos):**
-```text
-Shoot tiles, merge numbers to 2048 & trigger combos! Ultimate tactical puzzle.
-```
-*(Character count: 78 / 80)*
-
 ---
 
-### 3. Full Description (Max 4000 Characters)
+### 3. Full Description / Tam Açıklama (Max 4000 Characters)
 ```text
 👑 GRIDORIA: 2048 SHOOT & MERGE TACTICAL BLOCK PUZZLE
 
-Say goodbye to ordinary and repetitive number games! Gridoria is a next-generation tactical puzzle crafted by Mawelly Studio, blending the excitement of classic 2048 with innovative ceiling-shooting mechanics, surgical drone airstrikes, alien UFO tractor beams, and dynamic frost hazards.
+Say goodbye to ordinary and repetitive number games! Gridoria is a next-generation tactical puzzle crafted by Mawelly Studio, blending the excitement of classic 2048 with innovative ceiling-shooting mechanics, surgical drone airstrikes, alien UFO tractor beams, tactical smash hammers, and dynamic frost hazards.
 
 Aim, shoot tiles upward to the ceiling grid, merge matching numbers, trigger explosive chain combos, and climb to 2048, 4096, and beyond!
 
@@ -131,16 +138,16 @@ Aim, shoot tiles upward to the ceiling grid, merge matching numbers, trigger exp
 
 🔥 TACTICAL BOOSTERS & POWER-UPS:
 
-🚁 Surgical UCAV Drone Strike
+🚁 Surgical Drone Strike (45 💎)
 When the board gets congested, call in autonomous combat drones! Select your target zone to obliterate 5 tiles in a surgical airstrike and give your grid room to breathe.
 
-🛸 UFO Alien Tractor Beam
-Extract any troublesome or blocking tile straight into outer space with a high-energy alien tractor beam.
+🛸 UFO Alien Tractor Beam & Hammer (25 💎)
+Extract any troublesome block straight into space with the alien tractor beam, or crush blocking obstacles with a heavy tactical hammer strike!
 
-🔄 Quantum Tile Swap
-Tactically swap the positions of any two tiles on the grid to create unexpected match opportunities.
+🔄 Quantum Tile Swap (20 💎)
+Tactically swap the positions of any two tiles on the grid to create unexpected match opportunities and chain reactions.
 
-⏪ Time Rewind (Undo)
+⏪ Time Rewind (15 💎)
 Made a quick mistake? Instantly reverse your last move and rethink your tactical approach.
 
 ⚡ EXCITING GAME FEATURES:
@@ -161,12 +168,15 @@ Chain multiple merges in rapid succession to fill the combo gauge. Enter Fever R
 🧠 Brain Training & Relaxation
 A smart blend of tactical logic, spatial reasoning, and deeply satisfying ASMR-style block merging to unwind anytime.
 
+🏆 Global Leaderboard & Badges
+Compete against players worldwide, climb the leaderboards, and unlock prestigious career badges as you master the numbers!
+
 ✈️ 100% Offline Gameplay
 No Wi-Fi or mobile data needed! Enjoy seamless puzzle gameplay on airplanes, subways, road trips, or wherever you go.
 
 Download Gridoria for free now, launch your tiles, merge the numbers, and become the master of the tactical grid!
 ```
-*(Character count: ~2650 / 4000)*
+*(Character count: 2,873 / 4000)*
 
 ---
 
