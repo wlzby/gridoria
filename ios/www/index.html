@@ -1963,6 +1963,63 @@
         </div>
 
         <!-- 🧭 ALT MENÜ ÇUBUĞU (BOTTOM NAVIGATION BAR - 5 TABS) -->
+        <!-- ⚡ SADE & ŞIK BAŞLANGIÇ PAKETİ ÖZEL FIRSAT MODALI -->
+        <div class="modal-overlay hidden" id="modal-starter-offer" style="z-index: 4800;">
+            <div class="modal-card starter-offer-card">
+                <button class="starter-offer-close" id="btn-close-starter-offer" title="Kapat">✕</button>
+
+                <div class="starter-offer-badge-wrap">
+                    <span class="starter-offer-pill" data-i18n="starter_offer_badge">ÖZEL FIRSAT • %70 İNDİRİM</span>
+                </div>
+
+                <h2 class="starter-offer-title" data-i18n="starter_offer_title">Başlangıç Paketi</h2>
+                <p class="starter-offer-subtitle" data-i18n="starter_offer_subtitle">Gridoria yolculuğuna güçlü ve avantajlı bir başlangıç yapın.</p>
+
+                <div class="starter-offer-items">
+                    <div class="starter-offer-item">
+                        <div class="item-icon-circle gems-glow">
+                            <span class="item-emoji">💎</span>
+                        </div>
+                        <div class="item-amount">500</div>
+                        <div class="item-label" data-i18n="gems">Elmas</div>
+                    </div>
+
+                    <div class="starter-offer-item">
+                        <div class="item-icon-circle ufo-glow">
+                            <span class="item-emoji">🛸</span>
+                        </div>
+                        <div class="item-amount">3x</div>
+                        <div class="item-label">UFO</div>
+                    </div>
+
+                    <div class="starter-offer-item">
+                        <div class="item-icon-circle drone-glow">
+                            <svg viewBox="0 0 92 78" class="military-drone-svg starter-drone-svg" fill="none">
+                                <path d="M46 4 L88 52 L72 68 L58 58 L46 62 L34 58 L20 68 L4 52 Z" fill="#0f172a" stroke="#00f2fe" stroke-width="2.5"/>
+                                <circle cx="46" cy="44" r="7" fill="#00f2fe"/>
+                                <circle cx="46" cy="18" r="3" fill="#ef4444"/>
+                                <polygon points="37,60 43,60 40,75" fill="#00f2fe"/>
+                                <polygon points="49,60 55,60 52,75" fill="#00f2fe"/>
+                            </svg>
+                        </div>
+                        <div class="item-amount">3x</div>
+                        <div class="item-label">Dron</div>
+                    </div>
+                </div>
+
+                <div class="starter-offer-action">
+                    <button class="starter-offer-buy-btn" id="btn-buy-starter-offer">
+                        <span class="price-original">₺169.99</span>
+                        <span class="price-current">₺49.99</span>
+                        <span class="buy-action-label" data-i18n="starter_offer_btn_label">Paketi Al</span>
+                    </button>
+                    <button class="starter-offer-dismiss-btn" id="btn-dismiss-starter-offer" data-i18n="starter_offer_dismiss">
+                        Şimdilik Geç
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <nav id="bottom-nav-bar" class="bottom-nav-bar">
             <!-- 1. TAB: MAĞAZA (EN SOLDA) -->
             <button class="nav-tab-item" id="nav-tab-shop" data-tab="shop" title="Mağaza" data-i18n-title="nav_shop">

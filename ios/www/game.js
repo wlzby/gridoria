@@ -830,6 +830,29 @@ class GridoriaGame {
             this.onPurchaseSuccess(productId);
         });
 
+        // ⚡ Starter Offer Popup Event Listeners
+        listen('btn-close-starter-offer', 'click', () => {
+            const modal = document.getElementById('modal-starter-offer');
+            if (modal) modal.classList.add('hidden');
+        });
+        listen('btn-dismiss-starter-offer', 'click', () => {
+            const modal = document.getElementById('modal-starter-offer');
+            if (modal) modal.classList.add('hidden');
+        });
+        listen('btn-buy-starter-offer', 'click', () => {
+            const productId = 'com.mawelly.gridoria.starterpack';
+            const modal = document.getElementById('modal-starter-offer');
+            if (modal) modal.classList.add('hidden');
+            if (typeof NativeBridge !== 'undefined' && (NativeBridge.isIOS() || NativeBridge.isAndroid())) {
+                NativeBridge.triggerHaptic('medium');
+                const storeName = NativeBridge.isIOS() ? 'Apple' : 'Google Play';
+                this.showToast(`${storeName} ile satın alma başlatılıyor...`, '⏳', 'BEKLEYİN');
+                NativeBridge.buyProduct(productId);
+                return;
+            }
+            this.onPurchaseSuccess(productId);
+        });
+
         // VIP Pack Handler
         listen('btn-buy-vip', 'click', () => {
             const productId = 'com.mawelly.gridoria.vip';
@@ -1570,7 +1593,7 @@ class GridoriaGame {
         }
 
         // 2. Close any open modal overlay
-        const modalIds = ['modal-confirm-dialog', 'modal-custom-bg-confirm', 'modal-shop', 'modal-themes', 'modal-missions', 'modal-daily', 'modal-main-menu', 'modal-profile', 'modal-leaderboard', 'modal-settings', 'modal-peek-unlock'];
+        const modalIds = ['modal-starter-offer', 'modal-confirm-dialog', 'modal-custom-bg-confirm', 'modal-shop', 'modal-themes', 'modal-missions', 'modal-daily', 'modal-main-menu', 'modal-profile', 'modal-leaderboard', 'modal-settings', 'modal-peek-unlock'];
         for (const id of modalIds) {
             const modal = document.getElementById(id);
             if (modal && !modal.classList.contains('hidden')) {
@@ -1618,6 +1641,46 @@ class GridoriaGame {
         if (navBar) navBar.classList.remove('hidden');
         this.updateBannerVisibility();
         this.initMenuDemoAnimation();
+        this.checkAndShowStarterOffer();
+    }
+
+    checkAndShowStarterOffer() {
+        // 1. Zaten satın alındıysa gösterme
+        if (this.safeGet('gridoria_starter_pack_purchased') === 'true') return;
+
+        // 2. En az 2 oyun oynanmış olmalı
+        const gamesPlayed = parseInt(this.safeGet('gridoria_gameover_count') || '0', 10);
+        if (gamesPlayed < 2) return;
+
+        // 3. Sıklık kontrolü: En az 3 oyun aralıkla göster
+        const lastShownGame = parseInt(this.safeGet('gridoria_starter_last_shown_game') || '0', 10);
+        if (lastShownGame > 0 && (gamesPlayed - lastShownGame) < 3) return;
+
+        // 4. Zaman kontrolü: En az 4 saat geçmiş olmalı (oyuncuyu boğmamak için)
+        const now = Date.now();
+        const lastShownTime = parseInt(this.safeGet('gridoria_starter_last_shown_time') || '0', 10);
+        if (lastShownTime > 0 && (now - lastShownTime) < 4 * 60 * 60 * 1000) return;
+
+        // 5. Halihazırda açık bir modal varsa gösterme
+        const openModal = document.querySelector('.modal-overlay:not(.hidden)');
+        if (openModal) return;
+
+        // 6. Menüye geçiş animasyonu tamamlandıktan sonra sakin ve şık bir şekilde aç (500ms)
+        setTimeout(() => {
+            const menuView = document.getElementById('main-menu-view');
+            const anyModal = document.querySelector('.modal-overlay:not(.hidden)');
+            if (!menuView || menuView.classList.contains('hidden') || anyModal) return;
+
+            const modal = document.getElementById('modal-starter-offer');
+            if (modal) {
+                this.safeSet('gridoria_starter_last_shown_game', String(gamesPlayed));
+                this.safeSet('gridoria_starter_last_shown_time', String(Date.now()));
+                modal.classList.remove('hidden');
+                if (typeof sounds !== 'undefined' && typeof sounds.playPopup === 'function') {
+                    sounds.playPopup();
+                }
+            }
+        }, 500);
     }
 
     startGameView() {
@@ -4097,6 +4160,9 @@ class GridoriaGame {
             this.addGems(3000);
             this.showToast('+3,000 💎 Elmas Hesabınıza Eklenmiştir!', '💎', 'TEBRİKLER');
         } else if (productId === 'com.mawelly.gridoria.starterpack') {
+            this.safeSet('gridoria_starter_pack_purchased', 'true');
+            const starterModal = document.getElementById('modal-starter-offer');
+            if (starterModal) starterModal.classList.add('hidden');
             this.addGems(500);
             if (typeof powerups !== 'undefined' && typeof powerups.addFreeCount === 'function') {
                 powerups.addFreeCount('hammer', 3);
