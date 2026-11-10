@@ -20,7 +20,7 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * 💎 Google Play Billing Manager (Play Billing Library 7.x)
+ * 💎 Google Play Billing Manager (Play Billing Library 8.0.0)
  * Handles in-app purchases for diamonds, booster packs, and VIP membership.
  */
 object BillingManager : PurchasesUpdatedListener {
@@ -124,8 +124,9 @@ object BillingManager : PurchasesUpdatedListener {
             .setProductList(productList)
             .build()
 
-        client.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
+        client.queryProductDetailsAsync(params) { billingResult, productDetailsResult ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                val productDetailsList = productDetailsResult.productDetailsList ?: emptyList()
                 Log.d(TAG, "Queried ${productDetailsList.size} products from Google Play.")
                 for (details in productDetailsList) {
                     cachedProductDetails[details.productId] = details
