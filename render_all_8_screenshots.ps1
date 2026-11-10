@@ -142,7 +142,7 @@ body {
     width: ${width}px;
     height: ${height}px;
     overflow: hidden;
-    background: radial-gradient(130% 100% at 50% 0%, #0c1222 0%, #060913 60%, #03050a 100%);
+    background: radial-gradient(130% 100% at 50% 0%, #0d1527 0%, #060913 60%, #03050a 100%);
     font-family: 'Outfit', sans-serif;
     position: relative;
     color: #ffffff;
@@ -154,34 +154,34 @@ body {
     background-image: 
         radial-gradient(1.5px 1.5px at 150px 240px, rgba(255,255,255,0.4), transparent),
         radial-gradient(1.5px 1.5px at 420px 150px, rgba(255,255,255,0.6), transparent),
-        radial-gradient(2px 2px at 980px 300px, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1.5px 1.5px at 1080px 750px, rgba(255,255,255,0.3), transparent),
-        radial-gradient(2px 2px at 180px 1100px, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1.5px 1.5px at 1020px 1450px, rgba(255,255,255,0.4), transparent);
+        radial-gradient(2px 2px at 920px 280px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 1000px 750px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 120px 1100px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 980px 1450px, rgba(255,255,255,0.4), transparent);
     z-index: 1;
 }
 
 .ambient-glow-top {
     position: absolute;
-    top: -160px;
+    top: -120px;
     left: 50%;
     transform: translateX(-50%);
     width: ${glowTopW}px;
     height: ${glowTopH}px;
-    background: radial-gradient(circle, rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.35) 0%, rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.12) 50%, transparent 75%);
-    filter: blur(75px);
+    background: radial-gradient(circle, rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.32) 0%, rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.1) 50%, transparent 75%);
+    filter: blur(70px);
     z-index: 2;
 }
 
 .ambient-glow-phone {
     position: absolute;
-    top: 480px;
+    top: 500px;
     left: 50%;
     transform: translateX(-50%);
     width: ${glowPhoneW}px;
     height: ${glowPhoneH}px;
-    background: radial-gradient(circle, rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.28) 0%, rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.08) 55%, transparent 80%);
-    filter: blur(95px);
+    background: radial-gradient(circle, rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.25) 0%, rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.06) 55%, transparent 80%);
+    filter: blur(85px);
     z-index: 2;
 }
 
@@ -200,29 +200,29 @@ body {
     align-items: center;
     gap: 8px;
     padding: ${pillPad};
-    background: rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.15);
-    border: 1.5px solid rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.5);
+    background: rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.16);
+    border: 1.5px solid rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.55);
     border-radius: 50px;
     font-size: ${pillFont}px;
     font-weight: 800;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: #ffffff;
-    box-shadow: 0 0 30px rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.4);
-    margin-bottom: 15px;
+    box-shadow: 0 0 25px rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.45);
+    margin-bottom: 16px;
 }
 
 .main-title {
     font-family: 'Space Grotesk', sans-serif;
     font-size: ${titleFont}px;
     font-weight: 900;
-    letter-spacing: -1.5px;
+    letter-spacing: -1px;
     text-transform: uppercase;
     background: linear-gradient(180deg, #ffffff 15%, $($s.PrimaryColor) 85%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 35px rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.6));
-    line-height: 1.1;
+    line-height: 1.15;
     margin-bottom: 12px;
 }
 
@@ -241,7 +241,7 @@ body {
     transform: translateX(-50%);
     width: ${phoneWidth}px;
     z-index: 10;
-    filter: drop-shadow(0 35px 70px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 55px rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.35));
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 45px rgba($($s.GlowR), $($s.GlowG), $($s.GlowB), 0.35));
 }
 
 .phone-wrapper img {
@@ -288,7 +288,7 @@ body {
 }
 
 # ─────────────────────────────────────────────────────────────
-# 1. RENDER 8 PHONE SCREENSHOTS (1080 x 1920)
+# 1. RENDER 8 PHONE SCREENSHOTS (1080 x 1920) — BALANCED
 # ─────────────────────────────────────────────────────────────
 Write-Host "=== Rendering 8 Phone Screenshots (1080 x 1920) ==="
 foreach ($s in $slides) {
@@ -297,19 +297,19 @@ foreach ($s in $slides) {
         -s $s `
         -width 1080 `
         -height 1920 `
-        -phoneWidth 660 `
-        -phoneTop 340 `
-        -pillFont 22 `
-        -pillPad "9px 26px" `
-        -titleFont 70 `
-        -subFont 28 `
-        -headPadTop 72 `
-        -glowTopW 950 `
-        -glowTopH 650 `
-        -glowPhoneW 820 `
-        -glowPhoneH 1200 `
+        -phoneWidth 585 `
+        -phoneTop 410 `
+        -pillFont 21 `
+        -pillPad "10px 28px" `
+        -titleFont 68 `
+        -subFont 27 `
+        -headPadTop 130 `
+        -glowTopW 850 `
+        -glowTopH 550 `
+        -glowPhoneW 750 `
+        -glowPhoneH 1050 `
         -brandFont 20 `
-        -brandBottom 28
+        -brandBottom 45
 
     $slideHtmlPath = "$tempHtmlDir\$($s.Id)_phone.html"
     $slideOutPath = "$outDirPhone\$($s.Id).png"
@@ -334,7 +334,6 @@ foreach ($s in $slides) {
 
     if (Test-Path $slideOutPath) {
         Copy-Item -Path $slideOutPath -Destination $artOutPath -Force
-        # Also copy to root artifact dir for easy viewing
         Copy-Item -Path $slideOutPath -Destination "$artifactDir\$($s.Id).png" -Force
         Write-Host "Success Phone: $($s.Id).png"
     } else {
@@ -344,7 +343,7 @@ foreach ($s in $slides) {
 }
 
 # ─────────────────────────────────────────────────────────────
-# 2. RENDER 8 TABLET 7-INCH SCREENSHOTS (1200 x 1920)
+# 2. RENDER 8 TABLET 7-INCH SCREENSHOTS (1200 x 1920) — BALANCED
 # ─────────────────────────────────────────────────────────────
 Write-Host "=== Rendering 8 Tablet 7-inch Screenshots (1200 x 1920) ==="
 foreach ($s in $slides) {
@@ -353,19 +352,19 @@ foreach ($s in $slides) {
         -s $s `
         -width 1200 `
         -height 1920 `
-        -phoneWidth 700 `
-        -phoneTop 345 `
-        -pillFont 24 `
-        -pillPad "10px 28px" `
-        -titleFont 76 `
-        -subFont 30 `
-        -headPadTop 78 `
-        -glowTopW 1050 `
-        -glowTopH 650 `
-        -glowPhoneW 900 `
-        -glowPhoneH 1200 `
+        -phoneWidth 620 `
+        -phoneTop 415 `
+        -pillFont 23 `
+        -pillPad "10px 30px" `
+        -titleFont 72 `
+        -subFont 28 `
+        -headPadTop 135 `
+        -glowTopW 950 `
+        -glowTopH 550 `
+        -glowPhoneW 800 `
+        -glowPhoneH 1100 `
         -brandFont 21 `
-        -brandBottom 28
+        -brandBottom 40
 
     $slideHtmlPath = "$tempHtmlDir\$($s.Id)_7inch.html"
     $slideOutPath = "$outDir7\$($s.Id).png"
@@ -398,7 +397,7 @@ foreach ($s in $slides) {
 }
 
 # ─────────────────────────────────────────────────────────────
-# 3. RENDER 8 TABLET 10-INCH SCREENSHOTS (1600 x 2560)
+# 3. RENDER 8 TABLET 10-INCH SCREENSHOTS (1600 x 2560) — BALANCED
 # ─────────────────────────────────────────────────────────────
 Write-Host "=== Rendering 8 Tablet 10-inch Screenshots (1600 x 2560) ==="
 foreach ($s in $slides) {
@@ -407,19 +406,19 @@ foreach ($s in $slides) {
         -s $s `
         -width 1600 `
         -height 2560 `
-        -phoneWidth 935 `
-        -phoneTop 460 `
-        -pillFont 32 `
-        -pillPad "14px 38px" `
-        -titleFont 102 `
-        -subFont 40 `
-        -headPadTop 105 `
-        -glowTopW 1400 `
-        -glowTopH 850 `
-        -glowPhoneW 1200 `
-        -glowPhoneH 1600 `
+        -phoneWidth 825 `
+        -phoneTop 550 `
+        -pillFont 30 `
+        -pillPad "14px 40px" `
+        -titleFont 96 `
+        -subFont 38 `
+        -headPadTop 180 `
+        -glowTopW 1250 `
+        -glowTopH 750 `
+        -glowPhoneW 1050 `
+        -glowPhoneH 1450 `
         -brandFont 28 `
-        -brandBottom 38
+        -brandBottom 55
 
     $slideHtmlPath = "$tempHtmlDir\$($s.Id)_10inch.html"
     $slideOutPath = "$outDir10\$($s.Id).png"
@@ -451,4 +450,4 @@ foreach ($s in $slides) {
     Remove-Item $slideUserDir -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-Write-Host "=== All 24 Screenshots (8 Phone, 8 7-inch Tablet, 8 10-inch Tablet) Rendered Successfully! ==="
+Write-Host "=== All 24 Balanced Screenshots Rendered Successfully! ==="
