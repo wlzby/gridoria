@@ -1,4 +1,4 @@
-﻿Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Drawing
 
 $baseDir = "c:\Users\ozbayv\AndroidStudioProjects\gridoria"
 $rawDir = "$baseDir\play_store_assets\raw_screens"
