@@ -32,32 +32,32 @@ Nişan al, blokları fırlat ve sayıları birleştir! Taktiksel 2048 zeka bulma
 
 ### 3. Tam Açıklama (Maks. 4000 Karakter)
 ```text
-👑 GRIDORIA: 2048 BLOK FIRLATICI & TAKTİKSEL BULMACA
+👑 GRIDORIA: TAKTİKSEL BLOK BULMACA & SAYI BİRLEŞTİRME
 
-Klasik 2048 ve sıradan sayı birleştirme oyunlarına veda edin! Gridoria, geleneksel 2048 heyecanını yenilikçi tavana blok fırlatma mekaniği, cerrahi dron saldırıları, uzaylı UFO ışınlama teknolojisi ve donmuş buz engelleriyle buluşturan yeni nesil bir taktiksel zeka oyunudur.
+Sıradan ve tekrar eden bulmaca oyunlarına veda edin! Gridoria, sayı birleştirme heyecanını yenilikçi tavana blok fırlatma mekaniği, cerrahi dron saldırıları, uzaylı UFO ışınlama teknolojisi, taktiksel balyoz ve donmuş buz engelleriyle buluşturan yeni nesil bir taktiksel zeka oyunudur.
 
-Nişan al, blokları tavana doğru fırlat, aynı sayıları birleştir ve devasa zincirleme kombolarla 2048, 4096 ve ötesine ulaş!
+Nişan al, blokları tavana doğru fırlat, aynı sayıları birleştir ve devasa zincirleme kombolarla rekor puanlara ulaş!
 
 🎯 NASIL OYNANIR?
 1. Parmağını ekranda kaydırarak hedef sütunu belirle ve nişan al.
 2. Parmağını kaldırarak bloğu tavandaki ızgaraya fırlat.
-3. Aynı değere sahip sayı bloklarını çarpıştırarak birleştir ve katla (2, 4, 8, 16... 2048).
+3. Aynı değere sahip sayı bloklarını çarpıştırarak birleştir ve katla (2, 4, 8, 16... 1024, 2048 ve ötesi).
 4. Zincirleme reaksiyonlar başlat, çarpanları katla ve Fever Rush moduna gir!
 5. Donmuş blokları kırmak için yanlarında stratejik birleştirmeler yap.
 6. Blokların alt tehlike çizgisine taşmasına izin verme, tahtayı açık tut!
 
 🔥 EŞSİZ TAKTİKSEL JOKERLER & GÜÇLENDİRİCİLER:
 
-🚁 Cerrahi Dron Saldırısı (Drone Strike)
+🚁 Cerrahi Dron Saldırısı (45 💎)
 Tahta sıkıştığında gökyüzünden muharebe dronlarını çağır! Belirlediğin 5 bloğu cerrahi vuruşla anında yok et ve ızgaraya nefes aldır.
 
-🛸 UFO Çekim Işını (Tractor Beam)
-Yolunu tıkayan veya stratejini bozan herhangi bir bloğu uzay gemisi çekim ışınıyla doğrudan uzaya çekip tahtadan temizle.
+🛸 UFO Çekim Işını & Taktiksel Çekiç (25 💎)
+Yolunu tıkayan herhangi bir bloğu uzay gemisi çekim ışınıyla uzaya çekip tahtadan temizle veya güçlü bir çekiç darbesiyle engelleri parçala!
 
-🔄 Kuantum Yer Değiştirici (Swap)
+🔄 Kuantum Yer Değiştirici (20 💎)
 Izgaradaki herhangi iki bloğun yerini taktiksel olarak değiştir ve kilitlenen pozisyonları avantaja çevir.
 
-⏪ Zamanı Geri Al (Undo)
+⏪ Zamanı Geri Al (15 💎)
 Hatalı bir hamle mi yaptın? Anında geri alarak stratejini yeniden kur.
 
 ⚡ ÖNE ÇIKAN OYUN ÖZELLİKLERİ:
@@ -66,7 +66,7 @@ Hatalı bir hamle mi yaptın? Anında geri alarak stratejini yeniden kur.
 Tahtada beliren buzlu bloklar çift katmanlı taktik gerektirir. Buzu eritip kırmak için yanındaki blokları akıllıca birleştir!
 
 🔥 Fever Rush & Çarpan Komboları
-Art arda eşleştirmeler yaparak kombo sayacını doldur. Ateşli Fever moduna girerek puanını 2x, 3x ve 5x çarpanlarla zirveye taşı!
+Art arda eşleştirmeler yaparak kombo sayacını doldurur. Ateşli Fever moduna girerek puanını 2x, 3x ve 5x çarpanlarla zirveye taşı!
 
 🎨 13+ Büyüleyici Görsel Tema & Palet
 • Pofuduk Renkli Kürk (Fluffy Fur)
@@ -78,12 +78,15 @@ Art arda eşleştirmeler yaparak kombo sayacını doldur. Ateşli Fever moduna g
 🧠 Beyin Jimnastiği ve Rahatlama
 Hem zihnini keskinleştiren stratejik bir mantık oyunu hem de günün yorgunluğunu atan akıcı, tatmin edici bir bulmaca deneyimi.
 
+🏆 Küresel Liderlik Tablosu & Rozetler
+Dünyanın dört bir yanındaki oyuncularla yarış, sıralamalarda yüksel ve kariyer rozetlerinin kilidini aç!
+
 ✈️ %100 Çevrimdışı (İnternetsiz) Oynanabilir
 Wi-Fi veya internet bağlantısına gerek yok! Metroda, uçakta, yolculukta veya dilediğin her yerde kesintisiz oyna.
 
 Hemen ücretsiz indir, blokları fırlat, sayıları birleştir ve Gridoria tahtasının efsanesi sen ol!
 ```
-*(Karakter Sayısı: ~2800 / 4000)*
+*(Karakter Sayısı: 2.779 / 4000)*
 
 ---
 
@@ -122,16 +125,16 @@ Aim, shoot tiles & merge to 2048! Master the grid with drones & tactical UFOs.
 
 ### 3. Full Description / Tam Açıklama (Max 4000 Characters)
 ```text
-👑 GRIDORIA: 2048 SHOOT & MERGE TACTICAL BLOCK PUZZLE
+👑 GRIDORIA: TACTICAL SHOOT & MERGE BLOCK PUZZLE
 
-Say goodbye to ordinary and repetitive number games! Gridoria is a next-generation tactical puzzle crafted by Mawelly Studio, blending the excitement of classic 2048 with innovative ceiling-shooting mechanics, surgical drone airstrikes, alien UFO tractor beams, tactical smash hammers, and dynamic frost hazards.
+Say goodbye to repetitive and passive puzzle games! Gridoria is a next-generation tactical brain puzzle crafted by Mawelly Studio, blending the satisfying rush of number merging with innovative ceiling-shooting physics, surgical combat drone airstrikes, alien UFO tractor beams, heavy tactical hammers, and dynamic frost hazards.
 
-Aim, shoot tiles upward to the ceiling grid, merge matching numbers, trigger explosive chain combos, and climb to 2048, 4096, and beyond!
+Aim, shoot tiles upward into the ceiling grid, merge matching numbers, trigger explosive chain reactions, and climb to legendary high scores!
 
 🎯 HOW TO PLAY:
-1. Slide your finger horizontally across the screen to aim your shot.
-2. Release to launch the number tile upward into the ceiling grid.
-3. Collide tiles with identical values to fuse them into higher numbers (2, 4, 8, 16... 2048).
+1. Slide your finger across the screen to aim your shot at the target column.
+2. Release to launch the number block upward into the grid.
+3. Collide tiles with identical values to fuse them into bigger numbers (2, 4, 8, 16... 1024, 2048 and beyond).
 4. Trigger cascade chain reactions, multiply your score, and ignite Fever Rush mode!
 5. Shatter frozen obstacle tiles by triggering strategic adjacent merges.
 6. Keep the board clear—don't let the tiles cross the bottom danger line!
@@ -139,10 +142,10 @@ Aim, shoot tiles upward to the ceiling grid, merge matching numbers, trigger exp
 🔥 TACTICAL BOOSTERS & POWER-UPS:
 
 🚁 Surgical Drone Strike (45 💎)
-When the board gets congested, call in autonomous combat drones! Select your target zone to obliterate 5 tiles in a surgical airstrike and give your grid room to breathe.
+When the board gets congested, deploy autonomous combat drones! Select your target zone to obliterate 5 tiles in a pinpoint surgical airstrike and give your grid room to breathe.
 
 🛸 UFO Alien Tractor Beam & Hammer (25 💎)
-Extract any troublesome block straight into space with the alien tractor beam, or crush blocking obstacles with a heavy tactical hammer strike!
+Extract any troublesome block straight into space with the high-energy alien tractor beam, or crush blocking obstacles with a heavy tactical hammer strike!
 
 🔄 Quantum Tile Swap (20 💎)
 Tactically swap the positions of any two tiles on the grid to create unexpected match opportunities and chain reactions.
@@ -169,14 +172,14 @@ Chain multiple merges in rapid succession to fill the combo gauge. Enter Fever R
 A smart blend of tactical logic, spatial reasoning, and deeply satisfying ASMR-style block merging to unwind anytime.
 
 🏆 Global Leaderboard & Badges
-Compete against players worldwide, climb the leaderboards, and unlock prestigious career badges as you master the numbers!
+Compete against players worldwide, climb the leaderboards, and unlock prestigious career badges as you master the grid!
 
 ✈️ 100% Offline Gameplay
 No Wi-Fi or mobile data needed! Enjoy seamless puzzle gameplay on airplanes, subways, road trips, or wherever you go.
 
 Download Gridoria for free now, launch your tiles, merge the numbers, and become the master of the tactical grid!
 ```
-*(Character count: 2,873 / 4000)*
+*(Character count: 2,924 / 4000)*
 
 ---
 
